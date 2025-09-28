@@ -12,26 +12,31 @@ import static com.norwood.mcheli.networking.handlers.PlayerControlBaseData.Hatch
 public abstract class PacketPlayerControlBase extends PacketBase implements ClientToServerPacket {
 
 
-    protected void process(MCH_EntityAircraft aircraft, PlayerControlBaseData data, EntityPlayer entity) {
+    protected void process(MCH_EntityAircraft aircraft, PlayerControlBaseData data, EntityPlayer player) {
         if (aircraft == null) return;
 
         handleUnmount(aircraft, data);
-        handleEjectSeat(aircraft, data, entity);
+        handleEjectSeat(aircraft, data, player);
         handleVtolSwitch(aircraft, data);
         handleModeSwitch(aircraft, data);
         handleSearchLight(aircraft, data);
-        handleCameraMode(aircraft, data, entity);
-        handleWeaponSwitch(aircraft, data, entity);
-        handleUseWeapon(aircraft, data, entity);
-        handlePilotControls(aircraft, data, entity);
+        handleCameraMode(aircraft, data, player);
+        handleWeaponSwitch(aircraft, data, player);
+        handleUseWeapon(aircraft, data, player);
+        handlePilotControls(aircraft, data, player);
         handleFlare(aircraft, data);
-        handleGui(aircraft, data, entity);
+        handleChain(aircraft, data, player);
+        handleGui(aircraft, data, player);
         handleHatch(aircraft, data);
         handleFreeLook(aircraft, data);
         handleGear(aircraft, data);
         handleRack(aircraft, data);
         handleGunnerStatus(aircraft, data);
 
+    }
+
+    //Heli
+    protected void handleChain(MCH_EntityAircraft aircraft, PlayerControlBaseData data, EntityPlayer player) {
     }
 
     protected void handleUnmount(MCH_EntityAircraft aircraft, PlayerControlBaseData data) {

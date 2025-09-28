@@ -30,7 +30,7 @@ public class PacketPlayerControlPlane extends PacketPlayerControlBase {
             }
         }
 
-        if (plane != null) process(plane, controlBaseData, player);
+        process(plane, controlBaseData, player);
 
     }
 

@@ -282,6 +282,7 @@ public class MCH_EntityHeli extends MCH_EntityAircraft {
         return this.dataManager.get(FOLD_STAT);
     }
 
+    //huh
     public void setFoldBladeStat(byte b) {
         if (!this.world.isRemote && b >= 0 && b <= 3) {
             this.dataManager.set(FOLD_STAT, b);

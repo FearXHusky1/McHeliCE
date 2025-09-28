@@ -9,7 +9,7 @@ import lombok.experimental.Delegate;
 
 @Getter
 @Setter
-public class PlayerControlBaseData {
+public class PlayerControlBaseData implements IByteBufSerializable {
     public UnmountAction isUnmount = UnmountAction.NONE;
     public VtolSwitch switchVtol = VtolSwitch.NONE;
     public ModeSwitch switchMode = ModeSwitch.NONE;
@@ -32,6 +32,58 @@ public class PlayerControlBaseData {
     public PlayerControlBaseData() {
         switches = new PlayerControlSwitches();
     }
+
+    public void serialize(ByteBuf buf) {
+        // Serialize enums as bytes
+        buf.writeByte(isUnmount.ordinal());
+        buf.writeByte(switchVtol.ordinal());
+        buf.writeByte(switchMode.ordinal());
+        buf.writeByte(switchHatch.ordinal());
+        buf.writeByte(switchGear.ordinal());
+        buf.writeByte(putDownRack.ordinal());
+
+        switches.serialize(buf);
+
+        buf.writeByte(switchCameraMode);
+        buf.writeByte(switchWeapon);
+        buf.writeByte(useFlareType);
+
+        buf.writeInt(useWeaponOption1);
+        buf.writeInt(useWeaponOption2);
+
+        buf.writeDouble(useWeaponPosX);
+        buf.writeDouble(useWeaponPosY);
+        buf.writeDouble(useWeaponPosZ);
+
+        buf.writeByte(switchFreeLook);
+    }
+
+    @SuppressWarnings("unused")
+    public PlayerControlBaseData(ByteBuf buf) {
+        this.isUnmount   = UnmountAction.values()[buf.readByte()];
+        this.switchVtol  = VtolSwitch.values()[buf.readByte()];
+        this.switchMode  = ModeSwitch.values()[buf.readByte()];
+        this.switchHatch = HatchSwitch.values()[buf.readByte()];
+        this.switchGear  = GearSwitch.values()[buf.readByte()];
+        this.putDownRack = RackAction.values()[buf.readByte()];
+
+        this.switches = new PlayerControlSwitches(buf);
+
+        this.switchCameraMode = buf.readByte();
+        this.switchWeapon     = buf.readByte();
+        this.useFlareType     = buf.readByte();
+
+        this.useWeaponOption1 = buf.readInt();
+        this.useWeaponOption2 = buf.readInt();
+
+        this.useWeaponPosX = buf.readDouble();
+        this.useWeaponPosY = buf.readDouble();
+        this.useWeaponPosZ = buf.readDouble();
+
+        this.switchFreeLook = buf.readByte();
+    }
+
+
 
 
     public static enum UnmountAction {
