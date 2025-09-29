@@ -2,19 +2,14 @@ package com.norwood.mcheli.multiplay;
 
 import com.google.common.io.ByteArrayDataInput;
 import com.norwood.mcheli.MCH_Lib;
-import com.norwood.mcheli.networking.packet.PacketSyncServerSettings;
 import com.norwood.mcheli.helper.MCH_Utils;
 import com.norwood.mcheli.helper.network.HandleSide;
 import com.norwood.mcheli.aircraft.MCH_EntityAircraft;
-import net.minecraft.command.ICommandManager;
-import net.minecraft.command.server.CommandScoreboard;
+import lombok.Getter;
 import net.minecraft.command.server.CommandSummon;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.IThreadListener;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fml.relauncher.Side;
 
 import java.io.DataOutputStream;
@@ -31,44 +26,10 @@ public class MCH_MultiplayPacketHandler {
     private static byte[] imageData = null;
     private static String lastPlayerName = "";
     private static double lastDataPercent = 0.0;
+    @Getter
     private static int playerInfoId = 0;
 
-    @HandleSide({Side.SERVER})
-    public static void onPacket_Command(EntityPlayer player, ByteArrayDataInput data, IThreadListener scheduler) {
-        if (!player.world.isRemote) {
-            MCH_PacketIndMultiplayCommand pc = new MCH_PacketIndMultiplayCommand();
-            pc.readData(data);
-            scheduler.addScheduledTask(() -> {
-                MinecraftServer minecraftServer = MCH_Utils.getServer();
-                MCH_Lib.DbgLog(false, "MCH_MultiplayPacketHandler.onPacket_Command cmd:%d:%s", pc.CmdID, pc.CmdStr);
-                switch (pc.CmdID) {
-                    case 256:
-                        MCH_Multiplay.shuffleTeam(player);
-                        break;
-                    case 512:
-                        MCH_Multiplay.jumpSpawnPoint(player);
-                        break;
-                    case 768:
-                        ICommandManager icommandmanager = minecraftServer.getCommandManager();
-                        icommandmanager.executeCommand(player, pc.CmdStr);
-                        break;
-                    case 1024:
-                        if (new CommandScoreboard().checkPermission(minecraftServer, player)) {
-                            minecraftServer.setAllowPvp(!minecraftServer.isPVPEnabled());
-                            PacketSyncServerSettings.send(null);
-                        }
-                        break;
-                    case 1280:
-                        destoryAllAircraft(player);
-                        break;
-                    default:
-                        MCH_Lib.DbgLog(false, "MCH_MultiplayPacketHandler.onPacket_Command unknown cmd:%d:%s", pc.CmdID, pc.CmdStr);
-                }
-            });
-        }
-    }
-
-    private static void destoryAllAircraft(EntityPlayer player) {
+    public static void destoryAllAircraft(EntityPlayer player) {
         CommandSummon cmd = new CommandSummon();
         if (cmd.checkPermission(MCH_Utils.getServer(), player)) {
             for (Entity e :  new ArrayList<>(player.world.loadedEntityList)) {
@@ -76,30 +37,6 @@ public class MCH_MultiplayPacketHandler {
                     e.setDead();
                 }
             }
-        }
-    }
-
-    @HandleSide({Side.CLIENT})
-    public static void onPacket_NotifySpotedEntity(EntityPlayer player, ByteArrayDataInput data, IThreadListener scheduler) {
-        if (player.world.isRemote) {
-            MCH_PacketNotifySpotedEntity pc = new MCH_PacketNotifySpotedEntity();
-            pc.readData(data);
-            scheduler.addScheduledTask(() -> {
-                if (pc.count > 0) {
-                    for (int i = 0; i < pc.num; i++) {
-                        MCH_GuiTargetMarker.addSpotedEntity(pc.entityId[i], pc.count);
-                    }
-                }
-            });
-        }
-    }
-
-    @HandleSide({Side.CLIENT})
-    public static void onPacket_NotifyMarkPoint(EntityPlayer player, ByteArrayDataInput data, IThreadListener scheduler) {
-        if (player.world.isRemote) {
-            MCH_PacketNotifyMarkPoint pc = new MCH_PacketNotifyMarkPoint();
-            pc.readData(data);
-            scheduler.addScheduledTask(() -> MCH_GuiTargetMarker.markPoint(pc.px, pc.py, pc.pz));
         }
     }
 
@@ -181,25 +118,6 @@ public class MCH_MultiplayPacketHandler {
         MCH_Lib.Log(String.format(format, args));
     }
 
-    @HandleSide({Side.CLIENT})
-    public static void onPacket_IndClient(EntityPlayer player, ByteArrayDataInput data, IThreadListener scheduler) {
-        if (player.world.isRemote) {
-            MCH_PacketIndClient pc = new MCH_PacketIndClient();
-            pc.readData(data);
-            scheduler.addScheduledTask(
-                    () -> {
-                        if (pc.CmdID == 1) {
-                            MCH_MultiplayClient.startSendImageData();
-                        } else if (pc.CmdID == 2) {
-                            MCH_MultiplayClient.sendModsInfo(
-                                    player.getDisplayName().getFormattedText(), player.getDisplayName().getUnformattedText(), Integer.parseInt(pc.CmdStr)
-                            );
-                        }
-                    }
-            );
-        }
-    }
-
     public static int getPlayerInfoId(EntityPlayer player) {
         modListRequestPlayer = player;
         playerInfoId++;
@@ -210,36 +128,4 @@ public class MCH_MultiplayPacketHandler {
         return playerInfoId;
     }
 
-    @HandleSide({Side.CLIENT, Side.SERVER})
-    public static void onPacket_ModList(EntityPlayer player, ByteArrayDataInput data, IThreadListener scheduler) {
-        MCH_PacketModList pc = new MCH_PacketModList();
-        pc.readData(data);
-        if (player.world.isRemote) {
-            scheduler.addScheduledTask(() -> {
-                MCH_Lib.DbgLog(player.world, "MCH_MultiplayPacketHandler.onPacket_ModList : ID=%d, Num=%d", pc.id, pc.num);
-                if (pc.firstData) {
-                    MCH_Lib.Log(TextFormatting.RED + "###### " + player.getDisplayName() + " ######");
-                }
-
-                for (String s : pc.list) {
-                    MCH_Lib.Log(s);
-                    player.sendMessage(new TextComponentString(s));
-                }
-            });
-        } else if (pc.id == playerInfoId) {
-            scheduler.addScheduledTask(() -> {
-                if (modListRequestPlayer != null) {
-                    MCH_PacketModList.send(modListRequestPlayer, pc);
-                } else {
-                    if (pc.firstData) {
-                        LogInfo("###### " + player.getDisplayName() + " ######");
-                    }
-
-                    for (String s : pc.list) {
-                        LogInfo(s);
-                    }
-                }
-            });
-        }
-    }
 }

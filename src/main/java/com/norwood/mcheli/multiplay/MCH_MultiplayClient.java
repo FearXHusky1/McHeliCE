@@ -4,6 +4,7 @@ import com.norwood.mcheli.MCH_Config;
 import com.norwood.mcheli.MCH_FileSearch;
 import com.norwood.mcheli.MCH_Lib;
 import com.norwood.mcheli.MCH_OStream;
+import com.norwood.mcheli.networking.packet.PacketSendModlist;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.texture.TextureUtil;
@@ -25,6 +26,8 @@ import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
+
+import static com.norwood.mcheli.multiplay.MCH_MultiplayPacketHandler.modListRequestPlayer;
 
 public class MCH_MultiplayClient {
     private static IntBuffer pixelBuffer;
@@ -241,6 +244,6 @@ public class MCH_MultiplayClient {
             readModList(playerName, commandSenderName);
         }
 
-        MCH_PacketModList.send(modList, id);
+        PacketSendModlist.send(modList, id);
     }
 }

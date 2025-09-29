@@ -7,6 +7,7 @@ import com.norwood.mcheli.MCH_Lib;
 import com.norwood.mcheli.aircraft.MCH_AircraftInfo;
 import com.norwood.mcheli.aircraft.MCH_EntityAircraft;
 import com.norwood.mcheli.gltd.MCH_EntityGLTD;
+import com.norwood.mcheli.networking.packet.PacketPlayerLightWeaponControl;
 import com.norwood.mcheli.weapon.MCH_WeaponBase;
 import com.norwood.mcheli.weapon.MCH_WeaponCreator;
 import com.norwood.mcheli.weapon.MCH_WeaponGuidanceSystem;
@@ -16,6 +17,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.MobEffects;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.Packet;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.math.Vec3d;
 import org.lwjgl.BufferUtils;
@@ -210,9 +212,9 @@ public class MCH_ClientLightWeaponTickHandler extends MCH_ClientTickHandlerBase 
             MCH_Lib.DbgLog(true, "LWeapon cancel");
             if (!this.isHeldItem) {
                 if (getPotionNightVisionDuration(player) < 250) {
-                    MCH_PacketLightWeaponPlayerControl pc = new MCH_PacketLightWeaponPlayerControl();
-                    pc.camMode = 1;
-                    W_Network.sendToServer(pc);
+                    PacketPlayerLightWeaponControl packet = new PacketPlayerLightWeaponControl();
+                    packet.camMode = 1;
+                    packet.sendToServer();
                     player.removePotionEffect(MobEffects.NIGHT_VISION);
                 }
 
@@ -225,13 +227,13 @@ public class MCH_ClientLightWeaponTickHandler extends MCH_ClientTickHandlerBase 
     }
 
     protected void onCompleteReload() {
-        MCH_PacketLightWeaponPlayerControl pc = new MCH_PacketLightWeaponPlayerControl();
-        pc.cmpReload = 1;
-        W_Network.sendToServer(pc);
+        PacketPlayerLightWeaponControl packet = new PacketPlayerLightWeaponControl();
+        packet.cmpReload = 1;
+        packet.sendToServer();
     }
 
     protected void playerControl(EntityPlayer player, ItemStack is, MCH_ItemLightWeaponBase item) {
-        MCH_PacketLightWeaponPlayerControl pc = new MCH_PacketLightWeaponPlayerControl();
+        PacketPlayerLightWeaponControl packet = new PacketPlayerLightWeaponControl();
         boolean send = false;
         boolean autoShot = MCH_Config.LWeaponAutoFire.prmBool && is.getMetadata() < is.getMaxDamage() && gs.isLockComplete();
 
@@ -251,12 +253,12 @@ public class MCH_ClientLightWeaponTickHandler extends MCH_ClientTickHandlerBase 
                 }
 
                 if (canFire) {
-                    pc.useWeapon = true;
-                    pc.useWeaponOption1 = W_Entity.getEntityId(gs.lastLockEntity);
-                    pc.useWeaponOption2 = weaponMode;
-                    pc.useWeaponPosX = player.posX;
-                    pc.useWeaponPosY = player.posY + player.getEyeHeight();
-                    pc.useWeaponPosZ = player.posZ;
+                    packet.useWeapon = true;
+                    packet.useWeaponOption1 = W_Entity.getEntityId(gs.lastLockEntity);
+                    packet.useWeaponOption2 = weaponMode;
+                    packet.useWeaponPosX = player.posX;
+                    packet.useWeaponPosY = player.posY + player.getEyeHeight();
+                    packet.useWeaponPosZ = player.posZ;
                     gs.clearLock();
                     send = true;
                     result = true;
@@ -281,11 +283,11 @@ public class MCH_ClientLightWeaponTickHandler extends MCH_ClientTickHandlerBase 
             MCH_Lib.DbgLog(true, "LWeapon NV %s", pe != null ? "ON->OFF" : "OFF->ON");
             if (pe != null) {
                 player.removePotionEffect(MobEffects.NIGHT_VISION);
-                pc.camMode = 1;
+                packet.camMode = 1;
                 send = true;
                 W_McClient.MOD_playSoundFX("pi", 0.5F, 0.9F);
             } else if (player.getItemInUseMaxCount() > 60) {
-                pc.camMode = 2;
+                packet.camMode = 2;
                 send = true;
                 W_McClient.MOD_playSoundFX("pi", 0.5F, 0.9F);
             } else {
@@ -294,7 +296,7 @@ public class MCH_ClientLightWeaponTickHandler extends MCH_ClientTickHandlerBase 
         }
 
         if (send) {
-            W_Network.sendToServer(pc);
+            packet.sendToServer();
         }
     }
 }

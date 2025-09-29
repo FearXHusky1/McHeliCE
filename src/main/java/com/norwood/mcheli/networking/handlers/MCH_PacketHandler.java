@@ -2,7 +2,6 @@ package com.norwood.mcheli.networking.handlers;
 
 import com.google.common.io.ByteArrayDataInput;
 import com.norwood.mcheli.MCH_Lib;
-import com.norwood.mcheli.lweapon.MCH_LightWeaponPacketHandler;
 import com.norwood.mcheli.multiplay.MCH_MultiplayPacketHandler;
 import com.norwood.mcheli.wrapper.W_PacketHandler;
 import net.minecraft.entity.player.EntityPlayer;
@@ -17,13 +16,7 @@ public class MCH_PacketHandler extends W_PacketHandler {
         IThreadListener handler = FMLCommonHandler.instance().getWorldThread(ctx.netHandler);
         switch (msgid) {
             case 268437520 -> MCH_CommonPacketHandler.onPacketEffectExplosion(entityPlayer, data, handler);
-            case 268437761 -> MCH_MultiplayPacketHandler.onPacket_NotifySpotedEntity(entityPlayer, data, handler);
-            case 268437762 -> MCH_MultiplayPacketHandler.onPacket_NotifyMarkPoint(entityPlayer, data, handler);
-            case 268438032 -> MCH_MultiplayPacketHandler.onPacket_IndClient(entityPlayer, data, handler);
-            case 536873088 -> MCH_MultiplayPacketHandler.onPacket_Command(entityPlayer, data, handler);
             case 536873472 -> MCH_MultiplayPacketHandler.onPacket_LargeData(entityPlayer, data, handler);
-            case 536873473 -> MCH_MultiplayPacketHandler.onPacket_ModList(entityPlayer, data, handler);
-            case 536936464 -> MCH_LightWeaponPacketHandler.onPacket_PlayerControl(entityPlayer, data, handler);
             default ->
                     MCH_Lib.DbgLog(entityPlayer.world, "MCH_PacketHandler.onPacket invalid MSGID=0x%X(%d)", msgid, msgid);
         }
