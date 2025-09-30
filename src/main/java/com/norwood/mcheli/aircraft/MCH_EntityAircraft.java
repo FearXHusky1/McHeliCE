@@ -1560,7 +1560,7 @@ public abstract class MCH_EntityAircraft
         }
 
         if ((this.aircraftRotChanged || this.aircraftRollRev) && this.world.isRemote && this.getRiddenByEntity() != null) {
-            MCH_PacketIndRotation.send(this);
+            PacketIndRotation.send(this);
             this.aircraftRotChanged = false;
             this.aircraftRollRev = false;
         }
@@ -2542,7 +2542,7 @@ public abstract class MCH_EntityAircraft
             this.setCommonStatus(2, isReloading);
             if (!this.isDestroyed() && this.beforeSupplyAmmo && !isReloading) {
                 this.reloadAllWeapon();
-                MCH_PacketNotifyAmmoNum.sendAllAmmoNum(this, null);
+                PacketNotifyAmmoNum.sendAllAmmoNum(this, null);
             }
 
             this.beforeSupplyAmmo = isReloading;
@@ -2628,7 +2628,7 @@ public abstract class MCH_EntityAircraft
                                         ws.reloadMag();
                                     }
 
-                                    MCH_PacketNotifyAmmoNum.sendAmmoNum(ac, player, wid);
+                                    PacketNotifyAmmoNum.sendAmmoNum(ac, player, wid);
                                 }
                             }
                         }
@@ -3699,7 +3699,7 @@ public abstract class MCH_EntityAircraft
         if (b) {
             if (this.seatSearchCount > 40) {
                 if (this.world.isRemote) {
-                    MCH_PacketSeatListRequest.requestSeatList(this);
+                    PacketRequestSeatList.requestSeatList(this);
                 } else {
                     this.searchSeat();
                 }
@@ -4488,7 +4488,7 @@ public abstract class MCH_EntityAircraft
         this.cs_planeAutoThrottleDown = MCH_Config.AutoThrottleDownPlane.prmBool;
         this.cs_tankAutoThrottleDown = MCH_Config.AutoThrottleDownTank.prmBool;
         this.camera.setShaderSupport(seatId, W_EntityRenderer.isShaderSupport());
-        MCH_PacketNotifyClientSetting.send();
+        PacketClientSettingsSync.send();
     }
 
     @Override
@@ -4704,7 +4704,13 @@ public abstract class MCH_EntityAircraft
                 MCH_WeaponSet ws = this.getCurrentWeapon(entity);
                 ws.onSwitchWeapon(this.world.isRemote, this.isInfinityAmmo(entity));
                 if (!this.world.isRemote) {
-                    MCH_PacketNotifyWeaponID.send(this, sid, id, ws.getAmmoNum(), ws.getRestAllAmmoNum());
+                    new PacketSyncWeapon(
+                            getEntityId(this),
+                            sid,
+                            id,
+                            (short) ws.getAmmoNum(),
+                            (short) ws.getRestAllAmmoNum()
+                    ).sendPacketToAllAround(world, posX, posY, posZ, 150);
                 }
             }
         }
@@ -4779,7 +4785,7 @@ public abstract class MCH_EntityAircraft
                 this.currentWeaponID[sid] = this.getNextWeaponID(entity, 1);
                 this.switchWeapon(entity, this.getCurrentWeaponID(entity));
                 if (this.world.isRemote) {
-                    MCH_PacketIndNotifyAmmoNum.send(this, -1);
+                    PacketIndNotifyAmmoNum.send(this, -1);
                 }
             }
         }
