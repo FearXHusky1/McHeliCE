@@ -115,7 +115,7 @@ public abstract class MCH_AircraftClientTickHandler extends MCH_ClientTickHandle
                 ac.switchCameraMode(player);
                 int mode = ac.getCameraMode(player);
                 if (mode != beforeMode) {
-                    pc.switchCameraMode = (byte) (mode + 1);
+                    pc.switchCameraMode = DataPlayerControlAircraft.CameraMode.values()[mode];
                     playSoundOK();
                     send = true;
                 }

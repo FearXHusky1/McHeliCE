@@ -70,7 +70,7 @@ public abstract class PacketPlayerControlBase extends PacketBase implements Clie
     }
 
     protected void handleCameraMode(MCH_EntityAircraft aircraft, DataPlayerControlAircraft data, EntityPlayer player) {
-        if (data.switchCameraMode > 0) aircraft.switchCameraMode(player, data.switchCameraMode - 1);
+        if (data.switchCameraMode != DataPlayerControlAircraft.CameraMode.NORMAL) aircraft.switchCameraMode(player, data.getSwitchCameraMode().ordinal());
     }
 
     protected void handleWeaponSwitch(MCH_EntityAircraft aircraft, DataPlayerControlAircraft data, EntityPlayer player) {

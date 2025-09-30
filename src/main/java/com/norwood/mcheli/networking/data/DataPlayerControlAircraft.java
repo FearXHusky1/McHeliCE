@@ -16,9 +16,9 @@ public class DataPlayerControlAircraft implements IByteBufSerializable {
     public HatchSwitch switchHatch = HatchSwitch.NONE;
     public GearSwitch switchGear = GearSwitch.NONE;
     public RackAction putDownRack = RackAction.NONE;
+    public CameraMode switchCameraMode = CameraMode.NORMAL;
     @Delegate
     public PlayerControlSwitches switches;
-    public byte switchCameraMode = 0;//TODO:enumify
     public byte switchWeapon = -1;
     public byte useFlareType = 0;
     //TODO:Probably safe to squash to a short frankly
@@ -41,10 +41,10 @@ public class DataPlayerControlAircraft implements IByteBufSerializable {
         buf.writeByte(switchHatch.ordinal());
         buf.writeByte(switchGear.ordinal());
         buf.writeByte(putDownRack.ordinal());
+        buf.writeByte(switchCameraMode.ordinal());
 
         switches.serialize(buf);
 
-        buf.writeByte(switchCameraMode);
         buf.writeByte(switchWeapon);
         buf.writeByte(useFlareType);
 
@@ -66,10 +66,10 @@ public class DataPlayerControlAircraft implements IByteBufSerializable {
         this.switchHatch = HatchSwitch.values()[buf.readByte()];
         this.switchGear  = GearSwitch.values()[buf.readByte()];
         this.putDownRack = RackAction.values()[buf.readByte()];
+        this.switchCameraMode = CameraMode.values()[buf.readByte()];
 
         this.switches = new PlayerControlSwitches(buf);
 
-        this.switchCameraMode = buf.readByte();
         this.switchWeapon     = buf.readByte();
         this.useFlareType     = buf.readByte();
 
@@ -125,6 +125,12 @@ public class DataPlayerControlAircraft implements IByteBufSerializable {
         NONE,   // 0
         FOLD,   // 1
         UNFOLD  // 2
+    }
+
+    public static enum CameraMode {
+        NORMAL, // 0
+        NIGHT_VIS, // 1
+        THERMAL_VIS // 2
     }
 
 
