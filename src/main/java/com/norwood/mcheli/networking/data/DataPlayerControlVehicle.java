@@ -1,4 +1,4 @@
-package com.norwood.mcheli.networking.handlers;
+package com.norwood.mcheli.networking.data;
 
 import io.netty.buffer.ByteBuf;
 import lombok.Getter;

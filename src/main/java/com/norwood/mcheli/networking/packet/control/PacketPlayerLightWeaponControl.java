@@ -1,4 +1,4 @@
-package com.norwood.mcheli.networking.packet;
+package com.norwood.mcheli.networking.packet.control;
 
 import com.norwood.mcheli.MCH_Lib;
 import com.norwood.mcheli.lweapon.MCH_ItemLightWeaponBase;

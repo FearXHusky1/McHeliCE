@@ -2,7 +2,7 @@ package com.norwood.mcheli.networking.packet;
 
 import com.norwood.mcheli.MCH_Config;
 import com.norwood.mcheli.helper.world.MCH_ExplosionV2;
-import com.norwood.mcheli.networking.handlers.DataExplosionParameters;
+import com.norwood.mcheli.networking.data.DataExplosionParameters;
 import hohserg.elegant.networking.api.ElegantPacket;
 import hohserg.elegant.networking.api.ServerToClientPacket;
 import lombok.RequiredArgsConstructor;

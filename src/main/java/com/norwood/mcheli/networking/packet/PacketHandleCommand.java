@@ -7,6 +7,8 @@ import com.norwood.mcheli.multiplay.MCH_MultiplayClient;
 import hohserg.elegant.networking.api.ClientToServerPacket;
 import hohserg.elegant.networking.api.ElegantPacket;
 import hohserg.elegant.networking.api.ServerToClientPacket;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.ICommandManager;
 import net.minecraft.command.server.CommandScoreboard;
@@ -17,12 +19,14 @@ import static com.norwood.mcheli.multiplay.MultiplayerHandler.destoryAllAircraft
 
 
 @ElegantPacket
+@AllArgsConstructor
+@NoArgsConstructor
 public class PacketHandleCommand implements ServerToClientPacket, ClientToServerPacket {
-    public ClientCommandAction id = ClientCommandAction.NONE;
+    public CommandAction id = CommandAction.NONE;
     public String commandArgs;
 
-    public static void send(EntityPlayerMP player, ClientCommandAction id, String str) {
-        if (id != ClientCommandAction.NONE) {
+    public static void send(EntityPlayerMP player, CommandAction id, String str) {
+        if (id != CommandAction.NONE) {
             var packet = new PacketHandleCommand();
             packet.id = id;
             packet.commandArgs = str;
@@ -47,12 +51,11 @@ public class PacketHandleCommand implements ServerToClientPacket, ClientToServer
         switch (id) {
             case SHUFFLE_TEAM -> MCH_Multiplay.shuffleTeam(player);
             case JUMP_SPAWNPOINT -> MCH_Multiplay.jumpSpawnPoint(player);
-            case AIRCRAFT_UI -> {
-                //TF
+            case RAW_COMMAND -> { //Seeminly just passes command stright to the server, doesnt look right
                 ICommandManager icommandmanager = minecraftServer.getCommandManager();
                 icommandmanager.executeCommand(player, commandArgs);
             }
-            case SCOREBOARD -> {
+            case SETPVP -> {
                 if (new CommandScoreboard().checkPermission(minecraftServer, player)) {
                     minecraftServer.setAllowPvp(!minecraftServer.isPVPEnabled());
                     PacketSyncServerSettings.send(null);
@@ -65,9 +68,9 @@ public class PacketHandleCommand implements ServerToClientPacket, ClientToServer
 
     }
 
-    public static enum ClientCommandAction {
+    public static enum CommandAction {
         NONE, REQUEST_SCREENSHOT, REQUEST_MOD_INFO,
-        SHUFFLE_TEAM, JUMP_SPAWNPOINT, AIRCRAFT_UI, SCOREBOARD, DESTROY_AIRCRAFT
+        SHUFFLE_TEAM, JUMP_SPAWNPOINT, RAW_COMMAND, SETPVP, DESTROY_AIRCRAFT
 
     }
 }

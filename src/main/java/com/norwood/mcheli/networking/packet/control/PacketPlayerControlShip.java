@@ -1,8 +1,8 @@
-package com.norwood.mcheli.networking.packet;
+package com.norwood.mcheli.networking.packet.control;
 
 import com.norwood.mcheli.aircraft.MCH_EntityAircraft;
 import com.norwood.mcheli.aircraft.MCH_EntitySeat;
-import com.norwood.mcheli.networking.handlers.DataPlayerControlAircraft;
+import com.norwood.mcheli.networking.data.DataPlayerControlAircraft;
 import com.norwood.mcheli.plane.MCP_EntityPlane;
 import com.norwood.mcheli.ship.MCH_EntityShip;
 import com.norwood.mcheli.uav.MCH_EntityUavStation;

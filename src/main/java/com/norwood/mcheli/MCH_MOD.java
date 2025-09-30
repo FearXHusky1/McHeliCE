@@ -71,7 +71,8 @@ import java.util.Map.Entry;
 
 @Mod(
         modid = "mcheli",
-        name = "MC Helicopter MOD"
+        name = "MC Helicopter MOD",
+        dependencies = "required-after:elegant_networking;after:hbm"
 )
 public class MCH_MOD {
     public static final String MOD_ID = Tags.MODID;
@@ -347,7 +348,6 @@ public class MCH_MOD {
         W_LanguageRegistry.addNameForObject(blockDraftingTable, "ja_jp", "製図台");
         MCH_CriteriaTriggers.registerTriggers();
         MCH_Lib.Log("Register system");
-        W_NetworkRegistry.registerChannel(packetHandler, "MCHeli_CH");
         MinecraftForge.EVENT_BUS.register(new MCH_EventHook());
         proxy.registerClientTick();
         W_NetworkRegistry.registerGuiHandler(this, new MCH_GuiCommonHandler());

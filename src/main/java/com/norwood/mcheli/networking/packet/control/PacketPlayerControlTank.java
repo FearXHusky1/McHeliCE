@@ -1,8 +1,8 @@
-package com.norwood.mcheli.networking.packet;
+package com.norwood.mcheli.networking.packet.control;
 
 import com.norwood.mcheli.aircraft.MCH_EntityAircraft;
 import com.norwood.mcheli.aircraft.MCH_EntitySeat;
-import com.norwood.mcheli.networking.handlers.DataPlayerControlAircraft;
+import com.norwood.mcheli.networking.data.DataPlayerControlAircraft;
 import com.norwood.mcheli.tank.MCH_EntityTank;
 import com.norwood.mcheli.uav.MCH_EntityUavStation;
 import hohserg.elegant.networking.api.ElegantPacket;

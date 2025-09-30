@@ -142,7 +142,7 @@ public class MCH_Command extends CommandBase {
     private void handleSendScreenshot(MinecraftServer server, ICommandSender sender, String[] prm) throws CommandException {
         if (prm.length != 2) throw new CommandException("Usage: /mcheli sendss playerName");
         EntityPlayerMP player = getPlayer(server, sender, prm[1]);
-        PacketHandleCommand.send(player, PacketHandleCommand.ClientCommandAction.NONE, prm[1]);
+        PacketHandleCommand.send(player, PacketHandleCommand.CommandAction.NONE, prm[1]);
     }
 
     private void handleModList(MinecraftServer server, ICommandSender sender, String[] prm) throws CommandException {
@@ -150,7 +150,7 @@ public class MCH_Command extends CommandBase {
         EntityPlayerMP reqPlayer = sender instanceof EntityPlayerMP ? (EntityPlayerMP) sender : null;
         for (int i = 1; i < prm.length; i++) {
             EntityPlayerMP player = getPlayer(server, sender, prm[i]);
-            PacketHandleCommand.send(player, PacketHandleCommand.ClientCommandAction.REQUEST_MOD_INFO, "" + MultiplayerHandler.getPlayerInfoId(reqPlayer));
+            PacketHandleCommand.send(player, PacketHandleCommand.CommandAction.REQUEST_MOD_INFO, "" + MultiplayerHandler.getPlayerInfoId(reqPlayer));
         }
     }
 

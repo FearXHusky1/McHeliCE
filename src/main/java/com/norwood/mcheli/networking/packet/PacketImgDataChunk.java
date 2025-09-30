@@ -2,7 +2,6 @@ package com.norwood.mcheli.networking.packet;
 
 import hohserg.elegant.networking.api.ClientToServerPacket;
 import hohserg.elegant.networking.api.ElegantPacket;
-import lombok.AllArgsConstructor;
 import net.minecraft.entity.player.EntityPlayerMP;
 
 import static com.norwood.mcheli.multiplay.MultiplayerHandler.*;

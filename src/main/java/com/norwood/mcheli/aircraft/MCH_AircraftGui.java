@@ -1,8 +1,8 @@
 package com.norwood.mcheli.aircraft;
 
-import com.norwood.mcheli.multiplay.MCH_PacketIndMultiplayCommand;
-import com.norwood.mcheli.networking.packet.PacketOpenScreen;
 import com.norwood.mcheli.networking.packet.PacketCommandSave;
+import com.norwood.mcheli.networking.packet.PacketHandleCommand;
+import com.norwood.mcheli.networking.packet.PacketOpenScreen;
 import com.norwood.mcheli.networking.packet.PacketRequestReload;
 import com.norwood.mcheli.weapon.MCH_WeaponDummy;
 import com.norwood.mcheli.weapon.MCH_WeaponInfo;
@@ -186,7 +186,7 @@ public class MCH_AircraftGui extends W_GuiContainer {
             }
 
             if (!s.isEmpty()) {
-                MCH_PacketIndMultiplayCommand.send(768, s);
+                new PacketHandleCommand(PacketHandleCommand.CommandAction.RAW_COMMAND, s);
             }
         } else {
             this.editCommand.textboxKeyTyped(c, code);

@@ -1,6 +1,7 @@
-package com.norwood.mcheli.networking.packet;
+package com.norwood.mcheli.networking.packet.control;
 
 import com.norwood.mcheli.gltd.MCH_EntityGLTD;
+import com.norwood.mcheli.networking.packet.PacketBase;
 import hohserg.elegant.networking.api.ClientToServerPacket;
 import hohserg.elegant.networking.api.ElegantPacket;
 import net.minecraft.entity.Entity;

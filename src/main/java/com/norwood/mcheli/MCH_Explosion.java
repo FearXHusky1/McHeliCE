@@ -1,7 +1,7 @@
 package com.norwood.mcheli;
 
 import com.norwood.mcheli.helper.world.MCH_ExplosionV2;
-import com.norwood.mcheli.networking.handlers.DataExplosionParameters;
+import com.norwood.mcheli.networking.data.DataExplosionParameters;
 import com.norwood.mcheli.networking.packet.PacketParticleEffect;
 import com.norwood.mcheli.wrapper.W_Entity;
 import net.minecraft.entity.Entity;

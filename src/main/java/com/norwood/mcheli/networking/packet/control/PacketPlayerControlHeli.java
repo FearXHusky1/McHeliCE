@@ -1,4 +1,4 @@
-package com.norwood.mcheli.networking.packet;
+package com.norwood.mcheli.networking.packet.control;
 
 import com.norwood.mcheli.MCH_Lib;
 import com.norwood.mcheli.aircraft.MCH_EntityAircraft;
@@ -7,8 +7,8 @@ import com.norwood.mcheli.chain.MCH_EntityChain;
 import com.norwood.mcheli.container.MCH_EntityContainer;
 import com.norwood.mcheli.helicopter.MCH_EntityHeli;
 import com.norwood.mcheli.helper.MCH_CriteriaTriggers;
-import com.norwood.mcheli.networking.handlers.DataPlayerControlAircraft;
-import com.norwood.mcheli.networking.handlers.DataPlayerControlVehicle;
+import com.norwood.mcheli.networking.data.DataPlayerControlAircraft;
+import com.norwood.mcheli.networking.data.DataPlayerControlVehicle;
 import com.norwood.mcheli.uav.MCH_EntityUavStation;
 import hohserg.elegant.networking.api.ElegantPacket;
 import lombok.RequiredArgsConstructor;
