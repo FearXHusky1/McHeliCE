@@ -12,9 +12,10 @@ import net.minecraft.util.text.TextFormatting;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.norwood.mcheli.multiplay.MCH_MultiplayPacketHandler.*;
+import static com.norwood.mcheli.multiplay.MultiplayerHandler.*;
 
 @ElegantPacket
+//FIXME:Terrible implementation, low prio
 public class PacketSendModlist implements ServerToClientPacket, ClientToServerPacket {
 
     public List<String> list = new ArrayList<>();
@@ -53,7 +54,7 @@ public class PacketSendModlist implements ServerToClientPacket, ClientToServerPa
 
     @Override
     public void onReceive(EntityPlayerMP player) {
-        if (id == getPlayerInfoId()) {
+        if (id == getPlayerInfoId(player)) {
             if (modListRequestPlayer != null) {
                 this.sendToPlayer((EntityPlayerMP) modListRequestPlayer);
 

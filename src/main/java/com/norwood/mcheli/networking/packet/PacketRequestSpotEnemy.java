@@ -12,7 +12,7 @@ import net.minecraft.item.ItemStack;
 
 @ElegantPacket
 @RequiredArgsConstructor
-public class PacketIndSpotEntity extends PacketBase implements ClientToServerPacket {
+public class PacketRequestSpotEnemy extends PacketBase implements ClientToServerPacket {
 
     final public int targetFilter;
 

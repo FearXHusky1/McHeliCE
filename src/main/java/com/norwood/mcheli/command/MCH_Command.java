@@ -5,7 +5,7 @@ import com.norwood.mcheli.MCH_Config;
 import com.norwood.mcheli.MCH_MOD;
 import com.norwood.mcheli.Tags;
 import com.norwood.mcheli.helper.MCH_Utils;
-import com.norwood.mcheli.multiplay.MCH_MultiplayPacketHandler;
+import com.norwood.mcheli.multiplay.MultiplayerHandler;
 import com.norwood.mcheli.networking.packet.PacketHandleCommand;
 import com.norwood.mcheli.networking.packet.PacketSyncServerSettings;
 import com.norwood.mcheli.networking.packet.PacketTitle;
@@ -150,7 +150,7 @@ public class MCH_Command extends CommandBase {
         EntityPlayerMP reqPlayer = sender instanceof EntityPlayerMP ? (EntityPlayerMP) sender : null;
         for (int i = 1; i < prm.length; i++) {
             EntityPlayerMP player = getPlayer(server, sender, prm[i]);
-            PacketHandleCommand.send(player, PacketHandleCommand.ClientCommandAction.REQUEST_MOD_INFO, "" + MCH_MultiplayPacketHandler.getPlayerInfoId(reqPlayer));
+            PacketHandleCommand.send(player, PacketHandleCommand.ClientCommandAction.REQUEST_MOD_INFO, "" + MultiplayerHandler.getPlayerInfoId(reqPlayer));
         }
     }
 

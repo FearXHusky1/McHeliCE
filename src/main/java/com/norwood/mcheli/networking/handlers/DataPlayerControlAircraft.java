@@ -18,7 +18,7 @@ public class DataPlayerControlAircraft implements IByteBufSerializable {
     public RackAction putDownRack = RackAction.NONE;
     @Delegate
     public PlayerControlSwitches switches;
-    public byte switchCameraMode = 0;
+    public byte switchCameraMode = 0;//TODO:enumify
     public byte switchWeapon = -1;
     public byte useFlareType = 0;
     //TODO:Probably safe to squash to a short frankly

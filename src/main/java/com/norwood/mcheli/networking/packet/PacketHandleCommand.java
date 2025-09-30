@@ -13,7 +13,7 @@ import net.minecraft.command.server.CommandScoreboard;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 
-import static com.norwood.mcheli.multiplay.MCH_MultiplayPacketHandler.destoryAllAircraft;
+import static com.norwood.mcheli.multiplay.MultiplayerHandler.destoryAllAircraft;
 
 
 @ElegantPacket

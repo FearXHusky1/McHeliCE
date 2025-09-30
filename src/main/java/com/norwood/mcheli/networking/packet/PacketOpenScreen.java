@@ -6,13 +6,13 @@ import hohserg.elegant.networking.api.ClientToServerPacket;
 import net.minecraft.entity.player.EntityPlayerMP;
 
 @Deprecated //Will be replaced by modular
-public class PacketIndOpenScreen implements ClientToServerPacket {
+public class PacketOpenScreen implements ClientToServerPacket {
 
     public int guiID = -1; //Raw integer again...
 
     public static void send(int gui_id) {
         if (gui_id >= 0) {
-            var packet = new PacketIndOpenScreen();
+            var packet = new PacketOpenScreen();
             packet.guiID = gui_id;
             packet.sendToServer();
         }

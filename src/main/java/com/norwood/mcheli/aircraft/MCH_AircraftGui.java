@@ -1,9 +1,9 @@
 package com.norwood.mcheli.aircraft;
 
 import com.norwood.mcheli.multiplay.MCH_PacketIndMultiplayCommand;
-import com.norwood.mcheli.networking.packet.PacketIndOpenScreen;
+import com.norwood.mcheli.networking.packet.PacketOpenScreen;
 import com.norwood.mcheli.networking.packet.PacketCommandSave;
-import com.norwood.mcheli.networking.packet.PacketIndReload;
+import com.norwood.mcheli.networking.packet.PacketRequestReload;
 import com.norwood.mcheli.weapon.MCH_WeaponDummy;
 import com.norwood.mcheli.weapon.MCH_WeaponInfo;
 import com.norwood.mcheli.weapon.MCH_WeaponSet;
@@ -108,7 +108,7 @@ public class MCH_AircraftGui extends W_GuiContainer {
                 case 1:
                     this.buttonReload.enabled = this.canReload(this.thePlayer);
                     if (this.buttonReload.enabled) {
-                        PacketIndReload.send(this.aircraft, this.currentWeaponId);
+                        PacketRequestReload.send(this.aircraft, this.currentWeaponId);
                         this.aircraft.supplyAmmo(this.currentWeaponId);
                         this.reloadWait = 3;
                         this.buttonReload.enabled = false;
@@ -134,10 +134,10 @@ public class MCH_AircraftGui extends W_GuiContainer {
                     this.closeScreen();
                     break;
                 case 5:
-                    PacketIndOpenScreen.send(2);
+                    PacketOpenScreen.send(2);
                     break;
                 case 6:
-                    PacketIndOpenScreen.send(3);
+                    PacketOpenScreen.send(3);
             }
         }
     }

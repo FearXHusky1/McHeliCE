@@ -26,7 +26,6 @@ import com.norwood.mcheli.lweapon.MCH_ItemLightWeaponBase;
 import com.norwood.mcheli.lweapon.MCH_ItemLightWeaponBullet;
 import com.norwood.mcheli.mob.MCH_EntityGunner;
 import com.norwood.mcheli.mob.MCH_ItemSpawnGunner;
-import com.norwood.mcheli.networking.handlers.MCH_PacketHandler;
 import com.norwood.mcheli.parachute.MCH_EntityParachute;
 import com.norwood.mcheli.parachute.MCH_ItemParachute;
 import com.norwood.mcheli.plane.MCP_EntityPlane;
@@ -79,7 +78,6 @@ public class MCH_MOD {
     @Deprecated
     public static final String DOMAIN = MOD_ID;
     public static final String ADDON_FOLDER_NAME = "mcheli_addons";
-    public static final MCH_PacketHandler packetHandler = new MCH_PacketHandler();
     public static String VER = "";
     @Instance("mcheli")
     public static MCH_MOD instance;
