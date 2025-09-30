@@ -29,7 +29,7 @@ public class PacketParticleEffect implements ServerToClientPacket {
         var player = mc.player;
 
         Entity exploder = null;
-            if (explosionParameters.inWater) {
+            if (!explosionParameters.inWater) {
                 if (!MCH_Config.DefaultExplosionParticle.prmBool) {
                     List<BlockPos> affectedPositions = explosionParameters.getAffectedPositions();
                     MCH_ExplosionV2.effectMODExplosion(player.world, explosionParameters.x, explosionParameters.y, explosionParameters.z, explosionParameters.size, affectedPositions);
