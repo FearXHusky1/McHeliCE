@@ -18,7 +18,7 @@ import java.util.List;
 public abstract class MCH_AircraftInfo extends MCH_BaseInfo implements IItemContent {
     public final String name;
     public String displayName;
-    public final HashMap<String, String> displayNameLang;
+    public HashMap<String, String> displayNameLang;
     public int itemID;
     public List<String> recipeString;
     public final List<IRecipe> recipe;
