@@ -7,6 +7,7 @@ import com.norwood.mcheli.helper.info.IItemContent;
 import com.norwood.mcheli.hud.MCH_Hud;
 import com.norwood.mcheli.hud.MCH_HudManager;
 import com.norwood.mcheli.wrapper.W_Entity;
+import lombok.AllArgsConstructor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.util.math.Vec3d;
@@ -918,6 +919,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo implements IItemCont
         }
     }
 
+    @AllArgsConstructor
     public static class ParticleSplash {
         public final int num;
         public final float acceleration;

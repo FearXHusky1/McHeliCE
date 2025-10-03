@@ -11,6 +11,7 @@ import com.norwood.mcheli.tank.MCH_TankInfo;
 import com.norwood.mcheli.throwable.MCH_ThrowableInfo;
 import com.norwood.mcheli.vehicle.MCH_VehicleInfo;
 import com.norwood.mcheli.weapon.MCH_WeaponInfo;
+import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Nullable;
 import org.yaml.snakeyaml.Yaml;
 
@@ -91,14 +92,13 @@ public class YamlParser implements IParser {
             switch (entry.getKey()) {
                 case "DisplayName" -> {
                     Object nameObject = entry.getValue();
-                    if (nameObject instanceof String name)
-                        info.displayName = name.trim();
+                    if (nameObject instanceof String name) info.displayName = name.trim();
                     else if (nameObject instanceof Map<?, ?> translationNames)
                         info.displayNameLang = (HashMap<String, String>) translationNames;
                     else throw new ClassCastException();
                 }
                 case "Author" -> {
-                   //Proposal: would allow content creators to put their signature
+                    //Proposal: would allow content creators to put their signature
                 }
                 //Depricated on 1,12, around for 1.7 compat
                 case "ItemID" -> {
@@ -107,13 +107,11 @@ public class YamlParser implements IParser {
                 case "Category" -> {
                     if (entry.getValue() instanceof String category)
                         info.category = category.toUpperCase(Locale.ROOT).trim();
-                    if (entry.getValue() instanceof List<?> categories) {
+                    else if (entry.getValue() instanceof List<?> categories) {
                         List<String> list = (List<String>) categories;
-                        info.category = list.stream()
-                                .map(String::trim)
-                                .map(String::toUpperCase)
-                                .collect(Collectors.joining(","));
-                    }
+                        info.category = list.stream().map(String::trim).map(String::toUpperCase).collect(Collectors.joining(","));
+                    } else throw new RuntimeException();
+
 
                 }
                 case "CanRide" -> info.canRide = (boolean) entry.getValue();
@@ -156,8 +154,7 @@ public class YamlParser implements IParser {
                 case "NameOnEarlyASRadar" -> info.nameOnEarlyASRadar = ((String) entry.getValue()).trim();
                 case "ExplosionSizeByCrash" -> info.explosionSizeByCrash = getClamped(100, (Number) entry.getValue());
                 case "ThrottleDownFactor" -> {
-                    if (entry.getValue() instanceof String data)
-                        info.throttleDownFactor = info.toFloat(data, 0, 10);
+                    if (entry.getValue() instanceof String data) info.throttleDownFactor = info.toFloat(data, 0, 10);
                 }
                 case "HUDType", "WeaponGroupType" -> {
                     //Unimplemented
@@ -167,8 +164,11 @@ public class YamlParser implements IParser {
                     textures.stream().map(String::trim).forEach(info::addTextureName);
                 }
                 case "ParticleScale" -> info.particlesScale = getClamped(50f, (Number) entry.getValue());
-
                 case "EnableSeaSurfaceParticle" -> info.enableSeaSurfaceParticle = (boolean) entry.getValue();
+                case "SplashParticles" -> {
+                    List<Map<String, Object>> splashParticles = (List<Map<String, Object>>) entry.getValue();
+                    splashParticles.stream().map((this::parseParticleSplash)).forEach(info.particleSplashs::add);
+                }
 
 
             }
@@ -203,5 +203,42 @@ public class YamlParser implements IParser {
 
     private boolean valOrDefault(Object object, boolean defValue) {
         return object instanceof Boolean bool ? bool : defValue;
+    }
+
+    private MCH_AircraftInfo.ParticleSplash parseParticleSplash(Map<String, Object> map) {
+
+         Vec3d pos = null;
+         int num = 2;
+         float acceleration = 1f;
+         float size = 2f;
+         int age = 80;
+         float motionY = 0.01f;
+         float gravity = 0;
+
+        for(Map.Entry<String,Object> entry : map.entrySet()){
+            switch (entry.getKey()){
+                case "pos" -> pos = parseVector((Object[]) entry.getValue());
+                case "count" -> num = getClamped(1,100, (Number) entry.getValue());
+                case "size" -> size = ((Number) entry.getValue()).floatValue();
+                case "accel" -> acceleration  = ((Number) entry.getValue()).floatValue();
+                case "age" -> age = getClamped(1, 100_000, (Number) entry.getValue());
+                case "motion" -> motionY = ((Number) entry.getValue()).floatValue();
+                case "gravity" -> gravity = ((Number) entry.getValue()).floatValue();
+            }
+        }
+
+        if(pos == null) throw new IllegalArgumentException("Splash particle must have a position!");
+
+        return new MCH_AircraftInfo.ParticleSplash(num, size, acceleration, pos, age, motionY, gravity);
+    }
+
+    private Vec3d parseVector(Object[] vector) {
+        if (vector instanceof Number[] numbers) {
+            if (numbers.length != 3)
+                throw new IllegalArgumentException("The vector array must contain princely 3 numbers!");
+            return new Vec3d(numbers[0].doubleValue(), numbers[1].doubleValue(), numbers[2].doubleValue());
+        } else throw new IllegalArgumentException("Vector must be an array of Numbers!");
+
+
     }
 }
