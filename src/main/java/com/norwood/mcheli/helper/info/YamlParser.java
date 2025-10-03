@@ -16,10 +16,12 @@ import org.yaml.snakeyaml.Yaml;
 
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class YamlParser implements IParser {
@@ -87,62 +89,49 @@ public class YamlParser implements IParser {
 
         for (Map.Entry<String, Object> entry : root.entrySet()) {
             switch (entry.getKey()) {
-                case "displayName" -> {
+                case "DisplayName" -> {
                     Object nameObject = entry.getValue();
                     if (nameObject instanceof String name)
-                        info.displayName = name;
-                   else if (nameObject instanceof Map<?, ?> translationNames)
+                        info.displayName = name.trim();
+                    else if (nameObject instanceof Map<?, ?> translationNames)
                         info.displayNameLang = (HashMap<String, String>) translationNames;
                     else throw new ClassCastException();
                 }
+                case "Author" -> {
+                   //Proposal: would allow content creators to put their signature
+                }
                 //Depricated on 1,12, around for 1.7 compat
-                case "itemID" -> {
-                    if (entry.getValue() instanceof Integer integer)
-                        info.itemID = integer;
-                    else throw new RuntimeException("Item ID must be an integer!");
+                case "ItemID" -> {
+                    info.itemID = (int) entry.getValue();
                 }
                 case "Category" -> {
                     if (entry.getValue() instanceof String category)
-                        info.category = category.toUpperCase(Locale.ROOT);
-                    if (entry.getValue() instanceof String[] categories)
-                        info.category = Arrays.stream(categories)
+                        info.category = category.toUpperCase(Locale.ROOT).trim();
+                    if (entry.getValue() instanceof List<?> categories) {
+                        List<String> list = (List<String>) categories;
+                        info.category = list.stream()
+                                .map(String::trim)
                                 .map(String::toUpperCase)
                                 .collect(Collectors.joining(","));
-
-
-                }
-                case "CanRide" -> info.canRide = valOrDefault(entry.getValue(), true);
-                case "CreativeOnly" -> info.canRide = valOrDefault(entry.getValue(), false);
-                case "Invulnerable" -> info.invulnerable = valOrDefault(entry.getValue(), false);
-                case "MaxFuel" -> {
-                    if (entry.getValue() instanceof Number num)
-                        info.maxFuel = getClamped(0, 100_000_000, num);
-
-                }
-                case "FuelConsumption" -> {
-                    if (entry.getValue() instanceof Number num)
-                        info.fuelConsumption = getClamped(0.0F, 10_000.0F, num);
-                }
-                case "FuelSupplyRange" -> {
-                    if (entry.getValue() instanceof Number num)
-                        info.fuelSupplyRange = getClamped(0F, 1_1000.0F, num);
-                }
-                case "AmmoSupplyRange" -> {
-                    if (entry.getValue() instanceof Number num)
-                        info.ammoSupplyRange = getClamped(1000, num);
-                }
-                case "RepairOtherVehicles" -> {
-                    if (entry.getValue() instanceof Map<?, ?> map) {
-                        Map<String, Number> repairMap = (HashMap<String, Number>) map;
-
-                        if (repairMap.containsKey("range"))
-                            info.repairOtherVehiclesRange = getClamped(1_000.0F, repairMap.get("range"));
-
-                        if (repairMap.containsKey("value"))
-                            info.repairOtherVehiclesValue = getClamped(10_000_000, repairMap.get("value"));
                     }
+
                 }
-                //TODO
+                case "CanRide" -> info.canRide = (boolean) entry.getValue();
+                case "CreativeOnly" -> info.creativeOnly = (boolean) entry.getValue();
+                case "Invulnerable" -> info.invulnerable = (boolean) entry.getValue();
+                case "MaxFuel" -> info.maxFuel = getClamped(0, 100_000_000, (Number) entry.getValue());
+                case "FuelConsumption" -> info.fuelConsumption = getClamped(0.0F, 10_000.0F, (Number) entry.getValue());
+                case "FuelSupplyRange" -> info.fuelSupplyRange = getClamped(0F, 1_1000.0F, (Number) entry.getValue());
+                case "AmmoSupplyRange" -> info.ammoSupplyRange = getClamped(1000, (Number) entry.getValue());
+                case "RepairOtherVehicles" -> {
+                    Map<String, Number> repairMap = (HashMap<String, Number>) entry.getValue();
+                    if (repairMap.containsKey("range"))
+                        info.repairOtherVehiclesRange = getClamped(1_000.0F, repairMap.get("range"));
+                    if (repairMap.containsKey("value"))
+                        info.repairOtherVehiclesValue = getClamped(10_000_000, repairMap.get("value"));
+                }
+
+                //UNUSED in reforged too,
 //                case "RadarType" -> {
 //                    if (entry.getValue() instanceof String data) {
 //                        try {
@@ -161,29 +150,25 @@ public class YamlParser implements IParser {
 //                        }
 //                    }
 //                }
-                case "NameOnModernAARadar" -> {
-                    if (entry.getValue() instanceof String data)
-                        info.nameOnModernAARadar = data;
-                }
-                case "NameOnEarlyAARadar" -> {
-                    if (entry.getValue() instanceof String data)
-                        info.nameOnEarlyAARadar = data;
-                }
-                case "NameOnModernASRadar" -> {
-                    if (entry.getValue() instanceof String data)
-                        info.nameOnModernASRadar = data;
-                }
-                case "NameOnEarlyASRadar" -> {
-                    if (entry.getValue() instanceof String data)
-                        info.nameOnEarlyASRadar = data;
-                }
-                case "ExplosionSizeByCrash" -> {
-                    info.explosionSizeByCrash = info.toInt(data, 0, 100);
-                }
+                case "NameOnModernAARadar" -> info.nameOnModernAARadar = ((String) entry.getValue()).trim();
+                case "NameOnEarlyAARadar" -> info.nameOnEarlyAARadar = ((String) entry.getValue()).trim();
+                case "NameOnModernASRadar" -> info.nameOnModernASRadar = ((String) entry.getValue()).trim();
+                case "NameOnEarlyASRadar" -> info.nameOnEarlyASRadar = ((String) entry.getValue()).trim();
+                case "ExplosionSizeByCrash" -> info.explosionSizeByCrash = getClamped(100, (Number) entry.getValue());
                 case "ThrottleDownFactor" -> {
                     if (entry.getValue() instanceof String data)
                         info.throttleDownFactor = info.toFloat(data, 0, 10);
                 }
+                case "HUDType", "WeaponGroupType" -> {
+                    //Unimplemented
+                }
+                case "Textures" -> {
+                    List<String> textures = (List<String>) entry.getValue();
+                    textures.stream().map(String::trim).forEach(info::addTextureName);
+                }
+                case "ParticleScale" -> info.particlesScale = getClamped(50f, (Number) entry.getValue());
+
+                case "EnableSeaSurfaceParticle" -> info.enableSeaSurfaceParticle = (boolean) entry.getValue();
 
 
             }
