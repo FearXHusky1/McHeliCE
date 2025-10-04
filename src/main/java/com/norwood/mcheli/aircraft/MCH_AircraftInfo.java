@@ -688,6 +688,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo implements IItemCont
         }
     }
 
+    @AllArgsConstructor
     public static class CameraPosition {
         public final Vec3d pos;
         public final boolean fixRot;
@@ -957,6 +958,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo implements IItemCont
         }
     }
 
+    @AllArgsConstructor
     public static class RideRack {
         public final String name;
         public final int rackID;

@@ -1,6 +1,8 @@
 package com.norwood.mcheli.helper.info;
 
 import com.norwood.mcheli.aircraft.MCH_AircraftInfo;
+import com.norwood.mcheli.aircraft.MCH_SeatInfo;
+import com.norwood.mcheli.aircraft.MCH_SeatRackInfo;
 import com.norwood.mcheli.helicopter.MCH_HeliInfo;
 import com.norwood.mcheli.helper.addon.AddonResourceLocation;
 import com.norwood.mcheli.hud.MCH_Hud;
@@ -19,10 +21,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class YamlParser implements IParser {
@@ -183,15 +182,60 @@ public class YamlParser implements IParser {
                     repellingHooks.stream().map(this::parseHook).forEach(info.repellingHooks::add);
                 }
                 case "Racks" -> {
+                    List<Map<String, Object>> racks = (List<Map<String, Object>>) entry.getValue();
+                    racks.stream().map(this::parseRacks).forEach((rack) -> {
+                        if (rack instanceof MCH_SeatRackInfo r)
+                            info.entityRackList.add(r);
+                        else
+                            info.rideRacks.add((MCH_AircraftInfo.RideRack) rack);
 
+
+                    });
                 }
-
-
 
 
             }
         }
 
+    }
+
+    private Object parseRacks(Map<String, Object> map) {
+        if(map.containsKey("type")){
+            RACK_TYPE type  = RACK_TYPE.valueOf((String)map.get("type"));
+            return switch (type){
+                case NORMAL -> parseRack(map);
+                case RIDING -> parseRidingRack(map);
+                default -> throw new UnsupportedOperationException();
+            };
+
+        } else {
+            return parseRack(map);
+        }
+    }
+
+    private MCH_SeatRackInfo parseRack(Map<String, Object> map){
+
+        String[] names;
+
+
+        return null;
+    }
+
+    private MCH_AircraftInfo.RideRack parseRidingRack(Map<String, Object> map){
+        int rackID = -1;//FUCK IDs
+        String name = "";
+
+
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            switch (entry.getKey()) {
+                case "id" ->  rackID = getClamped(1,10_000, (Number) entry.getValue());
+                case "name" ->  name = ((String)entry.getValue()).toLowerCase(Locale.ROOT).trim();
+            }
+        }
+        if(rackID == -1 || name.isEmpty())
+            throw new IllegalArgumentException("Name nor ID can be empty!");
+
+        return new MCH_AircraftInfo.RideRack(name,rackID);
     }
 
     private MCH_AircraftInfo.SearchLight parseSearchLights(Map<String, Object> map) {
@@ -215,8 +259,8 @@ public class YamlParser implements IParser {
                 case "fixedDirection" -> fixedDirection = (boolean) entry.getValue();
                 case "steering" -> steering = (boolean) entry.getValue();
                 case "pos" -> pos = parseVector((Object[]) entry.getValue());
-                case "colorStart" -> colorStart = hex2dec((String) entry.getValue());
-                case "colorEnd" -> colorEnd = hex2dec((String) entry.getValue());
+                case "colorStart" -> colorStart = parseHexColor((String) entry.getValue());
+                case "colorEnd" -> colorEnd = parseHexColor((String) entry.getValue());
                 case "height" -> height = ((Number) entry.getValue()).floatValue();
                 case "width" -> width = ((Number) entry.getValue()).floatValue();
                 case "yaw" -> yaw = ((Number) entry.getValue()).floatValue();
@@ -237,7 +281,7 @@ public class YamlParser implements IParser {
 
     }
 
-    private MCH_AircraftInfo.RepellingHook parseHook(Map<String, Object> map){
+    private MCH_AircraftInfo.RepellingHook parseHook(Map<String, Object> map) {
         Vec3d pos = null;
         int interval = 0;
 
@@ -250,10 +294,10 @@ public class YamlParser implements IParser {
         }
 
         if (pos == null) throw new IllegalArgumentException("Repelling hook must have a position!");
-       return new MCH_AircraftInfo.RepellingHook(pos, interval);
+        return new MCH_AircraftInfo.RepellingHook(pos, interval);
     }
 
-    public int hex2dec(String s) {
+    public int parseHexColor(String s) {
         return !s.startsWith("0x") && !s.startsWith("0X") && s.indexOf(0) != 35 ? (int) (Long.decode("0x" + s).longValue()) : (int) (Long.decode(s).longValue());
     }
 
@@ -282,10 +326,6 @@ public class YamlParser implements IParser {
     }
 
 
-    private boolean valOrDefault(Object object, boolean defValue) {
-        return object instanceof Boolean bool ? bool : defValue;
-    }
-
     private MCH_AircraftInfo.ParticleSplash parseParticleSplash(Map<String, Object> map) {
 
         Vec3d pos = null;
@@ -313,6 +353,73 @@ public class YamlParser implements IParser {
         return new MCH_AircraftInfo.ParticleSplash(num, size, acceleration, pos, age, motionY, gravity);
     }
 
+    private MCH_AircraftInfo.CameraPosition parseCamera(Map<String, Object> map) {
+        Vec3d pos = Vec3d.ZERO;
+        boolean fixRot = false;
+        float yaw = 0;
+        float pitch = 0;
+
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            switch (entry.getKey()) {
+                case "pos" -> pos = parseVector((Object[]) entry.getValue());
+                case "fixedRot" -> fixRot = (boolean) entry.getValue();
+                case "yaw" -> yaw = ((Number) entry.getValue()).floatValue();
+                case "pitch" -> pitch = ((Number) entry.getValue()).floatValue();
+            }
+        }
+
+        return new MCH_AircraftInfo.CameraPosition(pos, fixRot, yaw, pitch);
+    }
+
+    private MCH_SeatInfo parseSeatInfo(Map<String, Object> map) {
+        Vec3d position = null;
+        boolean isGunner = false;
+        boolean canSwitchGunner = false;
+        boolean hasFixedRotation = false;
+        float fixedYaw = 0f;
+        float fixedPitch = 0f;
+        float minPitch = -30f;
+        float maxPitch = 70f;
+        boolean rotatableSeat = false;
+        boolean invertCameraPos = false;
+        MCH_AircraftInfo.CameraPosition cameraPos = null;
+
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            switch (entry.getKey()) {
+                case "pos" -> position = parseVector((Object[]) entry.getValue());
+                case "gunner" -> isGunner = (Boolean) entry.getValue();
+                case "switchGunner" -> canSwitchGunner = (Boolean) entry.getValue();
+                case "fixRot" -> hasFixedRotation = (Boolean) entry.getValue();
+                case "fixYaw" -> fixedYaw = ((Number) entry.getValue()).floatValue();
+                case "fixPitch" -> fixedPitch = ((Number) entry.getValue()).floatValue();
+                case "minPitch" -> minPitch = ((Number) entry.getValue()).floatValue();
+                case "maxPitch" -> maxPitch = ((Number) entry.getValue()).floatValue();
+                case "rotSeat" -> rotatableSeat = (Boolean) entry.getValue();
+                case "invCamPos" -> invertCameraPos = (Boolean) entry.getValue();
+                case "camera" -> cameraPos = parseCamera((Map<String, Object>) entry.getValue());
+            }
+        }
+
+        if (position == null) {
+            throw new IllegalArgumentException("Seat must have a position!");
+        }
+
+        return new MCH_SeatInfo(
+                position,
+                isGunner,
+                cameraPos,
+                invertCameraPos,
+                canSwitchGunner,
+                hasFixedRotation,
+                fixedYaw,
+                fixedPitch,
+                minPitch,
+                maxPitch,
+                rotatableSeat
+        );
+    }
+
+
     private Vec3d parseVector(Object[] vector) {
         if (vector instanceof Number[] numbers) {
             if (numbers.length != 3)
@@ -322,11 +429,12 @@ public class YamlParser implements IParser {
 
 
     }
-    private MCH_AircraftInfo.Hatch parseHatch( MCH_AircraftInfo data, Map<String, Object> map) {
+
+    private MCH_AircraftInfo.Hatch parseHatch(MCH_AircraftInfo data, Map<String, Object> map) {
         Vec3d position = null;
         Vec3d rotation = null;
         float maxRotation = 0f;
-        String partName = "light_hatch"+ data.lightHatchList.size();
+        String partName = "light_hatch" + data.lightHatchList.size();
         boolean isSliding = false;
 
         for (Map.Entry<String, Object> entry : map.entrySet()) {
@@ -354,8 +462,7 @@ public class YamlParser implements IParser {
     }
 
 
-
-    public static enum SEARCH_LIGHT {
-        NORMAL, FIXED, STEERING
+    public static enum RACK_TYPE {//Could be bool, but this makes it more extensible
+        NORMAL, RIDING
     }
 }
