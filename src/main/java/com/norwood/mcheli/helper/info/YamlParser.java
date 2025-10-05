@@ -23,8 +23,12 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static com.norwood.mcheli.aircraft.MCH_AircraftInfo.*;
+
+@SuppressWarnings({"unchecked", "unboxing"})
 public class YamlParser implements IParser {
 
     public static final Yaml YAML_INSTANCE = new Yaml();
@@ -86,6 +90,7 @@ public class YamlParser implements IParser {
         return null;
     }
 
+    @SuppressWarnings("unboxing")
     private void mapToAircraft(MCH_AircraftInfo info, Map<String, Object> root) {
 
 
@@ -118,9 +123,10 @@ public class YamlParser implements IParser {
                 case "CanRide" -> info.canRide = ((Boolean) entry.getValue()).booleanValue();
                 case "CreativeOnly" -> info.creativeOnly = ((Boolean) entry.getValue()).booleanValue();
                 case "Invulnerable" -> info.invulnerable = ((Boolean) entry.getValue()).booleanValue();
-                case "MaxFuel" -> info.maxFuel = getClamped(0, 100_000_000, (Number) entry.getValue());
-                case "FuelConsumption" -> info.fuelConsumption = getClamped(0.0F, 10_000.0F, (Number) entry.getValue());
-                case "FuelSupplyRange" -> info.fuelSupplyRange = getClamped(0F, 1_1000.0F, (Number) entry.getValue());
+                case "MaxFuel" -> info.maxFuel = getClamped(100_000_000, (Number) entry.getValue());
+                case "Stealth" -> info.stealth = getClamped(1F, (Number) entry.getValue());
+                case "FuelConsumption" -> info.fuelConsumption = getClamped(10_000.0F, (Number) entry.getValue());
+                case "FuelSupplyRange" -> info.fuelSupplyRange = getClamped(1_1000.0F, (Number) entry.getValue());
                 case "AmmoSupplyRange" -> info.ammoSupplyRange = getClamped(1000, (Number) entry.getValue());
                 case "RepairOtherVehicles" -> {
                     Map<String, Number> repairMap = (HashMap<String, Number>) entry.getValue();
@@ -204,13 +210,18 @@ public class YamlParser implements IParser {
                     List<Map<String, Object>> racks = (List<Map<String, Object>>) entry.getValue();
                     racks.stream().map(this::parseRacks).forEach((rack) -> {
                         if (rack instanceof MCH_SeatRackInfo r) info.entityRackList.add(r);
-                        else info.rideRacks.add((MCH_AircraftInfo.RideRack) rack);
+                        else info.rideRacks.add((RideRack) rack);
                     });
                 }
-                case "Wheels" -> {
+                case "WheelsHitbox" -> {
                     List<Map<String, Object>> wheel = (List<Map<String, Object>>) entry.getValue();
                     info.wheels.addAll(wheel.stream().map(this::parseWheel).sorted((o1, o2) -> o1.pos.z > o2.pos.z ? -1 : 1).collect(Collectors.toList()));
                 }
+                case "Parts" -> {
+                    List<Map<String, Object>> parts = (List<Map<String, Object>>) entry.getValue();
+                    parseParts(parts, info);
+                }
+
                 case "Seats" -> {
 
                 }
@@ -221,6 +232,83 @@ public class YamlParser implements IParser {
         }
 
     }
+
+    private void parseParts(List<Map<String, Object>> parts, MCH_AircraftInfo info) {
+        for (Map<String, Object> part : parts) {
+            if (!part.containsKey("Type") || !(part.get("Type") instanceof String))
+                throw new IllegalArgumentException("Part must contain a Type string!");
+            switch ((String) part.get("Type")) {
+                case "Camera" -> parseDrawnPart(
+                        Camera.class,
+                        part,
+                        (drawnPart) -> new Camera(
+                                drawnPart,
+                                (Boolean) part.getOrDefault("yawSync", false),
+                                (Boolean) part.getOrDefault("pitchSync", false)
+                        ),
+                        info.cameraList
+                );
+                case "Canopy" -> parseDrawnPart(
+                        Canopy.class,
+                        part,
+                        (drawnPart) -> new Canopy(
+                                drawnPart,
+                                getClamped(-180F, 180F, (Number) part.getOrDefault("maxRotation", 90F)),
+                                (Boolean) part.getOrDefault("isSliding", false)
+                        ),
+                        info.canopyList
+                );
+                case "Hatch" -> parseDrawnPart(
+                        Hatch.class,
+                        part,
+                        (drawnPart) -> new Hatch(
+                                drawnPart,
+                                getClamped(-180F, 180F, (Number) part.getOrDefault("maxRotation", 90F)),
+                                (Boolean) part.getOrDefault("isSliding", false)
+                        ),
+                        info.hatchList
+                );
+
+            }
+
+
+        }
+    }
+
+    private <Y extends DrawnPart> void parseDrawnPart(
+            Class<? extends DrawnPart> clazz,
+            Map<String, Object> map,
+            Function<DrawnPart, Y> fillChildFields, List<Y> partList) {
+
+        Vec3d pos = map.containsKey("Position") ? parseVector((Object[]) map.get("Position")) : null;
+        Vec3d rot = map.containsKey("Rotation") ? parseVector((Object[]) map.get("Rotation")) : null;
+
+        String modelName = (String) map.getOrDefault("PartName", clazz.getSimpleName().toLowerCase(Locale.ROOT) + partList.size());
+        if (pos == null || rot == null) throw new IllegalArgumentException("Part Rotation and Position must be set!");
+
+        var base = new DrawnPart(pos, rot, modelName);
+
+        partList.add(fillChildFields.apply(base));
+    }
+
+
+//    private <T extends MCH_AircraftInfo.DrawnPart> T parsePart(
+//            Map<String,Object> map,
+//            Class<T> clazz,
+//            Function<T, T> fillChildFields
+//    ) {
+//        try {
+//
+//            T part = clazz.getDeclaredConstructor().newInstance();
+//
+//            part = fillChildFields.apply(part);
+//
+//            return part;
+//        } catch (Exception e) {
+//            throw new RuntimeException("Failed to parse part: " + clazz.getName(), e);
+//        }
+//    }
+
 
     private void parseRender(Map<String, Object> renderProperties, MCH_AircraftInfo info) {
         for (Map.Entry<String, Object> entry : renderProperties.entrySet()) {
@@ -292,6 +380,7 @@ public class YamlParser implements IParser {
 
     }
 
+    @SuppressWarnings("unboxing")
     private void parseAircraftFeatures(Map<String, Object> map, MCH_AircraftInfo info) {
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             switch (entry.getKey()) {
@@ -323,7 +412,7 @@ public class YamlParser implements IParser {
         }
     }
 
-    private MCH_AircraftInfo.Flare parseFlare(Map<String, Object> value) {
+    private Flare parseFlare(Map<String, Object> value) {
         Vec3d pos = Vec3d.ZERO;
         List<FlareType> flareTypes = new ArrayList<>();
 
@@ -365,10 +454,11 @@ public class YamlParser implements IParser {
             flareTypes.add(FlareType.NONE);
         }
 
-        return new MCH_AircraftInfo.Flare(pos, flareTypes.stream().map(FlareType::getLegacyMapping).mapToInt(Integer::intValue).toArray());
+        return new Flare(pos, flareTypes.stream().map(FlareType::getLegacyMapping).mapToInt(Integer::intValue).toArray());
     }
 
 
+    @SuppressWarnings("unboxing")
     private void parseGlobalCamera(MCH_AircraftInfo info, Map.Entry<String, Object> entry) {
         switch (entry.getKey()) {
             case "ThirdPersonDist" -> info.thirdPersonDist = getClamped(4f, 100f, (Number) entry.getValue());
@@ -384,7 +474,7 @@ public class YamlParser implements IParser {
 
     }
 
-    private MCH_AircraftInfo.Wheel parseWheel(Map<String, Object> map) {
+    private Wheel parseWheel(Map<String, Object> map) {
         Vec3d wheelPos = null;
         float scale = 1;
 
@@ -399,7 +489,7 @@ public class YamlParser implements IParser {
 
 
         if (wheelPos == null) throw new IllegalArgumentException("Wheel must have a position!");
-        return new MCH_AircraftInfo.Wheel(wheelPos, scale);
+        return new Wheel(wheelPos, scale);
     }
 
     private Object parseRacks(Map<String, Object> map) {
@@ -419,7 +509,7 @@ public class YamlParser implements IParser {
 
     private MCH_SeatRackInfo parseSeatRackInfo(Map<String, Object> map) {
         Vec3d position = null;
-        MCH_AircraftInfo.CameraPosition cameraPos = null;
+        CameraPosition cameraPos = null;
         String[] entityNames = new String[0];
         float range = 0f;
         float openParaAlt = 0f;
@@ -462,7 +552,7 @@ public class YamlParser implements IParser {
     }
 
 
-    private MCH_AircraftInfo.RideRack parseRidingRack(Map<String, Object> map) {
+    private RideRack parseRidingRack(Map<String, Object> map) {
         int rackID = -1;//FUCK IDs
         String name = "";
 
@@ -475,10 +565,10 @@ public class YamlParser implements IParser {
         }
         if (rackID == -1 || name.isEmpty()) throw new IllegalArgumentException("Name nor ID can be empty!");
 
-        return new MCH_AircraftInfo.RideRack(name, rackID);
+        return new RideRack(name, rackID);
     }
 
-    private MCH_AircraftInfo.SearchLight parseSearchLights(Map<String, Object> map) {
+    private SearchLight parseSearchLights(Map<String, Object> map) {
         Vec3d pos = null;
         int colorStart = 0xFFFFFF; // default white
         int colorEnd = 0xFFFFFF;
@@ -514,12 +604,12 @@ public class YamlParser implements IParser {
             throw new IllegalArgumentException("SearchLight must have a position!");
         }
 
-        return new MCH_AircraftInfo.SearchLight(pos, colorStart, colorEnd, height, width, fixedDirection, yaw, pitch, steering, stRot);
+        return new SearchLight(pos, colorStart, colorEnd, height, width, fixedDirection, yaw, pitch, steering, stRot);
 
 
     }
 
-    private MCH_AircraftInfo.RepellingHook parseHook(Map<String, Object> map) {
+    private RepellingHook parseHook(Map<String, Object> map) {
         Vec3d pos = null;
         int interval = 0;
 
@@ -533,7 +623,7 @@ public class YamlParser implements IParser {
         }
 
         if (pos == null) throw new IllegalArgumentException("Repelling hook must have a position!");
-        return new MCH_AircraftInfo.RepellingHook(pos, interval);
+        return new RepellingHook(pos, interval);
     }
 
     public int parseHexColor(String s) {
@@ -565,7 +655,7 @@ public class YamlParser implements IParser {
     }
 
 
-    private MCH_AircraftInfo.ParticleSplash parseParticleSplash(Map<String, Object> map) {
+    private ParticleSplash parseParticleSplash(Map<String, Object> map) {
 
         Vec3d pos = null;
         int num = 2;
@@ -590,10 +680,10 @@ public class YamlParser implements IParser {
 
         if (pos == null) throw new IllegalArgumentException("Splash particle must have a position!");
 
-        return new MCH_AircraftInfo.ParticleSplash(num, size, acceleration, pos, age, motionY, gravity);
+        return new ParticleSplash(num, size, acceleration, pos, age, motionY, gravity);
     }
 
-    private MCH_AircraftInfo.CameraPosition parseCameraPosition(Map<String, Object> map) {
+    private CameraPosition parseCameraPosition(Map<String, Object> map) {
         Vec3d pos = Vec3d.ZERO;
         boolean fixRot = false;
         float yaw = 0;
@@ -609,9 +699,10 @@ public class YamlParser implements IParser {
             }
         }
 
-        return new MCH_AircraftInfo.CameraPosition(pos, fixRot, yaw, pitch);
+        return new CameraPosition(pos, fixRot, yaw, pitch);
     }
 
+    @SuppressWarnings("unboxing")
     private MCH_SeatInfo parseSeatInfo(Map<String, Object> map) {
         Vec3d position = null;
         boolean isGunner = false;
@@ -623,7 +714,7 @@ public class YamlParser implements IParser {
         float maxPitch = 70f;
         boolean rotatableSeat = false;
         boolean invertCameraPos = false;
-        MCH_AircraftInfo.CameraPosition cameraPos = null;
+        CameraPosition cameraPos = null;
 
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             switch (entry.getKey()) {
@@ -660,7 +751,7 @@ public class YamlParser implements IParser {
 
     }
 
-    private MCH_AircraftInfo.Hatch parseHatch(MCH_AircraftInfo data, Map<String, Object> map) {
+    private Hatch parseHatch(MCH_AircraftInfo data, Map<String, Object> map) {
         Vec3d position = null;
         Vec3d rotation = null;
         float maxRotation = 0f;
@@ -684,7 +775,7 @@ public class YamlParser implements IParser {
             throw new IllegalArgumentException("Hatch must have a rotation!");
         }
 
-        return new MCH_AircraftInfo.Hatch(position, rotation, partName, maxRotation, isSliding);
+        return new Hatch(position, rotation, partName, maxRotation, isSliding);
     }
 
 

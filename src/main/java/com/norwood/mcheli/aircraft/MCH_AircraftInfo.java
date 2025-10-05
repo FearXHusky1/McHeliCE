@@ -8,6 +8,7 @@ import com.norwood.mcheli.hud.MCH_Hud;
 import com.norwood.mcheli.hud.MCH_HudManager;
 import com.norwood.mcheli.wrapper.W_Entity;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.util.math.Vec3d;
@@ -19,7 +20,6 @@ import java.util.List;
 public abstract class MCH_AircraftInfo extends MCH_BaseInfo implements IItemContent {
     public final String name;
     public final List<IRecipe> recipe;
-    public MCH_AircraftInfo.Flare flare;
     public final List<MCH_AircraftInfo.WeaponSet> weaponSetList;
     public final List<MCH_SeatInfo> seatList;
     public final List<Integer[]> exclusionSeatList;
@@ -47,6 +47,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo implements IItemCont
     public final List<MCH_AircraftInfo.PartWheel> partSteeringWheel;
     public final List<MCH_AircraftInfo.Hatch> lightHatchList;
     private final List<String> textureNameList;
+    public MCH_AircraftInfo.Flare flare;
     public String displayName;
     public HashMap<String, String> displayNameLang;
     public int itemID;
@@ -677,6 +678,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo implements IItemCont
         return true;
     }
 
+    @Builder
     public static class Camera extends MCH_AircraftInfo.DrawnPart {
         public final boolean yawSync;
         public final boolean pitchSync;
@@ -685,6 +687,11 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo implements IItemCont
             super(paramMCH_AircraftInfo, px, py, pz, rx, ry, rz, name);
             this.yawSync = ys;
             this.pitchSync = ps;
+        }
+        public Camera(DrawnPart base, boolean yawSync, boolean pitchSync){
+            super(base);
+            this.yawSync = yawSync;
+            this.pitchSync = pitchSync;
         }
     }
 
@@ -714,6 +721,12 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo implements IItemCont
     public static class Canopy extends MCH_AircraftInfo.DrawnPart {
         public final float maxRotFactor;
         public final boolean isSlide;
+
+        public Canopy(DrawnPart base, float maxRotationFactor, boolean isSlide){
+            super(base);
+            this.maxRotFactor = maxRotationFactor;
+            this.isSlide = isSlide;
+        }
 
         public Canopy(MCH_AircraftInfo paramMCH_AircraftInfo, float px, float py, float pz, float rx, float ry, float rz, float mr, String name, boolean slide) {
             super(paramMCH_AircraftInfo, px, py, pz, rx, ry, rz, name);
@@ -748,6 +761,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo implements IItemCont
         }
     }
 
+    @Builder
     public static class DrawnPart {
         public final Vec3d pos;
         public final Vec3d rot;
@@ -766,6 +780,14 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo implements IItemCont
             this.rot = rot;
             this.modelName = modelName;
         }
+
+        public DrawnPart(DrawnPart other) {
+            this.pos = other.pos;
+            this.rot = other.rot;
+            this.modelName = other.modelName;
+            this.model = other.model;
+        }
+
     }
 
     @AllArgsConstructor
@@ -795,6 +817,14 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo implements IItemCont
             this.maxRotFactor = this.maxRot / 90.0F;
             this.isSlide = slide;
         }
+
+        public Hatch(DrawnPart base,  float maxRot, boolean isSlide) {
+            super(base);
+            this.maxRot = maxRot;
+            this.maxRotFactor = maxRot / 90.0F;
+            this.isSlide = isSlide;
+        }
+
     }
 
     public static class LandingGear extends MCH_AircraftInfo.DrawnPart {
