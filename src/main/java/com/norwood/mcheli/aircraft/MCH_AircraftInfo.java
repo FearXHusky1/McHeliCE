@@ -19,7 +19,7 @@ import java.util.List;
 public abstract class MCH_AircraftInfo extends MCH_BaseInfo implements IItemContent {
     public final String name;
     public final List<IRecipe> recipe;
-    public final MCH_AircraftInfo.Flare flare;
+    public MCH_AircraftInfo.Flare flare;
     public final List<MCH_AircraftInfo.WeaponSet> weaponSetList;
     public final List<MCH_SeatInfo> seatList;
     public final List<Integer[]> exclusionSeatList;
@@ -768,9 +768,10 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo implements IItemCont
         }
     }
 
+    @AllArgsConstructor
     public static class Flare {
-        public int[] types = new int[0];
         public Vec3d pos = new Vec3d(0.0, 0.0, 0.0);
+        public int[] types = new int[0];
 
         public Flare(MCH_AircraftInfo paramMCH_AircraftInfo) {
         }

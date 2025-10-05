@@ -14,6 +14,7 @@ import com.norwood.mcheli.tank.MCH_TankInfo;
 import com.norwood.mcheli.throwable.MCH_ThrowableInfo;
 import com.norwood.mcheli.vehicle.MCH_VehicleInfo;
 import com.norwood.mcheli.weapon.MCH_WeaponInfo;
+import lombok.Getter;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Nullable;
 import org.yaml.snakeyaml.Yaml;
@@ -22,10 +23,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class YamlParser implements IParser {
@@ -185,6 +183,15 @@ public class YamlParser implements IParser {
                     List<Map<String, Object>> repellingHooks = (List<Map<String, Object>>) entry.getValue();
                     repellingHooks.stream().map(this::parseHook).forEach(info.repellingHooks::add);
                 }
+                case "Camera" -> {
+                    Map<String, Object> cameraSettings = (Map<String, Object>) entry.getValue();
+                    cameraSettings.entrySet().stream().forEach((( camEntry) -> parseGlobalCamera(info, camEntry)));
+
+                }
+                case "AircraftFeatures" -> {
+                    Map<String, Object> feats = (Map<String, Object>) entry.getValue();
+                    feats.entrySet().forEach((feat) -> parseAircraftFeatures(feat,info));
+                }
                 case "Racks" -> {
                     List<Map<String, Object>> racks = (List<Map<String, Object>>) entry.getValue();
                     racks.stream().map(this::parseRacks).forEach((rack) -> {
@@ -201,11 +208,94 @@ public class YamlParser implements IParser {
                             .sorted((o1, o2) -> o1.pos.z > o2.pos.z ? -1 : 1)
                             .collect(Collectors.toList()));
                 }
+                case "Seats" -> {
+
+                }
 
 
                 default -> logUnkownEntry(entry, "AircraftInfo");
             }
         }
+
+    }
+
+    private void parseAircraftFeatures(Map.Entry<String,Object> entry, MCH_AircraftInfo info) {
+        switch (entry.getKey()){
+            case "GunnerMode" -> info.isEnableGunnerMode = (boolean) entry.getValue();
+            case "NightVision" -> info.isEnableNightVision = (boolean) entry.getValue();
+            case "EntityRadar" -> info.isEnableEntityRadar = (boolean) entry.getValue();
+            case "ConcurrentGunner" -> info.isEnableConcurrentGunnerMode = (boolean) entry.getValue();
+            case "EjectionSeat" -> info.isEnableEjectionSeat = (boolean) entry.getValue();
+            case "Parachuting" -> info.isEnableParachuting = (boolean) entry.getValue();
+            case "Flare" -> info.flare =  parseFlare((Map<String,Object>)entry.getValue());
+            default -> logUnkownEntry(entry, "AircraftFeatures");
+        }
+    }
+    private MCH_AircraftInfo.Flare parseFlare(Map<String, Object> value) {
+        Vec3d pos = Vec3d.ZERO;
+        List<FlareType> flareTypes = new ArrayList<>();
+
+        for (Map.Entry<String, Object> entry : value.entrySet()) {
+            switch (entry.getKey()) {
+                case "pos", "positions" -> pos = parseVector((Object[]) entry.getValue());
+
+                case "type", "types" -> {
+                    List<String> typeStrings = new ArrayList<>();
+                    if (entry.getValue() instanceof String singleType) {
+                        typeStrings.add(singleType);
+                    } else if (entry.getValue() instanceof String[] typeArray) {
+                        typeStrings.addAll(Arrays.asList(typeArray));
+                    } else if (entry.getValue() instanceof List<?> typeList) {
+                        for (Object obj : typeList) {
+                            if (obj instanceof String s) typeStrings.add(s);
+                            else throw new IllegalArgumentException("Flare type must be a string, got: " + obj.getClass());
+                        }
+                    } else {
+                        throw new IllegalArgumentException("Unsupported type value: " + entry.getValue().getClass());
+                    }
+
+                    for (String typeRaw : typeStrings) {
+                        try {
+                            FlareType type = FlareType.valueOf(typeRaw.trim().toUpperCase(Locale.ROOT));
+                            flareTypes.add(type);
+                        } catch (IllegalArgumentException e) {
+                            throw new IllegalArgumentException(
+                                    "Invalid flare type: " + typeRaw + ". Allowed values: " +
+                                            Arrays.stream(FlareType.values())
+                                                    .map(Enum::name)
+                                                    .collect(Collectors.joining(", "))
+                            );
+                        }
+                    }
+                }
+
+                default -> logUnkownEntry(entry, "Flare");
+            }
+        }
+
+        if (flareTypes.isEmpty()) {
+            flareTypes.add(FlareType.NONE);
+        }
+
+        return new MCH_AircraftInfo.Flare(pos,  flareTypes.stream()
+                .map(FlareType::getLegacyMapping)
+                .mapToInt(Integer::intValue)
+                .toArray());
+    }
+
+
+    private void parseGlobalCamera( MCH_AircraftInfo info, Map.Entry<String, Object> entry) {
+        switch (entry.getKey()) {
+            case "ThirdPersonDist" -> info.thirdPersonDist = getClamped(4f, 100f, (Number) entry.getValue());
+            case "zoom", "CameraZoom" -> info.cameraZoom = getClamped(1, 10, (Number) entry.getValue());
+            case "DefaultFreeLook" -> info.defaultFreelook = (boolean) entry.getValue();
+            case "pos", "positons" -> {
+               List<Map<String,Object>> cameraList = (List<Map<String, Object>>) entry.getValue();
+               info.cameraPosition.addAll(cameraList.stream().map(this::parseCameraPosition).collect(Collectors.toList()));
+            }
+            default -> logUnkownEntry(entry, "Camera");
+        }
+
 
     }
 
@@ -241,6 +331,7 @@ public class YamlParser implements IParser {
         }
     }
 
+
     private MCH_SeatRackInfo parseSeatRackInfo(Map<String, Object> map) {
         Vec3d position = null;
         MCH_AircraftInfo.CameraPosition cameraPos = null;
@@ -254,7 +345,7 @@ public class YamlParser implements IParser {
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             switch (entry.getKey()) {
                 case "pos" -> position = parseVector((Object[]) entry.getValue());
-                case "camera", "cam" -> cameraPos = parseCamera((Map<String, Object>) entry.getValue());
+                case "camera", "cam" -> cameraPos = parseCameraPosition((Map<String, Object>) entry.getValue());
                 case "names", "name" -> {
                     Object values = entry.getValue();
                     if (values instanceof List<?> list)
@@ -433,7 +524,7 @@ public class YamlParser implements IParser {
         return new MCH_AircraftInfo.ParticleSplash(num, size, acceleration, pos, age, motionY, gravity);
     }
 
-    private MCH_AircraftInfo.CameraPosition parseCamera(Map<String, Object> map) {
+    private MCH_AircraftInfo.CameraPosition parseCameraPosition(Map<String, Object> map) {
         Vec3d pos = Vec3d.ZERO;
         boolean fixRot = false;
         float yaw = 0;
@@ -477,7 +568,7 @@ public class YamlParser implements IParser {
                 case "maxPitch" -> maxPitch = ((Number) entry.getValue()).floatValue();
                 case "rotSeat" -> rotatableSeat = (Boolean) entry.getValue();
                 case "invCamPos" -> invertCameraPos = (Boolean) entry.getValue();
-                case "camera", "cam" -> cameraPos = parseCamera((Map<String, Object>) entry.getValue());
+                case "camera", "cam" -> cameraPos = parseCameraPosition((Map<String, Object>) entry.getValue());
                 default -> logUnkownEntry(entry, "Seats");
             }
         }
@@ -548,4 +639,25 @@ public class YamlParser implements IParser {
     public static enum RACK_TYPE {//Could be bool, but this makes it more extensible
         NORMAL, RIDING
     }
+
+   public static enum FlareType {
+       NONE(0),
+       NORMAL(1),
+       LARGE_AIRCRAFT(2),
+       SIDE(3),
+       FRONT(4),
+       DOWN(5),
+       SMOKE_LAUNCHER(10);
+       FlareType(int legacyMapping) {
+
+           this.legacyMapping = (byte) legacyMapping;
+       }
+
+       public int getLegacyMapping() {
+           return legacyMapping;
+       }
+
+       final byte legacyMapping;
+
+   }
 }
