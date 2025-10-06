@@ -906,6 +906,19 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo implements IItemCont
             this.child = new ArrayList<>();
             this.turret = turret;
         }
+
+        public PartWeapon(DrawnPart other, String[] name, boolean rotBarrel, boolean isMissile, boolean hideGM, boolean yaw, boolean pitch, float recoilBuf, boolean turret) {
+            super(other);
+            this.name = name;
+            this.rotBarrel = rotBarrel;
+            this.isMissile = isMissile;
+            this.hideGM = hideGM;
+            this.yaw = yaw;
+            this.pitch = pitch;
+            this.recoilBuf = recoilBuf;
+            this.turret = turret;
+            this.child = new ArrayList<>();
+        }
     }
 
     public static class PartWeaponChild extends MCH_AircraftInfo.DrawnPart {
@@ -933,6 +946,14 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo implements IItemCont
             this.yaw = y;
             this.pitch = p;
             this.recoilBuf = rb;
+        }
+
+        public PartWeaponChild(Vec3d pos, Vec3d rot, String modelName, String[] name, boolean yaw, boolean pitch, float recoilBuf) {
+            super(pos, rot, modelName);
+            this.name = name;
+            this.yaw = yaw;
+            this.pitch = pitch;
+            this.recoilBuf = recoilBuf;
         }
     }
 

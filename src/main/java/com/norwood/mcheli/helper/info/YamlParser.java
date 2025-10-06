@@ -336,8 +336,7 @@ public class YamlParser implements IParser {
                             case "Direction" -> dir = getClamped(-1800.0F, 1800.0F, (Number) entry.getValue());
                             case "Pivot" -> pivot = parseVector((Object[]) entry.getValue());
                             case "PartName" -> name = ((String) entry.getValue()).toLowerCase(Locale.ROOT).trim();
-                            case "Type" -> {
-                            }
+                            case "Type" -> {}
                             default -> logUnkownEntry(entry, "PartWheel");
                         }
                     }
@@ -373,7 +372,84 @@ public class YamlParser implements IParser {
                         new HashSet<>(Arrays.asList("maxRotation", "isReverse", "isHatch", "ArticulatedRotation", "MaxArticulatedRotation", "SlideVec"))
                 );
 
-                case "Weapon" -> { /* TODO */ }
+                case "Weapon" -> {
+                    parseDrawnPart(
+                            "weapon",
+                            part,
+                            drawnPart -> {
+                                String[] weaponNames = part.containsKey("WeaponNames")
+                                        ? info.splitParamSlash(((String) part.get("WeaponNames")).toLowerCase().trim())
+                                        : new String[]{"unnamed"};
+
+                                boolean isRotatingWeapon = (Boolean) part.getOrDefault("BarrelRot", false);
+                                boolean isMissile = (Boolean) (part.getOrDefault("IsMissile", false));
+                                boolean hideGM = (Boolean)(part.getOrDefault("hideGM", false));
+                                boolean yaw = (Boolean)(part.getOrDefault("yaw", false));
+                                boolean pitch = (Boolean)(part.getOrDefault("pitch", false));
+                                float recoilBuf = part.containsKey("RecoilBuf") ? ((Number) part.get("RecoilBuf")).floatValue() : 0.0F;
+                                boolean turret = (Boolean) (part.getOrDefault("turret", false));
+
+                                PartWeapon weapon = new PartWeapon(
+                                        drawnPart,
+                                        weaponNames,
+                                        isRotatingWeapon,
+                                        isMissile,
+                                        hideGM,
+                                        yaw,
+                                        pitch,
+                                        recoilBuf,
+                                        turret
+                                );
+
+                                // Parse child weapons if present
+                                if (part.containsKey("Children") && part.get("Children") instanceof List) {
+                                    List<Map<String, Object>> children = (List<Map<String, Object>>) part.get("Children");
+                                    for (Map<String, Object> childPart : children) {
+                                        String childName = weapon.modelName + "_" + weapon.child.size();
+                                        boolean childHideGM = Boolean.TRUE.equals(childPart.getOrDefault("HideGM", false));
+                                        boolean childYaw = Boolean.TRUE.equals(childPart.getOrDefault("Yaw", false));
+                                        boolean childPitch = Boolean.TRUE.equals(childPart.getOrDefault("Pitch", false));
+                                        Vec3d childPos = childPart.containsKey("Position")
+                                                ? parseVector((Object[]) childPart.get("Position"))
+                                                : Vec3d.ZERO;
+
+                                        Vec3d childRot = childPart.containsKey("Rotation")
+                                                ? parseVector((Object[]) childPart.get("Rotation"))
+                                                : Vec3d.ZERO;
+                                        float childRecoil = childPart.containsKey("RecoilBuf")
+                                                ? ((Number) childPart.get("RecoilBuf")).floatValue()
+                                                : 0.0F;
+
+                                        PartWeaponChild child = new PartWeaponChild(
+                                                childPos,
+                                                childRot,
+                                                weapon.name,
+
+                                                childHideGM,
+                                                childYaw,
+                                                childPitch,
+                                                childName,
+                                                childRecoil
+                                        );
+                                        weapon.child.add(child);
+
+                                        for (Map.Entry<String, Object> entry : childPart.entrySet()) {
+                                            if (!Arrays.asList("Position", "hideGM", "yaw", "pitch", "recoilBuf").contains(entry.getKey())) {
+                                                logUnkownEntry(entry, "PartWeaponChild");
+                                            }
+                                        }
+                                    }
+                                }
+
+                                return weapon;
+                            },
+                            info.partWeapon,
+                            new HashSet<>(Arrays.asList("WeaponNames", "RotBarrel", "IsMissile", "hideGM", "Yaw", "Pitch", "RecoilBuf", "Turret", "Children"))
+                    );
+
+
+
+                }
             }
         }
     }
@@ -386,11 +462,11 @@ public class YamlParser implements IParser {
             Set<String> knownKeys) {
 
         Vec3d pos = map.containsKey("Position") ? parseVector((Object[]) map.get("Position")) : null;
-        Vec3d rot = map.containsKey("Rotation") ? parseVector((Object[]) map.get("Rotation")) : null;
+        Vec3d rot = map.containsKey("Rotation") ? parseVector((Object[]) map.get("Rotation")) : Vec3d.ZERO;
 
         String modelName = (String) map.getOrDefault("PartName", defaultName + partList.size());
-        if (pos == null || rot == null)
-            throw new IllegalArgumentException("Part Rotation and Position must be set!");
+        if (pos == null)
+            throw new IllegalArgumentException("Part Position must be set!");
 
         var base = new DrawnPart(pos, rot, modelName);
         var built = fillChildFields.apply(base);
