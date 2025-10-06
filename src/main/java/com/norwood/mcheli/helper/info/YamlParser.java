@@ -233,6 +233,7 @@ public class YamlParser implements IParser {
 
     }
 
+    //TODO: add the whole default handling thing into it
     private void parseParts(List<Map<String, Object>> parts, MCH_AircraftInfo info) {
         for (Map<String, Object> part : parts) {
             if (!part.containsKey("Type") || !(part.get("Type") instanceof String))
@@ -268,16 +269,24 @@ public class YamlParser implements IParser {
                         ),
                         info.hatchList
                 );
-                case "WeaponBay" -> parseDrawnPart(
-                        "wb",
-                        part,
-                        (drawnPart) -> new Hatch(
-                                drawnPart,
-                                getClamped(-180F, 180F, (Number) part.getOrDefault("maxRotation", 90F)),
-                                (Boolean) part.getOrDefault("isSliding", false)
-                        ),
-                        info.hatchList
-                );
+                case "WeaponBay" -> {
+                    String weaponName = part.containsKey("WeaponName")
+                            ? ((String) part.get("WeaponName")).trim()
+                            : null;
+                    if (weaponName == null)
+                        throw new IllegalArgumentException("WeaponName is required!");
+                    parseDrawnPart(
+                            "wb",
+                            part,
+                            (drawnPart) -> new WeaponBay(
+                                    drawnPart,
+                                    getClamped(-180F, 180F, (Number) part.getOrDefault("maxRotation", 90F)),
+                                    (Boolean) part.getOrDefault("isSliding", false),
+                                    weaponName
+                            ),
+                            info.partWeaponBay
+                    );
+                }
                 case "Rotation" -> parseDrawnPart(
                         RotPart.class,
                         part,
@@ -300,9 +309,7 @@ public class YamlParser implements IParser {
                         ),
                         info.partSteeringWheel
                 );
-
-
-                case "Wheel" -> { //Wheels have their own fucking ruls ofc
+                case "Wheel" -> { //Wheels have their own fucking rules ofc
                     Vec3d pos = null;
                     Vec3d rot = new Vec3d(0, 1, 0);
                     Vec3d pivot = Vec3d.ZERO;
@@ -318,11 +325,57 @@ public class YamlParser implements IParser {
                             default -> logUnkownEntry(entry, "PartWheel");
                         }
                     }
-                    if(pos == null) throw new IllegalArgumentException("Part wheel must have a Position!");
-                    info.partWheel.add(new PartWheel(new DrawnPart(pos,rot, name), dir, pivot));
+                    if (pos == null) throw new IllegalArgumentException("Part wheel must have a Position!");
+                    info.partWheel.add(new PartWheel(new DrawnPart(pos, rot, name), dir, pivot));
+                }
+
+                case "LandingGear" ->
+                    parseDrawnPart(
+                        "lg",
+                        part,
+                        drawnPart -> {
+                            float maxRot = getClamped(-180F, 180F, (Number) part.getOrDefault("maxRotation", 90F)) / 90F;
+                            boolean reverse = (Boolean) part.getOrDefault("isReverse", false);
+                            boolean hatch = (Boolean) part.getOrDefault("isHatch", false);
+                            LandingGear gear = new LandingGear(
+                                    drawnPart, maxRot,reverse,hatch
+                            );
+                            // Optional secondary rotation
+                            if (part.containsKey("ArticulatedRotation")) {
+                                gear.enableRot2 = true;
+                                gear.rot2 = parseVector((Object[]) part.get("ArticulatedRotation"));
+                                gear.maxRotFactor2 = getClamped(
+                                        -180F, 180F, (Number) part.getOrDefault("MaxArticulatedRotation", 90F)
+                                ) / 90F;
+                            }
+
+                            // Optional sliding vector
+                            if (part.containsKey("SlideVec")) {
+                                gear.slide = parseVector((Object[]) part.get("SlideVec"));
+                            }
+
+                            for (Map.Entry<String, Object> entry : part.entrySet()) {
+                                switch (entry.getKey()) {
+                                    case "Type", "Position", "Rotation", "PartName",
+                                         "maxRotation", "isReverse", "isHatch",
+                                         "ArticulatedRotation", "MaxArticulatedRotation", "SlideVec":
+                                        break;
+                                    default:
+                                        logUnkownEntry(entry, "LandingGear");
+                                }
+                            }
+
+                            return gear;
+                        },
+                        info.landingGear
+                );
+                case "Weapon" -> {
+
                 }
 
             }
+
+
 
 
         }

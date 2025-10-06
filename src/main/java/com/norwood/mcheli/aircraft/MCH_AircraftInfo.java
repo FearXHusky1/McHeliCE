@@ -836,6 +836,13 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo implements IItemCont
         public Vec3d rot2;
         public float maxRotFactor2;
 
+        public LandingGear(DrawnPart other, float maxRotFactor, boolean reverse, boolean hatch) {
+            super(other);
+            this.maxRotFactor = maxRotFactor;
+            this.reverse = reverse;
+            this.hatch = hatch;
+        }
+
         public LandingGear(
                 MCH_AircraftInfo paramMCH_AircraftInfo,
                 float x,
@@ -1150,7 +1157,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo implements IItemCont
         public final float maxRotFactor;
         public final boolean isSlide;
         private final String weaponName;
-        public Integer[] weaponIds;
+        public Integer[] weaponIds;//TODO, get rid of that shit and just use hashmaps once the fucking old parser is dead
 
         public WeaponBay(
                 MCH_AircraftInfo paramMCH_AircraftInfo, String wn, float px, float py, float pz, float rx, float ry, float rz, float mr, String name, boolean slide
@@ -1159,6 +1166,14 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo implements IItemCont
             this.maxRotFactor = mr;
             this.isSlide = slide;
             this.weaponName = wn;
+            this.weaponIds = new Integer[0];
+        }
+
+        public WeaponBay(DrawnPart other, float maxRotFactor, boolean isSlide, String weaponName) {
+            super(other);
+            this.maxRotFactor = maxRotFactor;
+            this.isSlide = isSlide;
+            this.weaponName = weaponName;
             this.weaponIds = new Integer[0];
         }
     }
