@@ -33,6 +33,7 @@ public class YamlParser implements IParser {
 
     public static final Yaml YAML_INSTANCE = new Yaml();
     public static final YamlParser INSTANCE = new YamlParser();
+    public static final Set<String> DRAWN_PART_ARGS = new HashSet<>(Arrays.asList("Type", "Position", "Rotation", "PartName"));
 
     private YamlParser() {
     }
@@ -335,7 +336,8 @@ public class YamlParser implements IParser {
                             case "Direction" -> dir = getClamped(-1800.0F, 1800.0F, (Number) entry.getValue());
                             case "Pivot" -> pivot = parseVector((Object[]) entry.getValue());
                             case "PartName" -> name = ((String) entry.getValue()).toLowerCase(Locale.ROOT).trim();
-                            case "Type" -> {}
+                            case "Type" -> {
+                            }
                             default -> logUnkownEntry(entry, "PartWheel");
                         }
                     }
@@ -396,10 +398,9 @@ public class YamlParser implements IParser {
 
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             String key = entry.getKey();
-            if (!knownKeys.contains(key) &&
-                    !Set.of("Type", "Position", "Rotation", "PartName").contains(key)) {
+            if (!knownKeys.contains(key) && !DRAWN_PART_ARGS.contains(key))
                 logUnkownEntry(entry, built.getClass().getSimpleName());
-            }
+
         }
     }
 
@@ -411,7 +412,6 @@ public class YamlParser implements IParser {
             Set<String> knownKeys) {
         parseDrawnPart(clazz.getSimpleName().toLowerCase(Locale.ROOT).trim(), map, fillChildFields, partList, knownKeys);
     }
-
 
 
     private void parseRender(Map<String, Object> renderProperties, MCH_AircraftInfo info) {
