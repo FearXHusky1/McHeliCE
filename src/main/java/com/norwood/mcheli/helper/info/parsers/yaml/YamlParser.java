@@ -37,18 +37,73 @@ public class YamlParser implements IParser {
     public static final Set<String> DRAWN_PART_ARGS = new HashSet<>(Arrays.asList("Type", "Position", "Rotation", "PartName"));
     public static final ComponentParser COMPONENT_PARSER = new ComponentParser();
 
-    private YamlParser() {}
+    private YamlParser() {
+    }
 
     public static void register() {
         ContentParsers.register("yml", INSTANCE);
+    }
+
+    public static void logUnkownEntry(Map.Entry<String, Object> entry, String caller) {
+        MCH_Logger.get().warn("Uknown argument:" + entry.getKey() + " for " + caller);
+    }
+
+    public static int parseHexColor(String s) {
+        // Accepts "0xRRGGBB", "#RRGGBB", "RRGGBB"
+        if (s == null || s.isEmpty()) throw new IllegalArgumentException("Color string is empty");
+        String t = s.trim();
+        if (t.startsWith("#")) t = "0x" + t.substring(1);
+        if (!t.startsWith("0x") && !t.startsWith("0X")) t = "0x" + t;
+        return (int) (Long.decode(t).longValue());
+    }
+
+    public static float getClamped(float min, float max, Number value) {
+        return Math.max(min, Math.min(max, value.floatValue()));
+    }
+
+    public static int getClamped(int min, int max, Number value) {
+        return Math.max(min, Math.min(max, value.intValue()));
+    }
+
+    public static double getClamped(double min, double max, Number value) {
+        return Math.max(min, Math.min(max, value.doubleValue()));
+    }
+
+    public static float getClamped(float max, Number value) {
+        return getClamped(0, max, value);
+    }
+
+    public static int getClamped(int max, Number value) {
+        return getClamped(0, max, value);
+    }
+
+    public static double getClamped(double max, Number value) {
+        return getClamped(0, max, value);
+    }
+
+    public static Vec3d parseVector(Object vector) {
+        if (vector == null) throw new IllegalArgumentException("Vector value is null");
+        if (vector instanceof List<?> list) {
+            if (list.size() != 3) {
+                throw new IllegalArgumentException("Vector list must have exactly 3 elements, got " + list.size());
+            }
+            return new Vec3d(asDouble(list.get(0)), asDouble(list.get(1)), asDouble(list.get(2)));
+        }
+        throw new IllegalArgumentException("Unsupported vector value type: " + vector.getClass());
+    }
+
+    private static double asDouble(Object o) {
+        if (o instanceof Number n) return n.doubleValue();
+        if (o instanceof String s) return Double.parseDouble(s.trim());
+        throw new IllegalArgumentException("Vector component must be numeric, got: " + o.getClass());
     }
 
     @Override
     public @Nullable MCH_HeliInfo parseHelicopter(AddonResourceLocation location, String filepath, List<String> lines, boolean reload) throws Exception {
         InputStream input = Files.newInputStream(Paths.get(filepath), StandardOpenOption.READ);
         Map<String, Object> root = YAML_INSTANCE.load(input);
-        var info = new MCH_HeliInfo(location,filepath);
-        mapToAircraft(info,root);
+        var info = new MCH_HeliInfo(location, filepath);
+        mapToAircraft(info, root);
         //TODO: Do heli specific parsing
         return info;
     }
@@ -124,9 +179,9 @@ public class YamlParser implements IParser {
 
                 }
                 case "Recepie" -> {
-                    Map<String,Object> map = (Map<String, Object>) entry.getValue();
-                    for(Map.Entry<String,Object> recMapEntry : map.entrySet()){
-                        switch (recMapEntry.getKey()){
+                    Map<String, Object> map = (Map<String, Object>) entry.getValue();
+                    for (Map.Entry<String, Object> recMapEntry : map.entrySet()) {
+                        switch (recMapEntry.getKey()) {
                             case "isShaped" -> info.isShapedRecipe = (Boolean) recMapEntry.getValue();
                             case "Pattern" -> info.recipeString = ((List<String>) recMapEntry.getValue())
                                     .stream()
@@ -141,7 +196,7 @@ public class YamlParser implements IParser {
                 case "CreativeOnly" -> info.creativeOnly = ((Boolean) entry.getValue()).booleanValue();
                 case "Invulnerable" -> info.invulnerable = ((Boolean) entry.getValue()).booleanValue();
                 case "MaxFuel" -> info.maxFuel = getClamped(100_000_000, (Number) entry.getValue());
-                case "MaxHP" -> info.maxHp = getClamped(1,1000_000_000, (Number) entry.getValue());
+                case "MaxHP" -> info.maxHp = getClamped(1, 1000_000_000, (Number) entry.getValue());
                 case "Stealth" -> info.stealth = getClamped(1F, (Number) entry.getValue());
                 case "FuelConsumption" -> info.fuelConsumption = getClamped(10_000.0F, (Number) entry.getValue());
                 case "FuelSupplyRange" -> info.fuelSupplyRange = getClamped(1_000.0F, (Number) entry.getValue());
@@ -225,15 +280,17 @@ public class YamlParser implements IParser {
                     info.wheels.addAll(wheel.stream().map(this::parseWheel).sorted((o1, o2) -> o1.pos.z > o2.pos.z ? -1 : 1).collect(Collectors.toList()));
                 }
                 case "Components" -> {
-                   var  components = (Map<String, List<Map<String, Object>>>)entry.getValue();
-                    COMPONENT_PARSER.parseComponents( components, info);
+                    var components = (Map<String, List<Map<String, Object>>>) entry.getValue();
+                    COMPONENT_PARSER.parseComponents(components, info);
                 }
                 case "Sound" -> {
-                    Map<String,Object> soundSettings = (Map<String, Object>) entry.getValue();
-                    parseSound(soundSettings,info);
+                    Map<String, Object> soundSettings = (Map<String, Object>) entry.getValue();
+                    parseSound(soundSettings, info);
                 }
 
                 case "Seats" -> {
+                    List<Map<String, Object>> seatList = (List<Map<String, Object>>) entry.getValue();
+                    seatList.stream().forEachOrdered(seat -> parseSeatInfo(seat, info));
 
                 }
 
@@ -247,16 +304,15 @@ public class YamlParser implements IParser {
     private void parseSound(Map<String, Object> soundSettings, MCH_AircraftInfo info) {
 
         for (Map.Entry<String, Object> entry : soundSettings.entrySet()) {
-            switch (entry.getKey()){
+            switch (entry.getKey()) {
                 case "MoveSound" -> info.soundMove = ((String) entry.getValue()).toLowerCase(Locale.ROOT).trim();
-                case "Volume","Vol" -> info.soundVolume = getClamped(10F, (Number) entry.getValue());
-                case "Pitch" -> info.soundVolume = getClamped(1F,10F, (Number) entry.getValue());
+                case "Volume", "Vol" -> info.soundVolume = getClamped(10F, (Number) entry.getValue());
+                case "Pitch" -> info.soundVolume = getClamped(1F, 10F, (Number) entry.getValue());
                 case "Range" -> info.soundRange = getClamped(1F, 1000.0F, (Number) entry.getValue());
             }
 
         }
     }
-
 
     private void parseRender(Map<String, Object> renderProperties, MCH_AircraftInfo info) {
         for (Map.Entry<String, Object> entry : renderProperties.entrySet()) {
@@ -271,7 +327,7 @@ public class YamlParser implements IParser {
                 case "ModelHeight" -> info.entityHeight = ((Number) entry.getValue()).floatValue();
                 case "ModelPitch" -> info.entityPitch = ((Number) entry.getValue()).floatValue();
                 case "ModelRoll" -> info.entityRoll = ((Number) entry.getValue()).floatValue();
-                default -> logUnkownEntry(entry,"Render");
+                default -> logUnkownEntry(entry, "Render");
             }
 
         }
@@ -334,10 +390,11 @@ public class YamlParser implements IParser {
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             switch (entry.getKey()) {
                 case "GunnerMode" -> info.isEnableGunnerMode = ((Boolean) entry.getValue()).booleanValue();
-                case "InventorySize" -> info.inventorySize = getClamped(54, (Number) entry.getValue()); //FIXME: Capped due to inventory code being fucking ass
+                case "InventorySize" ->
+                        info.inventorySize = getClamped(54, (Number) entry.getValue()); //FIXME: Capped due to inventory code being fucking ass
                 case "NightVision" -> info.isEnableNightVision = ((Boolean) entry.getValue()).booleanValue();
                 case "EntityRadar" -> info.isEnableEntityRadar = ((Boolean) entry.getValue()).booleanValue();
-                case "CanReverse" -> info.enableBack  = ((Boolean) entry.getValue()).booleanValue();
+                case "CanReverse" -> info.enableBack = ((Boolean) entry.getValue()).booleanValue();
                 case "ConcurrentGunner" ->
                         info.isEnableConcurrentGunnerMode = ((Boolean) entry.getValue()).booleanValue();
                 case "EjectionSeat" -> info.isEnableEjectionSeat = ((Boolean) entry.getValue()).booleanValue();
@@ -347,8 +404,7 @@ public class YamlParser implements IParser {
                         info.isEnableParachuting = true;
                         for (Map.Entry<String, Object> mobEntry : ((Map<String, Object>) parachuteMapRaw).entrySet()) {
                             switch (mobEntry.getKey()) {
-                                case "Pos", "Position" ->
-                                        info.mobDropOption.pos = parseVector(mobEntry.getValue());
+                                case "Pos", "Position" -> info.mobDropOption.pos = parseVector(mobEntry.getValue());
                                 case "Interval" ->
                                         info.mobDropOption.interval = ((Number) mobEntry.getValue()).intValue();
                                 default -> logUnkownEntry(mobEntry, "Parachuting");
@@ -407,7 +463,6 @@ public class YamlParser implements IParser {
         return new Flare(pos, flareTypes.stream().map(FlareType::getLegacyMapping).mapToInt(Integer::intValue).toArray());
     }
 
-
     @SuppressWarnings("unboxing")
     private void parseGlobalCamera(MCH_AircraftInfo info, Map.Entry<String, Object> entry) {
         switch (entry.getKey()) {
@@ -456,7 +511,6 @@ public class YamlParser implements IParser {
         }
     }
 
-
     private MCH_SeatRackInfo parseSeatRackInfo(Map<String, Object> map) {
         Vec3d position = null;
         CameraPosition cameraPos = null;
@@ -497,11 +551,6 @@ public class YamlParser implements IParser {
         return new MCH_SeatRackInfo(entityNames, position.x, position.y, position.z, cameraPos, range, openParaAlt, yaw, pitch, rotSeat);
     }
 
-    public static void logUnkownEntry(Map.Entry<String, Object> entry, String caller) {
-        MCH_Logger.get().warn("Uknown argument:" + entry.getKey() + " for " + caller);
-    }
-
-
     private RideRack parseRidingRack(Map<String, Object> map) {
         int rackID = -1;//FUCK IDs
         String name = "";
@@ -517,40 +566,6 @@ public class YamlParser implements IParser {
 
         return new RideRack(name, rackID);
     }
-
-    public static int parseHexColor(String s) {
-        // Accepts "0xRRGGBB", "#RRGGBB", "RRGGBB"
-        if (s == null || s.isEmpty()) throw new IllegalArgumentException("Color string is empty");
-        String t = s.trim();
-        if (t.startsWith("#")) t = "0x" + t.substring(1);
-        if (!t.startsWith("0x") && !t.startsWith("0X")) t = "0x" + t;
-        return (int) (Long.decode(t).longValue());
-    }
-
-    public static float getClamped(float min, float max, Number value) {
-        return Math.max(min, Math.min(max, value.floatValue()));
-    }
-
-    public static int getClamped(int min, int max, Number value) {
-        return Math.max(min, Math.min(max, value.intValue()));
-    }
-
-    public static double getClamped(double min, double max, Number value) {
-        return Math.max(min, Math.min(max, value.doubleValue()));
-    }
-
-    public static float getClamped(float max, Number value) {
-        return getClamped(0, max, value);
-    }
-
-    public static int getClamped(int max, Number value) {
-        return getClamped(0, max, value);
-    }
-
-    public static double getClamped(double max, Number value) {
-        return getClamped(0, max, value);
-    }
-
 
     private ParticleSplash parseParticleSplash(Map<String, Object> map) {
         Vec3d pos = null;
@@ -576,7 +591,7 @@ public class YamlParser implements IParser {
 
         if (pos == null) throw new IllegalArgumentException("Splash particle must have a position!");
 
-        return new ParticleSplash(num, acceleration, size,  pos, age, motionY, gravity);
+        return new ParticleSplash(num, acceleration, size, pos, age, motionY, gravity);
     }
 
     private CameraPosition parseCameraPosition(Map<String, Object> map) {
@@ -599,7 +614,7 @@ public class YamlParser implements IParser {
     }
 
     @SuppressWarnings("unboxing")
-    private MCH_SeatInfo parseSeatInfo(Map<String, Object> map) {
+    private void parseSeatInfo(Map<String, Object> map, MCH_AircraftInfo info) {
         Vec3d position = null;
         boolean isGunner = false;
         boolean canSwitchGunner = false;
@@ -611,10 +626,11 @@ public class YamlParser implements IParser {
         boolean rotatableSeat = false;
         boolean invertCameraPos = false;
         CameraPosition cameraPos = null;
+        List<Integer> exclusionList = null;
 
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             switch (entry.getKey()) {
-                case "Pos" -> position = parseVector(entry.getValue());
+                case "Pos", "Position" -> position = parseVector(entry.getValue());
                 case "Gunner" -> isGunner = ((Boolean) entry.getValue()).booleanValue();
                 case "SwitchGunner" -> canSwitchGunner = ((Boolean) entry.getValue()).booleanValue();
                 case "FixRot" -> hasFixedRotation = ((Boolean) entry.getValue()).booleanValue();
@@ -625,6 +641,13 @@ public class YamlParser implements IParser {
                 case "RotSeat" -> rotatableSeat = ((Boolean) entry.getValue()).booleanValue();
                 case "InvCamPos" -> invertCameraPos = ((Boolean) entry.getValue()).booleanValue();
                 case "Camera", "Cam" -> cameraPos = parseCameraPosition((Map<String, Object>) entry.getValue());
+                case "ExcludeWith" -> exclusionList = ((List<Number>) entry.getValue())
+                        .stream()
+                        .mapToInt(Number::intValue)
+                        .boxed()
+                        .collect(Collectors.toList());
+
+
                 default -> logUnkownEntry(entry, "Seats");
             }
         }
@@ -633,24 +656,11 @@ public class YamlParser implements IParser {
             throw new IllegalArgumentException("Seat must have a position!");
         }
 
-        return new MCH_SeatInfo(position, isGunner, cameraPos, invertCameraPos, canSwitchGunner, hasFixedRotation, fixedYaw, fixedPitch, minPitch, maxPitch, rotatableSeat);
-    }
+        info.seatList.add(new MCH_SeatInfo(position, isGunner, cameraPos, invertCameraPos, canSwitchGunner, hasFixedRotation, fixedYaw, fixedPitch, minPitch, maxPitch, rotatableSeat));
 
-    public static Vec3d parseVector(Object vector) {
-        if (vector == null) throw new IllegalArgumentException("Vector value is null");
-        if (vector instanceof List<?> list) {
-            if (list.size() != 3) {
-                throw new IllegalArgumentException("Vector list must have exactly 3 elements, got " + list.size());
-            }
-            return new Vec3d(asDouble(list.get(0)), asDouble(list.get(1)), asDouble(list.get(2)));
-        }
-        throw new IllegalArgumentException("Unsupported vector value type: " + vector.getClass());
-    }
-
-    private static double asDouble(Object o) {
-        if (o instanceof Number n) return n.doubleValue();
-        if (o instanceof String s) return Double.parseDouble(s.trim());
-        throw new IllegalArgumentException("Vector component must be numeric, got: " + o.getClass());
+        final int seatIndex = info.seatList.size();
+        if (exclusionList != null)
+            exclusionList.stream().map(integers -> new Integer[]{seatIndex, integers}).forEachOrdered(info.exclusionSeatList::add);
     }
 
     public static enum RACK_TYPE {//Could be bool, but this makes it more extensible
