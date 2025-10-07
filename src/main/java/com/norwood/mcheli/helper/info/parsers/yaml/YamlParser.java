@@ -606,51 +606,12 @@ public class YamlParser implements IParser {
 
     public static Vec3d parseVector(Object vector) {
         if (vector == null) throw new IllegalArgumentException("Vector value is null");
-
-        // List form (most common from SnakeYAML)
         if (vector instanceof List<?> list) {
             if (list.size() != 3) {
                 throw new IllegalArgumentException("Vector list must have exactly 3 elements, got " + list.size());
             }
             return new Vec3d(asDouble(list.get(0)), asDouble(list.get(1)), asDouble(list.get(2)));
         }
-        // Object[] / Number[] forms
-        else if (vector instanceof Object[] arr) {
-            if (arr.length != 3) throw new IllegalArgumentException("Vector array must have exactly 3 elements");
-            return new Vec3d(asDouble(arr[0]), asDouble(arr[1]), asDouble(arr[2]));
-        } else if (vector instanceof Number[] nums) {
-            if (nums.length != 3) throw new IllegalArgumentException("Vector array must have exactly 3 elements");
-            return new Vec3d(nums[0].doubleValue(), nums[1].doubleValue(), nums[2].doubleValue());
-        }
-        // Primitive arrays
-        else if (vector instanceof double[] d && d.length == 3) {
-            return new Vec3d(d[0], d[1], d[2]);
-        } else if (vector instanceof float[] f && f.length == 3) {
-            return new Vec3d(f[0], f[1], f[2]);
-        } else if (vector instanceof int[] i && i.length == 3) {
-            return new Vec3d(i[0], i[1], i[2]);
-        } else if (vector instanceof long[] l && l.length == 3) {
-            return new Vec3d(l[0], l[1], l[2]);
-        }
-        // Map form: {x: , y: , z: } / {X:,Y:,Z:}
-        else if (vector instanceof Map<?, ?> m) {
-            Object x = m.containsKey("x") ? m.get("x") : m.get("X");
-            Object y = m.containsKey("y") ? m.get("y") : m.get("Y");
-            Object z = m.containsKey("z") ? m.get("z") : m.get("Z");
-            if (x == null || y == null || z == null) {
-                throw new IllegalArgumentException("Vector map must contain keys x,y,z (case-insensitive)");
-            }
-            return new Vec3d(asDouble(x), asDouble(y), asDouble(z));
-        }
-        // String form: "x y z" or "x,y,z"
-        else if (vector instanceof String s) {
-            String[] parts = s.trim().split("[,\\s]+");
-            if (parts.length != 3) {
-                throw new IllegalArgumentException("Vector string must have 3 components, got: " + s);
-            }
-            return new Vec3d(Double.parseDouble(parts[0]), Double.parseDouble(parts[1]), Double.parseDouble(parts[2]));
-        }
-
         throw new IllegalArgumentException("Unsupported vector value type: " + vector.getClass());
     }
 
