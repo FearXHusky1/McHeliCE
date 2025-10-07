@@ -35,11 +35,9 @@ public class YamlParser implements IParser {
     public static final Yaml YAML_INSTANCE = new Yaml();
     public static final YamlParser INSTANCE = new YamlParser();
     public static final Set<String> DRAWN_PART_ARGS = new HashSet<>(Arrays.asList("Type", "Position", "Rotation", "PartName"));
-    public final ComponentParser componentParser;
+    public static final ComponentParser COMPONENT_PARSER = new ComponentParser();
 
-    private YamlParser() {
-        componentParser = new ComponentParser();
-    }
+    private YamlParser() {}
 
     public static void register() {
         ContentParsers.register("yml", INSTANCE);
@@ -125,13 +123,28 @@ public class YamlParser implements IParser {
 
 
                 }
+                case "Recepie" -> {
+                    Map<String,Object> map = (Map<String, Object>) entry.getValue();
+                    for(Map.Entry<String,Object> recMapEntry : map.entrySet()){
+                        switch (recMapEntry.getKey()){
+                            case "isShaped" -> info.isShapedRecipe = (Boolean) recMapEntry.getValue();
+                            case "Pattern" -> info.recipeString = ((List<String>) recMapEntry.getValue())
+                                    .stream()
+                                    .map(String::toUpperCase)
+                                    .map(String::trim)
+                                    .collect(Collectors.toList());
+                        }
+                    }
+
+                }
                 case "CanRide" -> info.canRide = ((Boolean) entry.getValue()).booleanValue();
                 case "CreativeOnly" -> info.creativeOnly = ((Boolean) entry.getValue()).booleanValue();
                 case "Invulnerable" -> info.invulnerable = ((Boolean) entry.getValue()).booleanValue();
                 case "MaxFuel" -> info.maxFuel = getClamped(100_000_000, (Number) entry.getValue());
+                case "MaxHP" -> info.maxHp = getClamped(1,1000_000_000, (Number) entry.getValue());
                 case "Stealth" -> info.stealth = getClamped(1F, (Number) entry.getValue());
                 case "FuelConsumption" -> info.fuelConsumption = getClamped(10_000.0F, (Number) entry.getValue());
-                case "FuelSupplyRange" -> info.fuelSupplyRange = getClamped(1_1000.0F, (Number) entry.getValue());
+                case "FuelSupplyRange" -> info.fuelSupplyRange = getClamped(1_000.0F, (Number) entry.getValue());
                 case "AmmoSupplyRange" -> info.ammoSupplyRange = getClamped(1000, (Number) entry.getValue());
                 case "RepairOtherVehicles" -> {
                     Map<String, Number> repairMap = (HashMap<String, Number>) entry.getValue();
@@ -213,13 +226,11 @@ public class YamlParser implements IParser {
                 }
                 case "Components" -> {
                    var  components = (Map<String, List<Map<String, Object>>>)entry.getValue();
-                    componentParser.parseComponents( components, info);
+                    COMPONENT_PARSER.parseComponents( components, info);
                 }
                 case "Sound" -> {
                     Map<String,Object> soundSettings = (Map<String, Object>) entry.getValue();
                     parseSound(soundSettings,info);
-
-
                 }
 
                 case "Seats" -> {
@@ -237,8 +248,10 @@ public class YamlParser implements IParser {
 
         for (Map.Entry<String, Object> entry : soundSettings.entrySet()) {
             switch (entry.getKey()){
+                case "MoveSound" -> info.soundMove = ((String) entry.getValue()).toLowerCase(Locale.ROOT).trim();
                 case "Volume","Vol" -> info.soundVolume = getClamped(10F, (Number) entry.getValue());
                 case "Pitch" -> info.soundVolume = getClamped(1F,10F, (Number) entry.getValue());
+                case "Range" -> info.soundRange = getClamped(1F, 1000.0F, (Number) entry.getValue());
             }
 
         }
@@ -321,6 +334,7 @@ public class YamlParser implements IParser {
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             switch (entry.getKey()) {
                 case "GunnerMode" -> info.isEnableGunnerMode = ((Boolean) entry.getValue()).booleanValue();
+                case "InventorySize" -> info.inventorySize = getClamped(54, (Number) entry.getValue()); //FIXME: Capped due to inventory code being fucking ass
                 case "NightVision" -> info.isEnableNightVision = ((Boolean) entry.getValue()).booleanValue();
                 case "EntityRadar" -> info.isEnableEntityRadar = ((Boolean) entry.getValue()).booleanValue();
                 case "CanReverse" -> info.enableBack  = ((Boolean) entry.getValue()).booleanValue();
@@ -455,7 +469,7 @@ public class YamlParser implements IParser {
 
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             switch (entry.getKey()) {
-                case "Pos" -> position = parseVector(entry.getValue());
+                case "Pos", "Position" -> position = parseVector(entry.getValue());
                 case "Camera", "Cam" -> cameraPos = parseCameraPosition((Map<String, Object>) entry.getValue());
                 case "Names", "Name" -> {
                     Object values = entry.getValue();
@@ -539,7 +553,6 @@ public class YamlParser implements IParser {
 
 
     private ParticleSplash parseParticleSplash(Map<String, Object> map) {
-
         Vec3d pos = null;
         int num = 2;
         float acceleration = 1f;
@@ -563,7 +576,7 @@ public class YamlParser implements IParser {
 
         if (pos == null) throw new IllegalArgumentException("Splash particle must have a position!");
 
-        return new ParticleSplash(num, size, acceleration, pos, age, motionY, gravity);
+        return new ParticleSplash(num, acceleration, size,  pos, age, motionY, gravity);
     }
 
     private CameraPosition parseCameraPosition(Map<String, Object> map) {

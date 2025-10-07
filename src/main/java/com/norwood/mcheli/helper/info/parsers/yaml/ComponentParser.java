@@ -383,8 +383,8 @@ public class ComponentParser {
 
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             switch (entry.getKey()) {
-                case "pos" -> pos = parseVector(entry.getValue());
-                case "interval" -> interval = ((Number) entry.getValue()).intValue();
+                case "Pos","Position" -> pos = parseVector(entry.getValue());
+                case "Interval" -> interval = ((Number) entry.getValue()).intValue();
                 default -> logUnkownEntry(entry, "RepellingHooks");
             }
         }
