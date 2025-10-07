@@ -49,9 +49,10 @@ public class YamlParser implements IParser {
     public @Nullable MCH_HeliInfo parseHelicopter(AddonResourceLocation location, String filepath, List<String> lines, boolean reload) throws Exception {
         InputStream input = Files.newInputStream(Paths.get(filepath), StandardOpenOption.READ);
         Map<String, Object> root = YAML_INSTANCE.load(input);
-
-
-        return null;
+        var info = new MCH_HeliInfo(location,filepath);
+        mapToAircraft(info,root);
+        //TODO: Do heli specific parsing
+        return info;
     }
 
     @Override
@@ -211,8 +212,8 @@ public class YamlParser implements IParser {
                     info.wheels.addAll(wheel.stream().map(this::parseWheel).sorted((o1, o2) -> o1.pos.z > o2.pos.z ? -1 : 1).collect(Collectors.toList()));
                 }
                 case "Components" -> {
-                    List<Map<String, Object>> components = (List<Map<String, Object>>) entry.getValue();
-                    componentParser.parseComponents(components, info);
+                   var  components = (Map<String, List<Map<String, Object>>>)entry.getValue();
+                    componentParser.parseComponents( components, info);
                 }
 
                 case "Seats" -> {
@@ -612,33 +613,6 @@ public class YamlParser implements IParser {
         } else throw new IllegalArgumentException("Vector must be an array of Numbers!");
 
 
-    }
-
-    private Hatch parseHatch(MCH_AircraftInfo data, Map<String, Object> map) {
-        Vec3d position = null;
-        Vec3d rotation = null;
-        float maxRotation = 0f;
-        String partName = "light_hatch" + data.lightHatchList.size();
-        boolean isSliding = false;
-
-        for (Map.Entry<String, Object> entry : map.entrySet()) {
-            switch (entry.getKey()) {
-                case "Pos" -> position = parseVector((Object[]) entry.getValue());
-                case "Rot" -> rotation = parseVector((Object[]) entry.getValue());
-                case "Name" -> partName = (String) entry.getValue();
-                case "IsSliding" -> isSliding = ((Boolean) entry.getValue()).booleanValue();
-                default -> logUnkownEntry(entry, "Hatches");
-            }
-        }
-
-        if (position == null) {
-            throw new IllegalArgumentException("Hatch must have a position!");
-        }
-        if (rotation == null) {
-            throw new IllegalArgumentException("Hatch must have a rotation!");
-        }
-
-        return new Hatch(position, rotation, partName, maxRotation, isSliding);
     }
 
 
