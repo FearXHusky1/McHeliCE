@@ -51,11 +51,7 @@ public abstract class MCH_RenderAircraft<T extends MCH_EntityAircraft> extends W
             if (e.isSkipNormalRender()) {
                 return !renderingEntity;
             }
-        } else if ((
-                entity.getClass().toString().indexOf("flansmod.common.driveables.EntityPlane") > 0
-                        || entity.getClass().toString().indexOf("flansmod.common.driveables.EntityVehicle") > 0
-        )
-                && entity.getRidingEntity() instanceof MCH_EntitySeat) {
+        } else if ((entity.getClass().toString().indexOf("flansmod.common.driveables.EntityPlane") > 0 || entity.getClass().toString().indexOf("flansmod.common.driveables.EntityVehicle") > 0) && entity.getRidingEntity() instanceof MCH_EntitySeat) {
             return !renderingEntity;
         }
 
@@ -380,9 +376,7 @@ public abstract class MCH_RenderAircraft<T extends MCH_EntityAircraft> extends W
         }
     }
 
-    public static void renderWeaponChild(
-            MCH_EntityAircraft ac, MCH_AircraftInfo info, MCH_AircraftInfo.PartWeaponChild w, MCH_WeaponSet ws, Entity e, float tickTime
-    ) {
+    public static void renderWeaponChild(MCH_EntityAircraft ac, MCH_AircraftInfo info, MCH_AircraftInfo.PartWeaponChild w, MCH_WeaponSet ws, Entity e, float tickTime) {
         float rotYaw;
         float prevYaw;
         float rotPitch;
@@ -768,14 +762,7 @@ public abstract class MCH_RenderAircraft<T extends MCH_EntityAircraft> extends W
                                     builder.begin(1, MCH_Verts.POS_COLOR_LMAP);
                                     GL11.glLineWidth(1.0F);
                                     builder.pos(x, y + entity.height / 2.0F, z).color(1.0F, 0.0F, 0.0F, 1.0F).lightmap(0, 240).endVertex();
-                                    builder.pos(
-                                                    ac.lastTickPosX - TileEntityRendererDispatcher.staticPlayerX,
-                                                    ac.lastTickPosY - TileEntityRendererDispatcher.staticPlayerY - 1.0,
-                                                    ac.lastTickPosZ - TileEntityRendererDispatcher.staticPlayerZ
-                                            )
-                                            .color(1.0F, 0.0F, 0.0F, 1.0F)
-                                            .lightmap(0, 240)
-                                            .endVertex();
+                                    builder.pos(ac.lastTickPosX - TileEntityRendererDispatcher.staticPlayerX, ac.lastTickPosY - TileEntityRendererDispatcher.staticPlayerY - 1.0, ac.lastTickPosZ - TileEntityRendererDispatcher.staticPlayerZ).color(1.0F, 0.0F, 0.0F, 1.0F).lightmap(0, 240).endVertex();
                                     tessellator.draw();
                                     GlStateManager.popMatrix();
                                 }
@@ -805,9 +792,7 @@ public abstract class MCH_RenderAircraft<T extends MCH_EntityAircraft> extends W
             for (int i = 0; i < info.repellingHooks.size(); i++) {
                 builder.begin(3, DefaultVertexFormats.POSITION_COLOR);
                 builder.pos(info.repellingHooks.get(i).pos.x, info.repellingHooks.get(i).pos.y, info.repellingHooks.get(i).pos.z).color(0, 0, 0, 255).endVertex();
-                builder.pos(info.repellingHooks.get(i).pos.x, info.repellingHooks.get(i).pos.y + ac.ropesLength, info.repellingHooks.get(i).pos.z)
-                        .color(0, 0, 0, 255)
-                        .endVertex();
+                builder.pos(info.repellingHooks.get(i).pos.x, info.repellingHooks.get(i).pos.y + ac.ropesLength, info.repellingHooks.get(i).pos.z).color(0, 0, 0, 255).endVertex();
                 tessellator.draw();
             }
 
@@ -1070,38 +1055,35 @@ public abstract class MCH_RenderAircraft<T extends MCH_EntityAircraft> extends W
 
         GlStateManager.pushMatrix();
 
-
         Vec3d offset = bb.rotatedOffset == null ? Vec3d.ZERO : bb.rotatedOffset;
-            GlStateManager.translate(offset.x, offset.y, offset.z);
-            GlStateManager.translate(0.0F, 0.5F + bb.height, 0.0F);
+        GlStateManager.translate(offset.x, offset.y, offset.z);
+        GlStateManager.translate(0.0F, 0.5F + bb.height, 0.0F);
 
-            GlStateManager.rotate(-this.renderManager.playerViewY, 0.0F, 1.0F, 0.0F);
-            GlStateManager.rotate(this.renderManager.playerViewX, 1.0F, 0.0F, 0.0F);
-            GlStateManager.scale(-scale, -scale, scale);
+        GlStateManager.rotate(-this.renderManager.playerViewY, 0.0F, 1.0F, 0.0F);
+        GlStateManager.rotate(this.renderManager.playerViewX, 1.0F, 0.0F, 0.0F);
+        GlStateManager.scale(-scale, -scale, scale);
 
+        FontRenderer font = this.getFontRendererFromRenderManager();
 
-            FontRenderer font = this.getFontRendererFromRenderManager();
+        int strWidth = font.getStringWidth(s) / 2;
 
-            int strWidth = font.getStringWidth(s) / 2;
+        Tessellator tess = Tessellator.getInstance();
+        BufferBuilder buf = tess.getBuffer();
 
-            Tessellator tess = Tessellator.getInstance();
-            BufferBuilder buf = tess.getBuffer();
+        GlStateManager.disableTexture2D();
+        buf.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
+        buf.pos(-strWidth - 1, -1.0D, 0.0D).color(0F, 0F, 0F, 0.4F).endVertex();
+        buf.pos(-strWidth - 1, 8.0D, 0.0D).color(0F, 0F, 0F, 0.4F).endVertex();
+        buf.pos(strWidth + 1, 8.0D, 0.0D).color(0F, 0F, 0F, 0.4F).endVertex();
+        buf.pos(strWidth + 1, -1.0D, 0.0D).color(0F, 0F, 0F, 0.4F).endVertex();
+        tess.draw();
+        GlStateManager.enableTexture2D();
 
-            GlStateManager.disableTexture2D();
-            buf.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
-            buf.pos(-strWidth - 1, -1.0D, 0.0D).color(0F, 0F, 0F, 0.4F).endVertex();
-            buf.pos(-strWidth - 1, 8.0D, 0.0D).color(0F, 0F, 0F, 0.4F).endVertex();
-            buf.pos(strWidth + 1, 8.0D, 0.0D).color(0F, 0F, 0F, 0.4F).endVertex();
-            buf.pos(strWidth + 1, -1.0D, 0.0D).color(0F, 0F, 0F, 0.4F).endVertex();
-            tess.draw();
-            GlStateManager.enableTexture2D();
+        int color = bb.damageFactor < 1.0F ? 0xFFFFFFFF : (bb.damageFactor > 1.0F ? 0xFFFF0000 : 0xFFFFFF);
+        font.drawString(s, -font.getStringWidth(s) / 2, 0, color);
 
-            int color = bb.damageFactor < 1.0F ? 0xFFFFFFFF :
-                    (bb.damageFactor > 1.0F ? 0xFFFF0000 : 0xFFFFFF);
-            font.drawString(s, -font.getStringWidth(s) / 2, 0, color);
-
-            GlStateManager.popMatrix();
-            GlStateManager.resetColor();
+        GlStateManager.popMatrix();
+        GlStateManager.resetColor();
     }
 
     public final boolean shouldRender(MCH_EntityAircraft livingEntity, ICamera camera, double camX, double camY, double camZ) {

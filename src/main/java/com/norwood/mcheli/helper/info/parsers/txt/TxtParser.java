@@ -463,7 +463,7 @@ public class TxtParser implements IParser {
         } else if (item.compareTo("throttleupdown") == 0) {
             info.throttleUpDown = info.toFloat(data, 0.0F, 3.0F);
         } else if (item.equalsIgnoreCase("ThrottleUpDownOnEntity")) {
-            info.throttleUpDownOnEntity = info.toFloat(data, 0.0F, 100000.0F);
+            info.throttleUpDownOnEntity = info.toFloat(data, 0.0F, 100_000.0F);
         } else if (item.equalsIgnoreCase("Stealth")) {
             info.stealth = info.toFloat(data, 0.0F, 1.0F);
         } else if (item.equalsIgnoreCase("EntityWidth")) {
