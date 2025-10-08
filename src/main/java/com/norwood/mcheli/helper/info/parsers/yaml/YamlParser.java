@@ -578,7 +578,7 @@ public class YamlParser implements IParser {
 
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             switch (entry.getKey()) {
-                case "Pos" -> pos = parseVector(entry.getValue());
+                case "Pos","Position" -> pos = parseVector(entry.getValue());
                 case "Count" -> num = getClamped(1, 100, (Number) entry.getValue());
                 case "Size" -> size = ((Number) entry.getValue()).floatValue();
                 case "Accel" -> acceleration = ((Number) entry.getValue()).floatValue();
@@ -602,7 +602,7 @@ public class YamlParser implements IParser {
 
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             switch (entry.getKey()) {
-                case "Pos" -> pos = parseVector(entry.getValue());
+                case "Pos","Position" -> pos = parseVector(entry.getValue());
                 case "FixedRot" -> fixRot = ((Boolean) entry.getValue()).booleanValue();
                 case "Yaw" -> yaw = ((Number) entry.getValue()).floatValue();
                 case "Pitch" -> pitch = ((Number) entry.getValue()).floatValue();
