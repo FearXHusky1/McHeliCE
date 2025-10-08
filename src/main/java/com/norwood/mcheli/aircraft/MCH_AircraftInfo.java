@@ -1199,6 +1199,33 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo implements IItemCont
             this.maxPitch = mxp;
             this.turret = turret;
         }
+        public Weapon(
+                float x,
+                float y,
+                float z,
+                float yaw,
+                float pitch,
+                boolean canPirot,
+                int seatId,
+                float defy,
+                float mny,
+                float mxy,
+                float mnp,
+                float mxp,
+                boolean turret
+        ) {
+            this.pos = new Vec3d(x, y + W_Entity.GLOBAL_Y_OFFSET, z);
+            this.yaw = yaw;
+            this.pitch = pitch;
+            this.canUsePilot = canPirot;
+            this.seatID = seatId;
+            this.defaultYaw = defy;
+            this.minYaw = mny;
+            this.maxYaw = mxy;
+            this.minPitch = mnp;
+            this.maxPitch = mxp;
+            this.turret = turret;
+        }
     }
 
     public static class WeaponBay extends MCH_AircraftInfo.DrawnPart {
