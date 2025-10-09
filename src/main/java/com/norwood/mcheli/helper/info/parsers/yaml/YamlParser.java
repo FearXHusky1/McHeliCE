@@ -307,19 +307,18 @@ public class YamlParser implements IParser {
                     parseAircraftFeatures(feats, info);
                 }
                 case "Racks" -> {
+                    int seatCount = 0;
+                    if(root.containsKey("Seats")){
+                        seatCount = ((List<?>) root.get("Seats")).size();
+                    }
                     List<Map<String, Object>> racks = (List<Map<String, Object>>) entry.getValue();
-                    racks.stream().map(this::parseRacks).forEach((rack) -> {
-                        if (rack instanceof MCH_SeatRackInfo r) info.entityRackList.add(r);
-                        else info.rideRacks.add((RideRack) rack);
-                    });
+                    for (Map<String, Object> rack : racks) {
+                        parseSeatRackInfo(rack, info, seatCount, racks.size());
+                    }
                 }
 
                 case "RideRack" -> {
-                    List<Map<String, Object>> racks = (List<Map<String, Object>>) entry.getValue();
-                    racks.stream().map(this::parseRacks).forEach((rack) -> {
-                        if (rack instanceof MCH_SeatRackInfo r) info.entityRackList.add(r);
-                        else info.rideRacks.add((RideRack) rack);
-                    });
+                    parseRideRacks((Map<String, Integer>) entry.getValue(),info );
                 }
 
                 case "Wheels" -> {
@@ -337,7 +336,11 @@ public class YamlParser implements IParser {
 
                 case "Seats" -> {
                     List<Map<String, Object>> seatList = (List<Map<String, Object>>) entry.getValue();
-                    seatList.stream().forEachOrdered(seat -> parseSeatInfo(seat, info));
+                    int rackCount = 0;
+                    if(root.containsKey("Racks")){
+                        var rackList = ((List<?>) root.get("Racks")).size();
+                    }
+                    seatList.stream().forEachOrdered(seat -> parseSeatInfo(seat, info,rackCount,seatList.size()));
 
                 }
 
@@ -690,21 +693,17 @@ public class YamlParser implements IParser {
         return new Wheel(wheelPos, scale);
     }
 
-    private Object parseRacks(Map<String, Object> map) {
-        if (map.containsKey("Type")) {
-            RACK_TYPE type = RACK_TYPE.valueOf((String) map.get("Type"));
-            return switch (type) {
-                case NORMAL -> parseSeatRackInfo(map);
-                case RIDING -> parseRidingRack(map);
-                default -> throw new UnsupportedOperationException();
-            };
 
-        } else {
-            return parseSeatRackInfo(map);
-        }
+    private void parseRideRacks(Map<String,Integer>map, MCH_AircraftInfo info){
+       map.entrySet().forEach(stringIntegerEntry ->{
+           if(stringIntegerEntry.getKey().isEmpty()) throw new IllegalArgumentException("RideRack vehicle entry cannot be empty!");
+           if(stringIntegerEntry.getValue() < 0) throw new IllegalArgumentException("RideRack rackID cannot be negative!");
+           info.rideRacks.add(new RideRack(stringIntegerEntry.getKey(),stringIntegerEntry.getValue()));
+               }
+       );
     }
 
-    private MCH_SeatRackInfo parseSeatRackInfo(Map<String, Object> map) {
+    private void parseSeatRackInfo(Map<String, Object> map, MCH_AircraftInfo info, int seatCount, int rackCount) {
         Vec3d position = null;
         CameraPosition cameraPos = null;
         String[] entityNames = new String[0];
@@ -713,6 +712,7 @@ public class YamlParser implements IParser {
         float yaw = 0f;
         float pitch = 0f;
         boolean rotSeat = false;
+        List<Integer> exclusionList = null;
 
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             switch (entry.getKey()) {
@@ -730,6 +730,17 @@ public class YamlParser implements IParser {
                 case "Yaw" -> yaw = ((Number) entry.getValue()).floatValue();
                 case "Pitch" -> pitch = ((Number) entry.getValue()).floatValue();
                 case "RotSeat" -> rotSeat = ((Boolean) entry.getValue()).booleanValue();
+                case "ExcludeWith" -> {
+                    exclusionList = new ArrayList<>();
+                    var exclusionMap = (Map<String,List<Integer>>) entry.getValue();
+                    if(exclusionMap.containsKey("Seats")){
+                        exclusionMap.get("Seats").stream().forEach(exclusionList::add);
+                    }
+                    if(exclusionMap.containsKey("Racks")){
+                        exclusionMap.get("Racks").stream().map(num ->num+seatCount).forEach(exclusionList::add);
+                    }
+
+                }
                 default -> logUnkownEntry(entry, "Racks");
             }
         }
@@ -741,24 +752,12 @@ public class YamlParser implements IParser {
             throw new IllegalArgumentException("Seat rack must have a camera position!");
         }
 
-        return new MCH_SeatRackInfo(entityNames, position.x, position.y, position.z, cameraPos, range, openParaAlt, yaw, pitch, rotSeat);
+        info.entityRackList.add(new MCH_SeatRackInfo(entityNames, position.x, position.y, position.z, cameraPos, range, openParaAlt, yaw, pitch, rotSeat));
+        final int rackIndex = info.entityRackList.size();
+        if (exclusionList != null)
+            exclusionList.stream().map(integers -> new Integer[]{seatCount + rackIndex, integers}).forEachOrdered(info.exclusionSeatList::add);
     }
 
-    private RideRack parseRidingRack(Map<String, Object> map) {
-        int rackID = -1;//FUCK IDs
-        String name = "";
-
-
-        for (Map.Entry<String, Object> entry : map.entrySet()) {
-            switch (entry.getKey()) {
-                case "Id" -> rackID = getClamped(1, 10_000, (Number) entry.getValue());
-                case "Name" -> name = ((String) entry.getValue()).toLowerCase(Locale.ROOT).trim();
-            }
-        }
-        if (rackID == -1 || name.isEmpty()) throw new IllegalArgumentException("Name nor ID can be empty!");
-
-        return new RideRack(name, rackID);
-    }
 
     private ParticleSplash parseParticleSplash(Map<String, Object> map) {
         Vec3d pos = null;
@@ -871,7 +870,7 @@ public class YamlParser implements IParser {
 
 
     @SuppressWarnings("unboxing")
-    private void parseSeatInfo(Map<String, Object> map, MCH_AircraftInfo info) {
+    private void parseSeatInfo(Map<String, Object> map, MCH_AircraftInfo info, int rackCount, int seatCount) {
         Vec3d position = null;
         boolean isGunner = false;
         boolean canSwitchGunner = false;
@@ -900,11 +899,17 @@ public class YamlParser implements IParser {
                 case "InvCamPos" -> invertCameraPos = ((Boolean) entry.getValue()).booleanValue();
                 case "Hud" -> hudName = ((String) entry.getValue()).toLowerCase(Locale.ROOT).trim();
                 case "Camera", "Cam" -> cameraPos = parseCameraPosition((Map<String, Object>) entry.getValue());
-                case "ExcludeWith" -> exclusionList = ((List<Number>) entry.getValue())
-                        .stream()
-                        .mapToInt(Number::intValue)
-                        .boxed()
-                        .collect(Collectors.toList());
+                case "ExcludeWith" -> {
+                    exclusionList = new ArrayList<>();
+                    var exclusionMap = (Map<String,List<Integer>>) entry.getValue();
+                    if(exclusionMap.containsKey("Seats")){
+                        exclusionMap.get("Seats").stream().forEach(exclusionList::add);
+                    }
+                    if(exclusionMap.containsKey("Racks")){
+                        exclusionMap.get("Racks").stream().map(num ->num+seatCount).forEach(exclusionList::add);
+                    }
+
+                }
 
 
                 default -> logUnkownEntry(entry, "Seats");
