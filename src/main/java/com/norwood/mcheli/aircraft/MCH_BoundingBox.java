@@ -332,6 +332,39 @@ public class MCH_BoundingBox {
         return this.intersectsOBB(tmp);
     }
 
+    @Override
+    public String toString() {
+        return "MCH_BoundingBox{" +
+                "boundingBox=" + boundingBox +
+                ", backupBoundingBox=" + backupBoundingBox +
+                ", offsetX=" + offsetX +
+                ", offsetY=" + offsetY +
+                ", offsetZ=" + offsetZ +
+                ", width=" + width +
+                ", widthZ=" + widthZ +
+                ", height=" + height +
+                ", halfWidth=" + halfWidth +
+                ", halfHeight=" + halfHeight +
+                ", halfDepth=" + halfDepth +
+                ", rotatedOffset=" + rotatedOffset +
+                ", nowPos=" + nowPos +
+                ", prevPos=" + prevPos +
+                ", damageFactor=" + damageFactor +
+                ", boundingBoxType=" + boundingBoxType +
+                ", name='" + name + '\'' +
+                ", rotationYaw=" + rotationYaw +
+                ", rotationPitch=" + rotationPitch +
+                ", rotationRoll=" + rotationRoll +
+                ", axisX=" + axisX +
+                ", axisY=" + axisY +
+                ", axisZ=" + axisZ +
+                ", center=" + center +
+                ", localRotYaw=" + localRotYaw +
+                ", localRotPitch=" + localRotPitch +
+                ", localRotRoll=" + localRotRoll +
+                '}';
+    }
+
     public static enum EnumBoundingBoxType {
         DEFAULT, ENGINE, TURRET
     }

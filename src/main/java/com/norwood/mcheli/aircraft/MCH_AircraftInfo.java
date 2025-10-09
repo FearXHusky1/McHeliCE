@@ -14,6 +14,7 @@ import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.util.math.Vec3d;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -686,6 +687,154 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo implements IItemCont
         return true;
     }
 
+    @Override
+    public String toString() {
+        return "MCH_AircraftInfo{" +
+                "name='" + name + '\'' +
+                ", recipe=" + recipe +
+                ", weaponSetList=" + weaponSetList +
+                ", seatList=" + seatList +
+                ", exclusionSeatList=" + exclusionSeatList +
+                ", hudList=" + hudList +
+                ", extraBoundingBox=" + extraBoundingBox +
+                ", wheels=" + wheels +
+                ", entityRackList=" + entityRackList +
+                ", mobDropOption=" + mobDropOption +
+                ", repellingHooks=" + repellingHooks +
+                ", rideRacks=" + rideRacks +
+                ", particleSplashs=" + particleSplashs +
+                ", searchLights=" + searchLights +
+                ", cameraPosition=" + cameraPosition +
+                ", hatchList=" + hatchList +
+                ", cameraList=" + cameraList +
+                ", partWeapon=" + partWeapon +
+                ", partWeaponBay=" + partWeaponBay +
+                ", canopyList=" + canopyList +
+                ", landingGear=" + landingGear +
+                ", partThrottle=" + partThrottle +
+                ", partRotPart=" + partRotPart +
+                ", partCrawlerTrack=" + partCrawlerTrack +
+                ", partTrackRoller=" + partTrackRoller +
+                ", partWheel=" + partWheel +
+                ", partSteeringWheel=" + partSteeringWheel +
+                ", lightHatchList=" + lightHatchList +
+                ", textureNameList=" + textureNameList +
+                ", flare=" + flare +
+                ", displayName='" + displayName + '\'' +
+                ", displayNameLang=" + displayNameLang +
+                ", itemID=" + itemID +
+                ", recipeString=" + recipeString +
+                ", isShapedRecipe=" + isShapedRecipe +
+                ", category='" + category + '\'' +
+                ", creativeOnly=" + creativeOnly +
+                ", invulnerable=" + invulnerable +
+                ", isEnableGunnerMode=" + isEnableGunnerMode +
+                ", cameraZoom=" + cameraZoom +
+                ", isEnableConcurrentGunnerMode=" + isEnableConcurrentGunnerMode +
+                ", isEnableNightVision=" + isEnableNightVision +
+                ", isEnableEntityRadar=" + isEnableEntityRadar +
+                ", isEnableEjectionSeat=" + isEnableEjectionSeat +
+                ", isEnableParachuting=" + isEnableParachuting +
+                ", bodyHeight=" + bodyHeight +
+                ", bodyWidth=" + bodyWidth +
+                ", isFloat=" + isFloat +
+                ", floatOffset=" + floatOffset +
+                ", gravity=" + gravity +
+                ", gravityInWater=" + gravityInWater +
+                ", maxHp=" + maxHp +
+                ", armorMinDamage=" + armorMinDamage +
+                ", armorMaxDamage=" + armorMaxDamage +
+                ", armorDamageFactor=" + armorDamageFactor +
+                ", enableBack=" + enableBack +
+                ", inventorySize=" + inventorySize +
+                ", isUAV=" + isUAV +
+                ", isSmallUAV=" + isSmallUAV +
+                ", isNewUAV=" + isNewUAV +
+                ", isTargetDrone=" + isTargetDrone +
+                ", autoPilotRot=" + autoPilotRot +
+                ", onGroundPitch=" + onGroundPitch +
+                ", canMoveOnGround=" + canMoveOnGround +
+                ", canRotOnGround=" + canRotOnGround +
+                ", hudTvMissile=" + hudTvMissile +
+                ", damageFactor=" + damageFactor +
+                ", submergedDamageHeight=" + submergedDamageHeight +
+                ", regeneration=" + regeneration +
+                ", maxFuel=" + maxFuel +
+                ", fuelConsumption=" + fuelConsumption +
+                ", fuelSupplyRange=" + fuelSupplyRange +
+                ", ammoSupplyRange=" + ammoSupplyRange +
+                ", repairOtherVehiclesRange=" + repairOtherVehiclesRange +
+                ", repairOtherVehiclesValue=" + repairOtherVehiclesValue +
+                ", stealth=" + stealth +
+                ", canRide=" + canRide +
+                ", entityWidth=" + entityWidth +
+                ", entityHeight=" + entityHeight +
+                ", entityPitch=" + entityPitch +
+                ", entityRoll=" + entityRoll +
+                ", stepHeight=" + stepHeight +
+                ", mobSeatNum=" + mobSeatNum +
+                ", entityRackNum=" + entityRackNum +
+                ", rotorSpeed=" + rotorSpeed +
+                ", enableSeaSurfaceParticle=" + enableSeaSurfaceParticle +
+                ", pivotTurnThrottle=" + pivotTurnThrottle +
+                ", trackRollerRot=" + trackRollerRot +
+                ", partWheelRot=" + partWheelRot +
+                ", onGroundPitchFactor=" + onGroundPitchFactor +
+                ", onGroundRollFactor=" + onGroundRollFactor +
+                ", turretPosition=" + turretPosition +
+                ", defaultFreelook=" + defaultFreelook +
+                ", unmountPosition=" + unmountPosition +
+                ", thirdPersonDist=" + thirdPersonDist +
+                ", markerWidth=" + markerWidth +
+                ", markerHeight=" + markerHeight +
+                ", bbZmin=" + bbZmin +
+                ", bbZmax=" + bbZmax +
+                ", bbZ=" + bbZ +
+                ", alwaysCameraView=" + alwaysCameraView +
+                ", cameraRotationSpeed=" + cameraRotationSpeed +
+                ", speed=" + speed +
+                ", motionFactor=" + motionFactor +
+                ", mobilityYaw=" + mobilityYaw +
+                ", mobilityPitch=" + mobilityPitch +
+                ", mobilityRoll=" + mobilityRoll +
+                ", mobilityYawOnGround=" + mobilityYawOnGround +
+                ", minRotationPitch=" + minRotationPitch +
+                ", maxRotationPitch=" + maxRotationPitch +
+                ", minRotationRoll=" + minRotationRoll +
+                ", maxRotationRoll=" + maxRotationRoll +
+                ", limitRotation=" + limitRotation +
+                ", throttleUpDown=" + throttleUpDown +
+                ", throttleUpDownOnEntity=" + throttleUpDownOnEntity +
+                ", textureCount=" + textureCount +
+                ", particlesScale=" + particlesScale +
+                ", hideEntity=" + hideEntity +
+                ", smoothShading=" + smoothShading +
+                ", soundMove='" + soundMove + '\'' +
+                ", soundRange=" + soundRange +
+                ", soundVolume=" + soundVolume +
+                ", soundPitch=" + soundPitch +
+                ", model=" + model +
+                ", nameOnModernAARadar='" + nameOnModernAARadar + '\'' +
+                ", nameOnEarlyAARadar='" + nameOnEarlyAARadar + '\'' +
+                ", nameOnModernASRadar='" + nameOnModernASRadar + '\'' +
+                ", nameOnEarlyASRadar='" + nameOnEarlyASRadar + '\'' +
+                ", explosionSizeByCrash=" + explosionSizeByCrash +
+                ", throttleDownFactor=" + throttleDownFactor +
+                ", chaffUseTime=" + chaffUseTime +
+                ", chaffWaitTime=" + chaffWaitTime +
+                ", maintenanceUseTime=" + maintenanceUseTime +
+                ", maintenanceWaitTime=" + maintenanceWaitTime +
+                ", engineShutdownThreshold=" + engineShutdownThreshold +
+                ", apsUseTime=" + apsUseTime +
+                ", apsWaitTime=" + apsWaitTime +
+                ", apsRange=" + apsRange +
+                ", oneProbeScale=" + oneProbeScale +
+                ", lastWeaponType='" + lastWeaponType + '\'' +
+                ", lastWeaponIndex=" + lastWeaponIndex +
+                ", lastWeaponPart=" + lastWeaponPart +
+                '}';
+    }
+
     // mlbv: @Builder can't handle inheritance
     @SuperBuilder(toBuilder = true)
     public static class Camera extends MCH_AircraftInfo.DrawnPart {
@@ -701,6 +850,18 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo implements IItemCont
             super(base);
             this.yawSync = yawSync;
             this.pitchSync = pitchSync;
+        }
+
+        @Override
+        public String toString() {
+            return "Camera{" +
+                    "pos=" + pos +
+                    ", yawSync=" + yawSync +
+                    ", pitchSync=" + pitchSync +
+                    ", rot=" + rot +
+                    ", modelName='" + modelName + '\'' +
+                    ", model=" + model +
+                    '}';
         }
     }
 
@@ -725,6 +886,16 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo implements IItemCont
         public CameraPosition(MCH_AircraftInfo paramMCH_AircraftInfo) {
             this(paramMCH_AircraftInfo, new Vec3d(0.0, 0.0, 0.0));
         }
+
+        @Override
+        public String toString() {
+            return "CameraPosition{" +
+                    "pos=" + pos +
+                    ", fixRot=" + fixRot +
+                    ", yaw=" + yaw +
+                    ", pitch=" + pitch +
+                    '}';
+        }
     }
 
     public static class Canopy extends MCH_AircraftInfo.DrawnPart {
@@ -742,6 +913,18 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo implements IItemCont
             this.maxRotFactor = mr;
             this.isSlide = slide;
         }
+
+        @Override
+        public String toString() {
+            return "Canopy{" +
+                    "maxRotFactor=" + maxRotFactor +
+                    ", isSlide=" + isSlide +
+                    ", pos=" + pos +
+                    ", rot=" + rot +
+                    ", modelName='" + modelName + '\'' +
+                    ", model=" + model +
+                    '}';
+        }
     }
 
     public static class CrawlerTrack extends MCH_AircraftInfo.DrawnPart {
@@ -757,6 +940,22 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo implements IItemCont
         }
         public CrawlerTrack(String name) {
             super(null, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, name);
+        }
+
+        @Override
+        public String toString() {
+            return "CrawlerTrack{" +
+                    "len=" + len +
+                    ", cx=" + Arrays.toString(cx) +
+                    ", cy=" + Arrays.toString(cy) +
+                    ", lp=" + lp +
+                    ", z=" + z +
+                    ", side=" + side +
+                    ", pos=" + pos +
+                    ", rot=" + rot +
+                    ", modelName='" + modelName + '\'' +
+                    ", model=" + model +
+                    '}';
         }
     }
 
@@ -775,6 +974,17 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo implements IItemCont
         public CrawlerTrackPrm(float x, float y) {
             this.x = x;
             this.y = y;
+        }
+
+        @Override
+        public String toString() {
+            return "CrawlerTrackPrm{" +
+                    "x=" + x +
+                    ", y=" + y +
+                    ", nx=" + nx +
+                    ", ny=" + ny +
+                    ", r=" + r +
+                    '}';
         }
     }
 
@@ -805,6 +1015,15 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo implements IItemCont
             this.model = other.model;
         }
 
+        @Override
+        public String toString() {
+            return "DrawnPart{" +
+                    "pos=" + pos +
+                    ", rot=" + rot +
+                    ", modelName='" + modelName + '\'' +
+                    ", model=" + model +
+                    '}';
+        }
     }
 
     @AllArgsConstructor
@@ -813,6 +1032,14 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo implements IItemCont
         public int[] types = new int[0];
 
         public Flare(MCH_AircraftInfo paramMCH_AircraftInfo) {
+        }
+
+        @Override
+        public String toString() {
+            return "Flare{" +
+                    "pos=" + pos +
+                    ", types=" + Arrays.toString(types) +
+                    '}';
         }
     }
 
@@ -842,6 +1069,18 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo implements IItemCont
             this.isSlide = isSlide;
         }
 
+        @Override
+        public String toString() {
+            return "Hatch{" +
+                    "maxRotFactor=" + maxRotFactor +
+                    ", maxRot=" + maxRot +
+                    ", isSlide=" + isSlide +
+                    ", pos=" + pos +
+                    ", rot=" + rot +
+                    ", modelName='" + modelName + '\'' +
+                    ", model=" + model +
+                    '}';
+        }
     }
 
     public static class LandingGear extends MCH_AircraftInfo.DrawnPart {
@@ -880,6 +1119,23 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo implements IItemCont
             this.maxRotFactor2 = 0.0F;
             this.reverse = rev;
             this.hatch = isHatch;
+        }
+
+        @Override
+        public String toString() {
+            return "LandingGear{" +
+                    "maxRotFactor=" + maxRotFactor +
+                    ", reverse=" + reverse +
+                    ", hatch=" + hatch +
+                    ", slide=" + slide +
+                    ", enableRot2=" + enableRot2 +
+                    ", rot2=" + rot2 +
+                    ", maxRotFactor2=" + maxRotFactor2 +
+                    ", pos=" + pos +
+                    ", rot=" + rot +
+                    ", modelName='" + modelName + '\'' +
+                    ", model=" + model +
+                    '}';
         }
     }
 
@@ -936,6 +1192,25 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo implements IItemCont
             this.turret = turret;
             this.child = new ArrayList<>();
         }
+
+        @Override
+        public String toString() {
+            return "PartWeapon{" +
+                    "name=" + Arrays.toString(name) +
+                    ", rotBarrel=" + rotBarrel +
+                    ", isMissile=" + isMissile +
+                    ", hideGM=" + hideGM +
+                    ", yaw=" + yaw +
+                    ", pitch=" + pitch +
+                    ", recoilBuf=" + recoilBuf +
+                    ", turret=" + turret +
+                    ", child=" + child +
+                    ", pos=" + pos +
+                    ", rot=" + rot +
+                    ", modelName='" + modelName + '\'' +
+                    ", model=" + model +
+                    '}';
+        }
     }
 
     public static class PartWeaponChild extends MCH_AircraftInfo.DrawnPart {
@@ -972,6 +1247,20 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo implements IItemCont
             this.pitch = pitch;
             this.recoilBuf = recoilBuf;
         }
+
+        @Override
+        public String toString() {
+            return "PartWeaponChild{" +
+                    "name=" + Arrays.toString(name) +
+                    ", yaw=" + yaw +
+                    ", pitch=" + pitch +
+                    ", recoilBuf=" + recoilBuf +
+                    ", pos=" + pos +
+                    ", rot=" + rot +
+                    ", modelName='" + modelName + '\'' +
+                    ", model=" + model +
+                    '}';
+        }
     }
 
     public static class PartWheel extends MCH_AircraftInfo.DrawnPart {
@@ -1006,6 +1295,18 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo implements IItemCont
         public PartWheel(MCH_AircraftInfo paramMCH_AircraftInfo, float px, float py, float pz, float rx, float ry, float rz, float rd, String name) {
             this(paramMCH_AircraftInfo, px, py, pz, rx, ry, rz, rd, px, py, pz, name);
         }
+
+        @Override
+        public String toString() {
+            return "PartWheel{" +
+                    "rotDir=" + rotDir +
+                    ", pos2=" + pos2 +
+                    ", pos=" + pos +
+                    ", rot=" + rot +
+                    ", modelName='" + modelName + '\'' +
+                    ", model=" + model +
+                    '}';
+        }
     }
 
     @AllArgsConstructor
@@ -1027,6 +1328,19 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo implements IItemCont
             this.motionY = my;
             this.gravity = gr;
         }
+
+        @Override
+        public String toString() {
+            return "ParticleSplash{" +
+                    "num=" + num +
+                    ", acceleration=" + acceleration +
+                    ", size=" + size +
+                    ", pos=" + pos +
+                    ", age=" + age +
+                    ", motionY=" + motionY +
+                    ", gravity=" + gravity +
+                    '}';
+        }
     }
 
     @AllArgsConstructor
@@ -1038,6 +1352,14 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo implements IItemCont
             this.pos = pos;
             this.interval = inv;
         }
+
+        @Override
+        public String toString() {
+            return "RepellingHook{" +
+                    "pos=" + pos +
+                    ", interval=" + interval +
+                    '}';
+        }
     }
 
     @AllArgsConstructor
@@ -1048,6 +1370,14 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo implements IItemCont
         public RideRack(MCH_AircraftInfo paramMCH_AircraftInfo, String n, int id) {
             this.name = n;
             this.rackID = id;
+        }
+
+        @Override
+        public String toString() {
+            return "RideRack{" +
+                    "name='" + name + '\'' +
+                    ", rackID=" + rackID +
+                    '}';
         }
     }
 
@@ -1065,6 +1395,18 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo implements IItemCont
             super(other);
             this.rotSpeed = rotSpeed;
             this.rotAlways = rotAlways;
+        }
+
+        @Override
+        public String toString() {
+            return "RotPart{" +
+                    "rotSpeed=" + rotSpeed +
+                    ", rotAlways=" + rotAlways +
+                    ", pos=" + pos +
+                    ", rot=" + rot +
+                    ", modelName='" + modelName + '\'' +
+                    ", model=" + model +
+                    '}';
         }
     }
 
@@ -1112,6 +1454,23 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo implements IItemCont
             this.pitch = p;
             this.stRot = stRot;
         }
+
+        @Override
+        public String toString() {
+            return "SearchLight{" +
+                    "pos=" + pos +
+                    ", colorStart=" + colorStart +
+                    ", colorEnd=" + colorEnd +
+                    ", height=" + height +
+                    ", width=" + width +
+                    ", angle=" + angle +
+                    ", fixDir=" + fixDir +
+                    ", yaw=" + yaw +
+                    ", pitch=" + pitch +
+                    ", steering=" + steering +
+                    ", stRot=" + stRot +
+                    '}';
+        }
     }
 
     public static class Throttle extends MCH_AircraftInfo.DrawnPart {
@@ -1142,6 +1501,18 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo implements IItemCont
             this.slide = slide;
             this.rot2 = rot2;
         }
+
+        @Override
+        public String toString() {
+            return "Throttle{" +
+                    "slide=" + slide +
+                    ", rot2=" + rot2 +
+                    ", pos=" + pos +
+                    ", rot=" + rot +
+                    ", modelName='" + modelName + '\'' +
+                    ", model=" + model +
+                    '}';
+        }
     }
 
     public static class TrackRoller extends MCH_AircraftInfo.DrawnPart {
@@ -1155,6 +1526,17 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo implements IItemCont
         public TrackRoller(DrawnPart other) {
             super(other);
             this.side = other.pos.x >= 0 ? 1 : 0;
+        }
+
+        @Override
+        public String toString() {
+            return "TrackRoller{" +
+                    "side=" + side +
+                    ", pos=" + pos +
+                    ", rot=" + rot +
+                    ", modelName='" + modelName + '\'' +
+                    ", model=" + model +
+                    '}';
         }
     }
 
@@ -1226,6 +1608,23 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo implements IItemCont
             this.maxPitch = mxp;
             this.turret = turret;
         }
+
+        @Override
+        public String toString() {
+            return "Weapon{" +
+                    "pos=" + pos +
+                    ", yaw=" + yaw +
+                    ", pitch=" + pitch +
+                    ", canUsePilot=" + canUsePilot +
+                    ", seatID=" + seatID +
+                    ", defaultYaw=" + defaultYaw +
+                    ", minYaw=" + minYaw +
+                    ", maxYaw=" + maxYaw +
+                    ", minPitch=" + minPitch +
+                    ", maxPitch=" + maxPitch +
+                    ", turret=" + turret +
+                    '}';
+        }
     }
 
     public static class WeaponBay extends MCH_AircraftInfo.DrawnPart {
@@ -1251,6 +1650,20 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo implements IItemCont
             this.weaponName = weaponName;
             this.weaponIds = new Integer[0];
         }
+
+        @Override
+        public String toString() {
+            return "WeaponBay{" +
+                    "maxRotFactor=" + maxRotFactor +
+                    ", isSlide=" + isSlide +
+                    ", weaponName='" + weaponName + '\'' +
+                    ", weaponIds=" + Arrays.toString(weaponIds) +
+                    ", pos=" + pos +
+                    ", rot=" + rot +
+                    ", modelName='" + modelName + '\'' +
+                    ", model=" + model +
+                    '}';
+        }
     }
 
     public static class WeaponSet {
@@ -1266,6 +1679,14 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo implements IItemCont
             this.type = t;
             this.weapons = new ArrayList<>();
         }
+
+        @Override
+        public String toString() {
+            return "WeaponSet{" +
+                    "type='" + type + '\'' +
+                    ", weapons=" + weapons +
+                    '}';
+        }
     }
 
     @AllArgsConstructor
@@ -1280,6 +1701,14 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo implements IItemCont
 
         public Wheel(MCH_AircraftInfo paramMCH_AircraftInfo, Vec3d v) {
             this(paramMCH_AircraftInfo, v, 1.0F);
+        }
+
+        @Override
+        public String toString() {
+            return "Wheel{" +
+                    "pos=" + pos +
+                    ", size=" + size +
+                    '}';
         }
     }
 }

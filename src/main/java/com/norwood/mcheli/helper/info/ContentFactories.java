@@ -3,6 +3,7 @@ package com.norwood.mcheli.helper.info;
 import com.google.common.collect.Maps;
 import com.norwood.mcheli.helper.MCH_Utils;
 import com.norwood.mcheli.helper.info.parsers.txt.TxtParser;
+import com.norwood.mcheli.helper.info.parsers.yaml.YamlParser;
 
 import javax.annotation.Nullable;
 import java.util.Map;
@@ -23,6 +24,7 @@ public class ContentFactories {
         }
 
         TxtParser.register();
+//        YamlParser.register();
     }
 
     private ContentFactories() {

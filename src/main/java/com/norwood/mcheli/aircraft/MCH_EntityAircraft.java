@@ -4470,7 +4470,6 @@ public abstract class MCH_EntityAircraft
         } else {
             for (Integer[] a : this.getAcInfo().exclusionSeatList) {
                 if (Arrays.asList(a).contains(seatId)) {
-                    int len$ = a.length;
 
                     for (int id : a) {
                         if (this.getEntityBySeatId(id) != null) {

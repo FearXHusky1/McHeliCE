@@ -107,8 +107,7 @@ public class YamlParser implements IParser {
 
     @Override
     public @Nullable MCH_HeliInfo parseHelicopter(AddonResourceLocation location, String filepath, List<String> lines, boolean reload) throws Exception {
-        InputStream input = Files.newInputStream(Paths.get(filepath), StandardOpenOption.READ);
-        Map<String, Object> root = YAML_INSTANCE.load(input);
+        Map<String, Object> root = YAML_INSTANCE.load(lines.stream().collect(Collectors.joining("\n")));
         var info = new MCH_HeliInfo(location, filepath);
         mapToAircraft(info, root);
         for (Map.Entry<String, Object> entry : root.entrySet()) {
@@ -307,13 +306,22 @@ public class YamlParser implements IParser {
                     Map<String, Object> feats = (Map<String, Object>) entry.getValue();
                     parseAircraftFeatures(feats, info);
                 }
-                case "Racks" -> { //TODO:Move to components
+                case "Racks" -> {
                     List<Map<String, Object>> racks = (List<Map<String, Object>>) entry.getValue();
                     racks.stream().map(this::parseRacks).forEach((rack) -> {
                         if (rack instanceof MCH_SeatRackInfo r) info.entityRackList.add(r);
                         else info.rideRacks.add((RideRack) rack);
                     });
                 }
+
+                case "RideRack" -> {
+                    List<Map<String, Object>> racks = (List<Map<String, Object>>) entry.getValue();
+                    racks.stream().map(this::parseRacks).forEach((rack) -> {
+                        if (rack instanceof MCH_SeatRackInfo r) info.entityRackList.add(r);
+                        else info.rideRacks.add((RideRack) rack);
+                    });
+                }
+
                 case "Wheels" -> {
                     Map<String, Object> wheel = (Map<String, Object>) entry.getValue();
                     parseWheels(wheel, info);

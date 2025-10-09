@@ -67,6 +67,15 @@ public class MCH_HeliInfo extends MCH_AircraftInfo {
         MCH_MOD.proxy.registerModelsHeli(this, true);
     }
 
+    @Override
+    public String toString() {
+        return "MCH_HeliInfo{" +
+                "item=" + item +
+                ", isEnableFoldBlade=" + isEnableFoldBlade +
+                ", rotorList=" + rotorList +
+                '}' + super.toString();
+    }
+
     public static class Rotor extends MCH_AircraftInfo.DrawnPart {
         public final int bladeNum;
         public final int bladeRot;
@@ -90,6 +99,20 @@ public class MCH_HeliInfo extends MCH_AircraftInfo {
             this.bladeRot = bladeRot;
             this.haveFoldFunc = haveFoldFunc;
             this.oldRenderMethod = oldRenderMethod;
+        }
+
+        @Override
+        public String toString() {
+            return "Rotor{" +
+                    "bladeNum=" + bladeNum +
+                    ", bladeRot=" + bladeRot +
+                    ", haveFoldFunc=" + haveFoldFunc +
+                    ", oldRenderMethod=" + oldRenderMethod +
+                    ", pos=" + pos +
+                    ", rot=" + rot +
+                    ", modelName='" + modelName + '\'' +
+                    ", model=" + model +
+                    '}';
         }
     }
 }
