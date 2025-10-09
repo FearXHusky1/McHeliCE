@@ -1,6 +1,7 @@
 package com.norwood.mcheli.helper.info.parsers.yaml;
 
 import com.norwood.mcheli.aircraft.MCH_AircraftInfo;
+import com.norwood.mcheli.helicopter.MCH_HeliInfo;
 import net.minecraft.util.math.Vec3d;
 
 import java.util.*;
@@ -10,6 +11,43 @@ import static com.norwood.mcheli.helper.info.parsers.yaml.YamlParser.*;
 
 @SuppressWarnings("unchecked")
 public class ComponentParser {
+    public void parseComponentsHeli(Map<String, List<Map<String, Object>>> components, MCH_HeliInfo info) {
+
+        for (Map.Entry<String, List<Map<String, Object>>> entry : components.entrySet()) {
+            String type = entry.getKey();
+            var componentList = entry.getValue();
+            switch (type) {
+                case "Rotor" -> componentList.stream()
+                        .map(component -> parseDrawnPart(
+                                "blade",
+                                component,
+                                drawnPart -> {
+                                    int bladeNum = 0;
+                                    int bladeRot = 0;
+                                    boolean haveFoldFunc = false;
+                                    boolean oldRenderMethod = false;
+
+                                    for (Map.Entry<String, Object> bladeEntry : component.entrySet()) {
+                                        switch (bladeEntry.getKey()) {
+                                            case "BladeNum" -> bladeNum = ((Number) bladeEntry.getValue()).intValue();
+                                            case "BladeRot" -> bladeRot = ((Number) bladeEntry.getValue()).intValue();
+                                            case "CanFold" -> haveFoldFunc = (Boolean) bladeEntry.getValue();
+                                            case "OldRenderer" -> oldRenderMethod = (Boolean) bladeEntry.getValue();
+                                            default -> logUnkownEntry(bladeEntry, "Rotor");
+                                        }
+                                    }
+
+                                    return new MCH_HeliInfo.Rotor(drawnPart, bladeNum, bladeRot, haveFoldFunc, oldRenderMethod);
+                                },
+                                info.rotorList,
+                                new HashSet<>(Arrays.asList("BladeNum", "BladeRot", "CanFold", "OldRenderer"))
+                        ))
+                        .forEachOrdered(info.rotorList::add);
+            }
+        }
+    }
+
+
     public void parseComponents(Map<String, List<Map<String, Object>>> components, MCH_AircraftInfo info) {
         for (Map.Entry<String, List<Map<String, Object>>> entry : components.entrySet()) {
             String type = entry.getKey();

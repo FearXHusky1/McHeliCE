@@ -111,8 +111,27 @@ public class YamlParser implements IParser {
         Map<String, Object> root = YAML_INSTANCE.load(input);
         var info = new MCH_HeliInfo(location, filepath);
         mapToAircraft(info, root);
-        //TODO: Do heli specific parsing
+        for (Map.Entry<String, Object> entry : root.entrySet()) {
+            switch (entry.getKey()){
+                case "HeliFeatures" -> parseHeliFeatures((Map<String,Object>)entry.getValue(),info);
+                case "Components" -> {
+                var components = (Map<String, List<Map<String, Object>>>) entry.getValue();
+                COMPONENT_PARSER.parseComponents(components, info);
+                }
+            }
+
+
+        }
         return info;
+    }
+
+    private void parseHeliFeatures(Map<String, Object> heliFeat, MCH_HeliInfo info) {
+        for (Map.Entry<String, Object> mobEntry : heliFeat.entrySet()) {
+            switch (mobEntry.getKey()) {
+                case "IsFoldableBlade" -> info.isEnableFoldBlade = (Boolean) mobEntry.getValue();
+                default -> logUnkownEntry(mobEntry, "HeliFeatures");
+            }
+        }
     }
 
     @Override

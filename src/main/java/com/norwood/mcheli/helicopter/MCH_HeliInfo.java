@@ -73,14 +73,23 @@ public class MCH_HeliInfo extends MCH_AircraftInfo {
         public final boolean haveFoldFunc;
         public final boolean oldRenderMethod;
 
+
+        public Rotor(DrawnPart other, int bladeNum, int bladeRot, boolean haveFoldFunc, boolean oldRenderMethod) {
+            super(other);
+            this.bladeNum = bladeNum;
+            this.bladeRot = bladeRot;
+            this.haveFoldFunc = haveFoldFunc;
+            this.oldRenderMethod = oldRenderMethod;
+        }
+
         public Rotor(
-                MCH_HeliInfo paramMCH_HeliInfo, int b, int br, float x, float y, float z, float rx, float ry, float rz, String model, boolean hf, boolean old
+                MCH_HeliInfo paramMCH_HeliInfo, int bladeNum, int bladeRot, float x, float y, float z, float rx, float ry, float rz, String model, boolean haveFoldFunc, boolean oldRenderMethod
         ) {
             super(paramMCH_HeliInfo, x, y, z, rx, ry, rz, model);
-            this.bladeNum = b;
-            this.bladeRot = br;
-            this.haveFoldFunc = hf;
-            this.oldRenderMethod = old;
+            this.bladeNum = bladeNum;
+            this.bladeRot = bladeRot;
+            this.haveFoldFunc = haveFoldFunc;
+            this.oldRenderMethod = oldRenderMethod;
         }
     }
 }
