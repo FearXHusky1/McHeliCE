@@ -53,7 +53,15 @@ public class ComponentParser {
             var componentList = entry.getValue();
             switch (type) {
                 case "Camera" ->
-                        componentList.stream().map(component -> parseDrawnPart(MCH_AircraftInfo.Camera.class, component, drawnPart -> new MCH_AircraftInfo.Camera(drawnPart, (Boolean) component.getOrDefault("YawSync", true), (Boolean) component.getOrDefault("PitchSync", false)), info.cameraList, new HashSet<>(Arrays.asList("YawSync", "PitchSync")))).forEachOrdered(info.cameraList::add);
+                        componentList.stream()
+                                .map(component -> parseDrawnPart(
+                                        MCH_AircraftInfo.Camera.class,
+                                        component,
+                                        drawnPart -> new MCH_AircraftInfo.Camera(drawnPart, (Boolean)
+                                                component.getOrDefault("YawSync", true),
+                                                (Boolean) component.getOrDefault("PitchSync", false)),
+                                        info.cameraList,
+                                        new HashSet<>(Arrays.asList("YawSync", "PitchSync")))).forEachOrdered(info.cameraList::add);
 
                 case "Canopy" ->
                         componentList.stream().map(component -> parseDrawnPart(MCH_AircraftInfo.Canopy.class, component, drawnPart -> new MCH_AircraftInfo.Canopy(drawnPart, getClamped(-180F, 180F, (Number) component.getOrDefault("maxRotation", 90F)), (Boolean) component.getOrDefault("isSliding", false)), info.canopyList, new HashSet<>(Arrays.asList("maxRotation", "isSliding")))).forEachOrdered(info.canopyList::add);
