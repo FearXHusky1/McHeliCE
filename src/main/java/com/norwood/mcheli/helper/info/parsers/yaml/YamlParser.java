@@ -266,8 +266,14 @@ public class YamlParser implements IParser {
                 case "DisplayName" -> {
                     Object nameObject = entry.getValue();
                     if (nameObject instanceof String name) info.displayName = name.trim();
-                    else if (nameObject instanceof Map<?, ?> translationNames)
-                        info.displayNameLang = (HashMap<String, String>) translationNames;
+                    else if (nameObject instanceof Map<?, ?> translationNames) {
+                        var userNameMap = (Map<String, String>) translationNames;
+                        if(userNameMap.containsKey("DEFAULT")) {
+                            info.displayName = userNameMap.get("DEFAULT");
+                            userNameMap.remove("DEFAULT");
+                        }
+                        info.displayNameLang = (HashMap<String, String>) userNameMap;
+                    }
                     else throw new ClassCastException();
                 }
                 case "Author" -> {
@@ -366,12 +372,6 @@ public class YamlParser implements IParser {
                 case "Render" -> {
                     Map<String, Object> renderProperties = (Map<String, Object>) entry.getValue();
                     parseRender(renderProperties, info);
-                }
-                case "ParticleScale" -> info.particlesScale = getClamped(50f, (Number) entry.getValue());
-                case "EnableSeaSurfaceParticle" -> info.enableSeaSurfaceParticle = (Boolean) entry.getValue();
-                case "SplashParticles" -> {
-                    List<Map<String, Object>> splashParticles = (List<Map<String, Object>>) entry.getValue();
-                    splashParticles.stream().map((this::parseParticleSplash)).forEach(info.particleSplashs::add);
                 }
                 case "Armor" -> {
                     Map<String, Object> armorSettings = (Map<String, Object>) entry.getValue();
@@ -552,7 +552,13 @@ public class YamlParser implements IParser {
                 case "ModelHeight" -> info.entityHeight = ((Number) entry.getValue()).floatValue();
                 case "ModelPitch" -> info.entityPitch = ((Number) entry.getValue()).floatValue();
                 case "ModelRoll" -> info.entityRoll = ((Number) entry.getValue()).floatValue();
+                case "ParticleScale" -> info.particlesScale = getClamped(50f, (Number) entry.getValue());
                 case "OneProbeScale" -> info.oneProbeScale = ((Number) entry.getValue()).floatValue();
+                case "EnableSeaSurfaceParticle" -> info.enableSeaSurfaceParticle = (Boolean) entry.getValue();
+                case "SplashParticles" -> {
+                    List<Map<String, Object>> splashParticles = (List<Map<String, Object>>) entry.getValue();
+                    splashParticles.stream().map((this::parseParticleSplash)).forEach(info.particleSplashs::add);
+                }
                 default -> logUnkownEntry(entry, "Render");
             }
 
@@ -847,7 +853,7 @@ public class YamlParser implements IParser {
                 case "Pos", "Position" -> pos = parseVector(entry.getValue());
                 case "Count" -> num = getClamped(1, 100, (Number) entry.getValue());
                 case "Size" -> size = ((Number) entry.getValue()).floatValue();
-                case "Accel" -> acceleration = ((Number) entry.getValue()).floatValue();
+                case "Accel","Acceleration" -> acceleration = ((Number) entry.getValue()).floatValue();
                 case "Age" -> age = getClamped(1, 100_000, (Number) entry.getValue());
                 case "Motion" -> motionY = ((Number) entry.getValue()).floatValue();
                 case "Gravity" -> gravity = ((Number) entry.getValue()).floatValue();
@@ -1002,10 +1008,6 @@ public class YamlParser implements IParser {
 
     public static enum TankWeight {
         UKNOWN, TANK, CAR
-    }
-
-    public static enum RACK_TYPE {//Could be bool, but this makes it more extensible
-        NORMAL, RIDING
     }
 
     public static enum FlareType {

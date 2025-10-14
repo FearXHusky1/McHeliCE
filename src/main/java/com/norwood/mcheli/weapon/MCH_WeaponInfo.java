@@ -1,5 +1,6 @@
 package com.norwood.mcheli.weapon;
 
+import com.github.bsideup.jabel.Desugar;
 import com.norwood.mcheli.MCH_BaseInfo;
 import com.norwood.mcheli.MCH_Color;
 import com.norwood.mcheli.MCH_DamageFactor;
@@ -18,7 +19,9 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
     public final String name;
     public String explosionType;
     public int nukeYield;
-    public float chemYield = 0;
+    public float chemYield;
+    public int chemType = 0;
+    public double chemSpeed;
     public int effectYield = 0;
     public boolean nukeEffectOnly;
     public String displayName;
@@ -41,7 +44,7 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
     public int round;
     public int suppliedNum;
     public int maxAmmo;
-    public List roundItems;
+    public List<RoundItem> roundItems;
     public int soundDelay;
     public float soundVolume;
     public float soundPitch;
@@ -96,8 +99,8 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
     public MCH_BulletModel bombletModel;
     public MCH_DamageFactor damageFactor;
     public String group;
-    public List listMuzzleFlash;
-    public List listMuzzleFlashSmoke;
+    public List<MuzzleFlash> listMuzzleFlash;
+    public List<MuzzleFlash> listMuzzleFlashSmoke;
 
     /**
      * Number of block-breaking particles generated
@@ -171,44 +174,28 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
      */
     public boolean hasLaserGuidancePod = true;
 
-    /**
-     * Allow off-boresight firing (for AA missiles)
-     */
+    /// Allow off-boresight firing (for AA missiles)
     public boolean enableOffAxis = true;
 
-    /**
-     * Missile maneuverability factor — smaller = smoother. 1 means vanilla missile movement. Recommended: 0.1
-     */
+    /// Missile maneuverability factor — smaller = smoother. 1 means vanilla missile movement. Recommended: 0.1
     public double turningFactor = 0.5;
 
-    /**
-     * Enable chunk loader (experimental feature)
-     */
+    /// Enable chunk loader (experimental feature)
     public boolean enableChunkLoader = false;
 
-    /**
-     * Active radar missile (BVR) will automatically track target after launch
-     */
+    /// Active radar missile (BVR) will automatically track target after launch
     public boolean activeRadar = false;
 
-    /**
-     * Scan interval for active radar missile
-     */
+    /// Scan interval for active radar missile
     public int scanInterval = 20;
 
-    /**
-     * Weapon switch cooldown
-     */
+    /// Weapon switch cooldown
     public int weaponSwitchCount = 0;
 
-    /**
-     * Weapon switch sound effect
-     */
+    /// Weapon switch sound effect
     public String weaponSwitchSound = "";
 
-    /**
-     * Vertical weapon recoil
-     */
+    /// Vertical weapon recoil
     public float recoilPitch = 0.0F;
     /**
      * Horizontal weapon recoil (fixed direction)
@@ -473,7 +460,19 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
         }
     }
 
-    public class MuzzleFlash {
+    @Desugar
+    public record MuzzleFlashRaw(
+            float Distance,
+            float Size,
+            float Range,
+            int Age,
+            int Count,
+            int Color //ARGB
+    ) {}
+
+
+
+    public static class MuzzleFlash {
 
         public final float dist;
         public final float size;
@@ -486,6 +485,22 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
         public final int num;
 
 
+        public MuzzleFlash(MuzzleFlashRaw raw) {
+            this.dist = raw.Distance();
+            this.size = raw.Size();
+            this.range = raw.Range();
+            this.age = raw.Age();
+            this.num = raw.Count();
+
+            int color = raw.Color();
+            this.a = ((color >> 24) & 0xFF) / 255.0F;
+            this.r = ((color >> 16) & 0xFF) / 255.0F;
+            this.g = ((color >> 8) & 0xFF) / 255.0F;
+            this.b = (color & 0xFF) / 255.0F;
+        }
+
+
+        @Deprecated
         public MuzzleFlash(float dist, float size, float range, int age, float a, float r, float g, float b, int num) {
             this.dist = dist;
             this.size = size;

@@ -261,11 +261,7 @@ class YamlParserTest {
                 put("Pitch", 5.0f);
                 put("RotSeat", true);
             }});
-            add(new HashMap<>() {{
-                put("type", YamlParser.RACK_TYPE.RIDING.name());
-                put("id", 7);
-                put("name", "  Rear Seat   ");
-            }});
+
         }});
         root.put("Wheels", new ArrayList<Map<String, Object>>() {{
             add(new HashMap<>() {{
