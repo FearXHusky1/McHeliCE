@@ -64,18 +64,18 @@ public class ComponentParser {
                                         new HashSet<>(Arrays.asList("YawSync", "PitchSync")))).forEachOrdered(info.cameraList::add);
 
                 case "Canopy" ->
-                        componentList.stream().map(component -> parseDrawnPart(MCH_AircraftInfo.Canopy.class, component, drawnPart -> new MCH_AircraftInfo.Canopy(drawnPart, getClamped(-180F, 180F, (Number) component.getOrDefault("maxRotation", 90F)), (Boolean) component.getOrDefault("isSliding", false)), info.canopyList, new HashSet<>(Arrays.asList("maxRotation", "isSliding")))).forEachOrdered(info.canopyList::add);
+                        componentList.stream().map(component -> parseDrawnPart(MCH_AircraftInfo.Canopy.class, component, drawnPart -> new MCH_AircraftInfo.Canopy(drawnPart, getClamped(-180F, 180F, (Number) component.getOrDefault("MaxRotation", 90F)), (Boolean) component.getOrDefault("IsSliding", false)), info.canopyList, new HashSet<>(Arrays.asList("MaxRotation", "IsSliding")))).forEachOrdered(info.canopyList::add);
 
                 case "Hatch" ->
-                        componentList.stream().map(component -> parseDrawnPart(MCH_AircraftInfo.Hatch.class, component, drawnPart -> new MCH_AircraftInfo.Hatch(drawnPart, getClamped(-180F, 180F, (Number) component.getOrDefault("maxRotation", 90F)), (Boolean) component.getOrDefault("isSliding", false)), info.hatchList, new HashSet<>(Arrays.asList("maxRotation", "isSliding")))).forEachOrdered(info.hatchList::add);
+                        componentList.stream().map(component -> parseDrawnPart(MCH_AircraftInfo.Hatch.class, component, drawnPart -> new MCH_AircraftInfo.Hatch(drawnPart, getClamped(-180F, 180F, (Number) component.getOrDefault("MaxRotation", 90F)), (Boolean) component.getOrDefault("IsSliding", false)), info.hatchList, new HashSet<>(Arrays.asList("MaxRotation", "IsSliding")))).forEachOrdered(info.hatchList::add);
 
                 case "LightHatch" ->
-                        componentList.stream().map(component -> parseDrawnPart("light_hatch", component, drawnPart -> new MCH_AircraftInfo.Hatch(drawnPart, getClamped(-180F, 180F, (Number) component.getOrDefault("maxRotation", 90F)), (Boolean) component.getOrDefault("isSliding", false)), info.hatchList, new HashSet<>(Arrays.asList("maxRotation", "isSliding")))).forEachOrdered(info.lightHatchList::add);
+                        componentList.stream().map(component -> parseDrawnPart("light_hatch", component, drawnPart -> new MCH_AircraftInfo.Hatch(drawnPart, getClamped(-180F, 180F, (Number) component.getOrDefault("MaxRotation", 90F)), (Boolean) component.getOrDefault("IsSliding", false)), info.hatchList, new HashSet<>(Arrays.asList("MaxRotation", "IsSliding")))).forEachOrdered(info.lightHatchList::add);
 
                 case "WeaponBay" -> componentList.stream().map(component -> {
                     String weaponName = ((String) component.get("WeaponName")).trim();
                     if (weaponName == null) throw new IllegalArgumentException("WeaponName is required!");
-                    return parseDrawnPart("wb", component, drawnPart -> new MCH_AircraftInfo.WeaponBay(drawnPart, getClamped(-180F, 180F, (Number) component.getOrDefault("maxRotation", 90F)), (Boolean) component.getOrDefault("isSliding", false), weaponName), info.partWeaponBay, new HashSet<>(Arrays.asList("maxRotation", "isSliding", "WeaponName")));
+                    return parseDrawnPart("wb", component, drawnPart -> new MCH_AircraftInfo.WeaponBay(drawnPart, getClamped(-180F, 180F, (Number) component.getOrDefault("MaxRotation", 90F)), (Boolean) component.getOrDefault("IsSliding", false), weaponName), info.partWeaponBay, new HashSet<>(Arrays.asList("MaxRotation", "IsSliding", "WeaponName")));
                 }).forEachOrdered(info.partWeaponBay::add);
 
 
@@ -113,9 +113,9 @@ public class ComponentParser {
 
                 case "LandingGear" ->
                         componentList.stream().map(component -> parseDrawnPart("lg", component, drawnPart -> {
-                            float maxRot = getClamped(-180F, 180F, (Number) component.getOrDefault("maxRotation", 90F)) / 90F;
-                            boolean reverse = (Boolean) component.getOrDefault("isReverse", false);
-                            boolean hatch = (Boolean) component.getOrDefault("isHatch", false);
+                            float maxRot = getClamped(-180F, 180F, (Number) component.getOrDefault("MaxRotation", 90F)) / 90F;
+                            boolean reverse = (Boolean) component.getOrDefault("IsReverse", false);
+                            boolean hatch = (Boolean) component.getOrDefault("IsHatch", false);
                             MCH_AircraftInfo.LandingGear gear = new MCH_AircraftInfo.LandingGear(drawnPart, maxRot, reverse, hatch);
 
                             if (component.containsKey("ArticulatedRotation")) {
@@ -129,7 +129,7 @@ public class ComponentParser {
                             }
 
                             return gear;
-                        }, info.landingGear, new HashSet<>(Arrays.asList("maxRotation", "isReverse", "isHatch", "ArticulatedRotation", "MaxArticulatedRotation", "SlideVec")))).forEachOrdered(info.landingGear::add);
+                        }, info.landingGear, new HashSet<>(Arrays.asList("maxRotation", "IsReverse", "IsHatch", "ArticulatedRotation", "MaxArticulatedRotation", "SlideVec")))).forEachOrdered(info.landingGear::add);
 
                 case "Weapon" ->
                         componentList.stream().map(component -> parseDrawnPart("weapon", component, drawnPart -> {
@@ -137,7 +137,7 @@ public class ComponentParser {
 
                             boolean isRotatingWeapon = (Boolean) component.getOrDefault("BarrelRot", false);
                             boolean isMissile = (Boolean) (component.getOrDefault("IsMissile", false));
-                            boolean hideGM = (Boolean) (component.getOrDefault("hideGM", false));
+                            boolean hideGM = (Boolean) (component.getOrDefault("HideGM", false));
                             boolean yaw = (Boolean) (component.getOrDefault("Yaw", false));
                             boolean pitch = (Boolean) (component.getOrDefault("Pitch", false));
                             float recoilBuf = component.containsKey("RecoilBuf") ? ((Number) component.get("RecoilBuf")).floatValue() : 0.0F;
