@@ -107,4 +107,19 @@ public class MCH_Hud extends MCH_BaseInfo {
             this.isDrawing = false;
         }
     }
+
+    @Override
+    public String toString() {
+        return "MCH_Hud{" +
+                "name='" + name + '\'' +
+                ", fileName='" + fileName + '\'' +
+                ", isWaitEndif=" + isWaitEndif +
+                ", isIfFalse=" + isIfFalse +
+                ", exit=" + exit +
+                ", list=" + list +
+                ", isDrawing=" + isDrawing +
+                ", filePath='" + filePath + '\'' +
+                ", location=" + location +
+                '}';
+    }
 }

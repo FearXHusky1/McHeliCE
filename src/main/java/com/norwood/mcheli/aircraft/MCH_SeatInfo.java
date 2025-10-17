@@ -56,4 +56,21 @@ public class MCH_SeatInfo {
     public MCH_AircraftInfo.CameraPosition getCamPos() {
         return this.camPos;
     }
+
+    @Override
+    public String toString() {
+        return "MCH_SeatInfo{" +
+                "pos=" + pos +
+                ", gunner=" + gunner +
+                ", switchgunner=" + switchgunner +
+                ", fixRot=" + fixRot +
+                ", fixYaw=" + fixYaw +
+                ", fixPitch=" + fixPitch +
+                ", minPitch=" + minPitch +
+                ", maxPitch=" + maxPitch +
+                ", rotSeat=" + rotSeat +
+                ", camPos=" + camPos +
+                ", invCamPos=" + invCamPos +
+                '}';
+    }
 }

@@ -6,6 +6,7 @@ import hohserg.elegant.networking.api.ClientToServerPacket;
 import hohserg.elegant.networking.api.ElegantPacket;
 import net.minecraft.entity.player.EntityPlayerMP;
 
+
 @Deprecated //Will be replaced by modular
 @ElegantPacket
 public class PacketOpenScreen implements ClientToServerPacket {

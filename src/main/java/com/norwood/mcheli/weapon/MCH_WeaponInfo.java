@@ -1,5 +1,6 @@
 package com.norwood.mcheli.weapon;
 
+import com.github.bsideup.jabel.Desugar;
 import com.norwood.mcheli.MCH_BaseInfo;
 import com.norwood.mcheli.MCH_Color;
 import com.norwood.mcheli.MCH_DamageFactor;
@@ -18,9 +19,10 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
     public final String name;
     public String explosionType;
     public int nukeYield;
-    public int chemYield;
+    public float chemYield;
+    public int chemType = 0;
     public double chemSpeed;
-    public int chemType;
+    public int effectYield = 0;
     public boolean nukeEffectOnly;
     public String displayName;
     public String type;
@@ -42,12 +44,12 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
     public int round;
     public int suppliedNum;
     public int maxAmmo;
-    public final List<MCH_WeaponInfo.RoundItem> roundItems;
+    public List<RoundItem> roundItems;
     public int soundDelay;
     public float soundVolume;
     public float soundPitch;
     public float soundPitchRandom;
-    public final int soundPattern;
+    public int soundPattern;
     public int lockTime;
     public boolean ridableOnly;
     public float proximityFuseDist;
@@ -97,166 +99,192 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
     public MCH_BulletModel bombletModel;
     public MCH_DamageFactor damageFactor;
     public String group;
-    public List<MCH_WeaponInfo.MuzzleFlash> listMuzzleFlash;
-    public List<MCH_WeaponInfo.MuzzleFlash> listMuzzleFlashSmoke;
+    public List<MuzzleFlash> listMuzzleFlash;
+    public List<MuzzleFlash> listMuzzleFlashSmoke;
 
     /**
-     * 生成的方块破碎粒子数量
+     * Number of block-breaking particles generated
      */
     public int flakParticlesCrack = 10;
     /**
-     * 生成的白色烟雾粒子数量
+     * Number of white smoke particles generated
      */
     public int numParticlesFlak = 3;
     /**
-     * 生成的方块破碎粒子扩散，推荐值0.1(步枪子弹) ~ 0.6(反坦克步枪)
+     * Spread of block-breaking particles. Recommended values: 0.1 (rifle bullet) ~ 0.6 (anti-tank rifle)
      */
     public float flakParticlesDiff = 0.3F;
-    public String hitSound;
+    public String hitSound = "";
     public String hitSoundIron = "hit_metal";
-    public float hitSoundRange;
-    public boolean hitSoundEnable = false;
-    public boolean entityHitSoundEnable = false;
+    public String railgunSound = "railgun";
+    public float hitSoundRange = 100;
     /**
-     * 是否为红外弹，会受到热焰弹干扰
+     * Whether this is an infrared missile (affected by flares)
      */
     public boolean isHeatSeekerMissile = true;
     /**
-     * 是否为雷达弹，会受到箔条干扰
+     * Whether this is a radar-guided missile (affected by chaff)
      */
     public boolean isRadarMissile = false;
-    //弹药导引头最大导引角度
+    // Maximum homing angle of the missile seeker
     public int maxDegreeOfMissile = 60;
-    //脱锁延时，-1为永远锁定
+    // Unlock delay; -1 means permanent lock
     public int tickEndHoming = -1;
     /**
-     * 最大锁定距离
+     * Maximum lock-on range
      */
     public int maxLockOnRange = 300;
     /**
-     * 机载雷达最大锁定角度
+     * Maximum lock-on angle for aircraft radar
      */
     public int maxLockOnAngle = 10;
     /**
-     * 速度门雷达最大角度，超过此角度将脱锁 (也可用于红外弹尾后攻击)
+     * Maximum angle for pulse-Doppler radar; beyond this, the missile will lose lock (can be used for IR missile rear attacks)
      */
     public float pdHDNMaxDegree = 1000f;
     /**
-     * 速度门雷达脱锁间隔，超过最大角度后，在该tick后导弹脱锁
+     * Unlock interval for pulse-Doppler radar; after exceeding max angle, missile unlocks after this many ticks
      */
     public int pdHDNMaxDegreeLockOutCount = 10;
     /**
-     * 导弹抗干扰时长，-1为不抗干扰
+     * Duration of flare resistance; -1 means no resistance
      */
     public int antiFlareCount = -1;
     /**
-     * 雷达弹多径杂波检测高度，飞机低于这个高度将使雷达弹脱锁
+     * Radar missile multipath clutter detection height — aircraft below this height will cause radar lock loss
      */
     public int lockMinHeight = 25;
     /**
-     * 半主动雷达弹需要持续引导
+     * Semi-active radar missile requires continuous guidance
      */
     public boolean passiveRadar = false;
 
     /**
-     * 半主动雷达弹脱离引导后脱锁计时
+     * Unlock countdown after semi-active radar missile loses guidance
      */
     public int passiveRadarLockOutCount = 20;
 
     /**
-     * 对TV弹启用激光制导
+     * Enable laser guidance for TV missiles
      */
     public boolean laserGuidance = false;
 
     /**
-     * 是否有激光吊舱
+     * Whether the aircraft has a laser targeting pod
      */
     public boolean hasLaserGuidancePod = true;
 
-    /**
-     * 允许离轴射击 AA弹
-     */
+    /// Allow off-boresight firing (for AA missiles)
     public boolean enableOffAxis = true;
 
-    /**
-     * 导弹机动参数，越小越平滑，值设为1时为原版导弹机动，推荐值为0.1
-     */
+    /// Missile maneuverability factor — smaller = smoother. 1 means vanilla missile movement. Recommended: 0.1
     public double turningFactor = 0.5;
 
-    /**
-     * 启用区块加载器(试验功能)
-     */
+    /// Enable chunk loader (experimental feature)
     public boolean enableChunkLoader = false;
 
-    /**
-     * 主动雷达弹 BVR 发射后自动追踪目标
-     */
+    /// Active radar missile (BVR) will automatically track target after launch
     public boolean activeRadar = false;
 
-    /**
-     * 主动雷达弹 扫描间隔
-     */
+    /// Scan interval for active radar missile
     public int scanInterval = 20;
 
-    /**
-     * 武器切换冷却
-     */
+    /// Weapon switch cooldown
     public int weaponSwitchCount = 0;
 
-    /**
-     * 武器切换音效
-     */
+    /// Weapon switch sound effect
     public String weaponSwitchSound = "";
 
-    /**
-     * 武器垂直后坐力
-     */
+    /// Vertical weapon recoil
     public float recoilPitch = 0.0F;
     /**
-     * 武器水平后坐力（固定方向）
+     * Horizontal weapon recoil (fixed direction)
      */
     public float recoilYaw = 0.0F;
     /**
-     * 武器随机垂直后坐力 (Recoil 2 + rndRecoil 0.5 == 1.5-2.5 Recoil range)
+     * Random vertical recoil (Recoil 2 + rndRecoil 0.5 == 1.5–2.5 recoil range)
      */
     public float recoilPitchRange = 0.0F;
     /**
-     * 武器随机水平后坐力
+     * Random horizontal recoil
      */
     public float recoilYawRange = 0.0F;
     /**
-     * 武器后坐力恢复速度
+     * Weapon recoil recovery speed
      */
     public float recoilRecoverFactor = 0.8F;
 
     /**
-     * 每tick速度增加数值，小于0减速，大于0加速
+     * Per-tick speed increment. Negative = deceleration, positive = acceleration
      */
     public float speedFactor = 0F;
     /**
-     * 每tick的速度乘数生效时长
+     * Start tick for per-tick speed multiplier
      */
     public int speedFactorStartTick = 0;
     /**
-     * 每tick的速度乘数结束时长
+     * End tick for per-tick speed multiplier
      */
     public int speedFactorEndTick = 0;
     /**
-     * 速度是否跟随载机，最终速度 = 载机速度 + 子弹速度
+     * Whether missile speed depends on aircraft velocity (final speed = aircraft speed + projectile speed)
      */
     public boolean speedDependsAircraft = false;
     /**
-     * 是否可以锁定导弹实体
+     * Whether missile can lock onto other missile entities
      */
     public boolean canLockMissile = false;
     /**
-     * 允许超视距索敌
+     * Allow beyond visual range (BVR) target acquisition
      */
     public boolean enableBVR = false;
     /**
-     * 超视距索敌功能最小启用距离
+     * Minimum activation distance for BVR functionality
      */
     public int minRangeBVR = 300;
+    /**
+     * Predict target position
+     */
+    public boolean predictTargetPos = true;
+
+    /**
+     * Maximum number of chaff locks — beyond this, the missile will fly straight
+     */
+    public int numLockedChaffMax = 2;
+
+    /**
+     * Explosion damage multipliers for different entity types
+     */
+    public float explosionDamageVsLiving = 1f;
+    public float explosionDamageVsPlayer = 1f;
+    public float explosionDamageVsPlane = 1f;
+    public float explosionDamageVsVehicle = 1f;
+    public float explosionDamageVsTank = 1f;
+    public float explosionDamageVsHeli = 1f;
+    public boolean disableDestroyBlock = true;
+    public boolean canBeIntercepted = false;
+    public boolean canAirburst = false;
+    public int explosionAirburst;
+    /**
+     * HUD custom field, used to indicate reticle type
+     */
+    public int crossType = 0;
+    /**
+     * Whether the weapon has a mortar radar
+     */
+    public boolean hasMortarRadar = false;
+    /**
+     * Maximum display distance for mortar radar — should be greater than the indirect-fire weapon’s max range
+     */
+    public double mortarRadarMaxDist = -1;
+
+    /**
+     * Marker rocket parameters
+     */
+    public int markerRocketSpawnNum = 5;
+    public int markerRocketSpawnDiff = 15;
+    public int markerRocketSpawnHeight = 200;
+    public int markerRocketSpawnSpeed = 5;
 
     public MCH_WeaponInfo(AddonResourceLocation location, String path) {
         super(location, path);
@@ -337,9 +365,13 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
         this.cameraRotationSpeedPitch = 1.0F;
         this.nukeYield = 0;
         this.chemYield = 0;
-        this.chemSpeed = 1.25;
-        this.chemType = 0;
     }
+
+    @Override
+    public void onPostReload() {
+        MCH_WeaponInfoManager.setRoundItems();
+    }
+
 
     public void checkData() {
         if (this.explosionBlock < 0) {
@@ -378,78 +410,42 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
             this.delay = 1000000;
         }
 
-        this.angle = (float) (Math.atan2(this.radius, this.length) * 180.0 / Math.PI);
+        this.angle = (float) (Math.atan2(this.radius, this.length) * 180.0D / 3.141592653589793D);
     }
-
 
     public float getDamageFactor(Entity e) {
         return this.damageFactor != null ? this.damageFactor.getDamageFactor(e) : 1.0F;
     }
 
     public String getWeaponTypeName() {
-        if (this.type.equalsIgnoreCase("MachineGun1")) {
-            return "MachineGun";
-        } else if (this.type.equalsIgnoreCase("MachineGun2")) {
-            return "MachineGun";
-        } else if (this.type.equalsIgnoreCase("Torpedo")) {
-            return "Torpedo";
-        } else if (this.type.equalsIgnoreCase("CAS")) {
-            return "CAS";
-        } else if (this.type.equalsIgnoreCase("Rocket")) {
-            return "Rocket";
-        } else if (this.type.equalsIgnoreCase("ASMissile")) {
-            return "AS Missile";
-        } else if (this.type.equalsIgnoreCase("AAMissile")) {
-            return "AA Missile";
-        } else if (this.type.equalsIgnoreCase("TVMissile")) {
-            return "TV Missile";
-        } else if (this.type.equalsIgnoreCase("ATMissile")) {
-            return "AT Missile";
-        } else if (this.type.equalsIgnoreCase("Bomb")) {
-            return "Bomb";
-        } else if (this.type.equalsIgnoreCase("MkRocket")) {
-            return "Mk Rocket";
-        } else if (this.type.equalsIgnoreCase("Dummy")) {
-            return "Dummy";
-        } else if (this.type.equalsIgnoreCase("Smoke")) {
-            return "Smoke";
-        } else if (this.type.equalsIgnoreCase("Dispenser")) {
-            return "Dispenser";
-        } else {
-            return this.type.equalsIgnoreCase("TargetingPod") ? "Targeting Pod" : "";
-        }
+        return switch (this.type.toLowerCase()) {
+            case "machinegun1", "machinegun2", "railgun" -> "MachineGun";
+            case "torpedo" -> "Torpedo";
+            case "cas" -> "CAS";
+            case "rocket" -> "Rocket";
+            case "asmissile" -> "AS Missile";
+            case "aamissile" -> "AA Missile";
+            case "tvmissile" -> "TV Missile";
+            case "atmissile" -> "AT Missile";
+            case "bomb" -> "Bomb";
+            case "mkrocket" -> "Mk Rocket";
+            case "dummy" -> "Dummy";
+            case "smoke" -> "Smoke";
+            case "dispenser" -> "Dispenser";
+            case "targetingpod" -> "Targeting Pod";
+            default -> "";
+        };
     }
 
 
-    @Override
-    public void onPostReload() {
-        MCH_WeaponInfoManager.setRoundItems();
+    public float getRecoilPitch() {
+        return this.recoilPitch + (rand.nextFloat() * this.recoilPitchRange);
     }
 
-
-    public static class MuzzleFlash {
-        public final float dist;
-        public final float size;
-        public final float range;
-        public final int age;
-        public final float a;
-        public final float r;
-        public final float g;
-        public final float b;
-        public final int num;
-
-        public MuzzleFlash(float dist, float size, float range, int age, float a, float r, float g, float b, int num) {
-            this.dist = dist;
-            this.size = size;
-            this.range = range;
-            this.age = age;
-            this.a = a;
-            this.r = r;
-            this.g = g;
-            this.b = b;
-            this.num = num;
-        }
+    public float getRecoilYaw() {
+        return this.recoilYaw + ((rand.nextFloat() - 0.5F) * this.recoilYawRange);
     }
+
 
     public static class RoundItem {
         public final int num;
@@ -461,6 +457,60 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
             this.num = n;
             this.itemName = new ResourceLocation(name);
             this.damage = damage;
+        }
+    }
+
+    @Desugar
+    public record MuzzleFlashRaw(
+            float Distance,
+            float Size,
+            float Range,
+            int Age,
+            int Count,
+            int Color //ARGB
+    ) {}
+
+
+
+    public static class MuzzleFlash {
+
+        public final float dist;
+        public final float size;
+        public final float range;
+        public final int age;
+        public final float a;
+        public final float r;
+        public final float g;
+        public final float b;
+        public final int num;
+
+
+        public MuzzleFlash(MuzzleFlashRaw raw) {
+            this.dist = raw.Distance();
+            this.size = raw.Size();
+            this.range = raw.Range();
+            this.age = raw.Age();
+            this.num = raw.Count();
+
+            int color = raw.Color();
+            this.a = ((color >> 24) & 0xFF) / 255.0F;
+            this.r = ((color >> 16) & 0xFF) / 255.0F;
+            this.g = ((color >> 8) & 0xFF) / 255.0F;
+            this.b = (color & 0xFF) / 255.0F;
+        }
+
+
+        @Deprecated
+        public MuzzleFlash(float dist, float size, float range, int age, float a, float r, float g, float b, int num) {
+            this.dist = dist;
+            this.size = size;
+            this.range = range;
+            this.age = age;
+            this.a = a;
+            this.r = r;
+            this.g = g;
+            this.b = b;
+            this.num = num;
         }
     }
 }
