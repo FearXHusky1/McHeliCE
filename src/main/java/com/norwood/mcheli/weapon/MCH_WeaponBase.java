@@ -252,4 +252,6 @@ public abstract class MCH_WeaponBase {
             return -1.0;
         }
     }
+
+
 }

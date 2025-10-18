@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Random;
 
 public class MCH_WeaponInfo extends MCH_BaseInfo {
+
     public static Random rand = new Random();
     public final String name;
     public String explosionType;
@@ -417,6 +418,7 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
         return this.damageFactor != null ? this.damageFactor.getDamageFactor(e) : 1.0F;
     }
 
+    //TODO:Enumify
     public String getWeaponTypeName() {
         return switch (this.type.toLowerCase()) {
             case "machinegun1", "machinegun2", "railgun" -> "MachineGun";

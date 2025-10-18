@@ -1,75 +1,22 @@
 package com.norwood.mcheli.weapon;
 
+import com.norwood.mcheli.weapon.registry.WeaponTypeRegistry;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
+import java.util.Optional;
 
 public class MCH_WeaponCreator {
     @Nullable
-    public static MCH_WeaponBase createWeapon(World w, String weaponName, Vec3d v, float yaw, float pitch, MCH_IEntityLockChecker lockChecker, boolean onTurret) {
+    public static MCH_WeaponBase createWeapon(World world, String weaponName, Vec3d vec, float yaw, float pitch, MCH_IEntityLockChecker lockChecker, boolean onTurret) {
         MCH_WeaponInfo info = MCH_WeaponInfoManager.get(weaponName);
         if (info != null && !info.type.isEmpty()) {
-            MCH_WeaponBase weapon = null;
-            if (info.type.compareTo("machinegun1") == 0) {
-                weapon = new MCH_WeaponMachineGun1(w, v, yaw, pitch, weaponName, info);
-            }
+            MCH_WeaponBase weapon =
+                     Optional.ofNullable(WeaponTypeRegistry.WEAPON_TYPES.get(info.type))
+                    .map(f -> f.create(world, vec, yaw, pitch, weaponName, info))
+                    .orElse(null);
 
-            if (info.type.compareTo("machinegun2") == 0) {
-                weapon = new MCH_WeaponMachineGun2(w, v, yaw, pitch, weaponName, info);
-            }
-
-            if (info.type.compareTo("tvmissile") == 0) {
-                weapon = new MCH_WeaponTvMissile(w, v, yaw, pitch, weaponName, info);
-            }
-
-            if (info.type.compareTo("torpedo") == 0) {
-                weapon = new MCH_WeaponTorpedo(w, v, yaw, pitch, weaponName, info);
-            }
-
-            if (info.type.compareTo("cas") == 0) {
-                weapon = new MCH_WeaponCAS(w, v, yaw, pitch, weaponName, info);
-            }
-
-            if (info.type.compareTo("rocket") == 0) {
-                weapon = new MCH_WeaponRocket(w, v, yaw, pitch, weaponName, info);
-            }
-
-            if (info.type.compareTo("asmissile") == 0) {
-                weapon = new MCH_WeaponASMissile(w, v, yaw, pitch, weaponName, info);
-            }
-
-            if (info.type.compareTo("aamissile") == 0) {
-                weapon = new MCH_WeaponAAMissile(w, v, yaw, pitch, weaponName, info);
-            }
-
-            if (info.type.compareTo("atmissile") == 0) {
-                weapon = new MCH_WeaponATMissile(w, v, yaw, pitch, weaponName, info);
-            }
-
-            if (info.type.compareTo("bomb") == 0) {
-                weapon = new MCH_WeaponBomb(w, v, yaw, pitch, weaponName, info);
-            }
-
-            if (info.type.compareTo("mkrocket") == 0) {
-                weapon = new MCH_WeaponMarkerRocket(w, v, yaw, pitch, weaponName, info);
-            }
-
-            if (info.type.compareTo("dummy") == 0) {
-                weapon = new MCH_WeaponDummy(w, v, yaw, pitch, weaponName, info);
-            }
-
-            if (info.type.compareTo("smoke") == 0) {
-                weapon = new MCH_WeaponSmoke(w, v, yaw, pitch, weaponName, info);
-            }
-
-            if (info.type.compareTo("dispenser") == 0) {
-                weapon = new MCH_WeaponDispenser(w, v, yaw, pitch, weaponName, info);
-            }
-
-            if (info.type.compareTo("targetingpod") == 0) {
-                weapon = new MCH_WeaponTargetingPod(w, v, yaw, pitch, weaponName, info);
-            }
 
             if (weapon != null) {
                 weapon.displayName = info.displayName;
@@ -106,7 +53,7 @@ public class MCH_WeaponCreator {
                 }
 
                 weapon.delayedInterval = interval;
-                if (w.isRemote) {
+                if (world.isRemote) {
                     weapon.interval = interval;
                     weapon.heatCount++;
                     weapon.cartridge = info.cartridge;

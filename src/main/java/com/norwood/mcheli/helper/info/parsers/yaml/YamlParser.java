@@ -39,6 +39,7 @@ public class YamlParser implements IParser {
     public static final YamlParser INSTANCE = new YamlParser();
     public static final Set<String> DRAWN_PART_ARGS = new HashSet<>(Arrays.asList("Type", "Position", "Rotation", "PartName"));
     public static final ComponentParser COMPONENT_PARSER = new ComponentParser();
+   public static final WeaponParser WEAPON_PARSER = new WeaponParser();
 
     private YamlParser() {
     }
@@ -212,7 +213,10 @@ public class YamlParser implements IParser {
 
     @Override
     public @Nullable MCH_WeaponInfo parseWeapon(AddonResourceLocation location, String filepath, List<String> lines, boolean reload) throws Exception {
-        return null;
+        Map<String, Object> root = YAML_INSTANCE.load(lines.stream().collect(Collectors.joining("\n")));
+        var info = new MCH_WeaponInfo(location, filepath);
+        WEAPON_PARSER.parse(info, root);
+        return info;
     }
 
     @Override
