@@ -12,19 +12,19 @@ import net.minecraft.util.ResourceLocation;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 
 public class MCH_WeaponInfo extends MCH_BaseInfo {
 
-    public static Random rand = new Random();
+    //Type of effect
+    public Payload payloadNTM = Payload.NONE;
+    public boolean effectOnly = false;
+    public String fluidTypeNTM = null;
+
     public final String name;
+    public static Random rand = new Random();
     public String explosionType;
-    public int nukeYield;
-    public float chemYield;
-    public int chemType = 0;
-    public double chemSpeed;
-    public int effectYield = 0;
-    public boolean nukeEffectOnly;
     public String displayName;
     public String type;
     public int power;
@@ -364,8 +364,6 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
         this.displayMortarDistance = false;
         this.fixCameraPitch = false;
         this.cameraRotationSpeedPitch = 1.0F;
-        this.nukeYield = 0;
-        this.chemYield = 0;
     }
 
     @Override
@@ -449,6 +447,14 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
     }
 
 
+    public static enum Payload {
+        NONE,
+        NTM_EXP_SMALL,
+        NTM_EXP_LARGE,
+        NTM_NUKE,
+    }
+
+
     public static class RoundItem {
         public final int num;
         public final ResourceLocation itemName;
@@ -470,9 +476,8 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
             int Age,
             int Count,
             int Color //ARGB
-    ) {}
-
-
+    ) {
+    }
 
     public static class MuzzleFlash {
 

@@ -1,10 +1,10 @@
-package com.norwood.mcheli;
+package com.norwood.mcheli.compat.hbm;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.Optional;
 
-public class MCH_HBMUtil {
+public class HBMUtil {
 
     @Optional.Method(modid = "hbm")
     public static Entity EntityNukeExplosionMK5_statFac(World world, int r, double posX, double posY, double posZ) {

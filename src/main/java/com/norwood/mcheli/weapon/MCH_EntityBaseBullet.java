@@ -2,7 +2,7 @@ package com.norwood.mcheli.weapon;
 
 import com.norwood.mcheli.MCH_Config;
 import com.norwood.mcheli.MCH_Explosion;
-import com.norwood.mcheli.MCH_HBMUtil;
+import com.norwood.mcheli.compat.hbm.HBMUtil;
 import com.norwood.mcheli.MCH_Lib;
 import com.norwood.mcheli.aircraft.MCH_EntityAircraft;
 import com.norwood.mcheli.aircraft.MCH_EntityHitBox;
@@ -803,7 +803,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
             try {
                 if (this.getInfo().chemYield > 0 && ModCompatManager.isLoaded(ModCompatManager.MODID_HBM)) {
                     System.out.println("chem yield detected");
-                    MCH_HBMUtil.ExplosionChaos_spawnChlorine(world, posX, posY + 0.5, posZ, this.getInfo().chemYield, this.getInfo().chemSpeed, this.getInfo().chemType);
+                    HBMUtil.ExplosionChaos_spawnChlorine(world, posX, posY + 0.5, posZ, this.getInfo().chemYield, this.getInfo().chemSpeed, this.getInfo().chemType);
                 }
             } catch (Exception e) {
                 MCH_Lib.Log(this, "Error in onImpact: %s", e.getMessage());
@@ -945,9 +945,9 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
 
         if (this.getInfo().nukeYield > 0 && ModCompatManager.isLoaded(ModCompatManager.MODID_HBM)) {
             if (!this.getInfo().nukeEffectOnly) {
-                world.spawnEntity(MCH_HBMUtil.EntityNukeExplosionMK5_statFac(world, this.getInfo().nukeYield, this.posX + 0.5, this.posY + 0.5, this.posZ + 0.5));
+                world.spawnEntity(HBMUtil.EntityNukeExplosionMK5_statFac(world, this.getInfo().nukeYield, this.posX + 0.5, this.posY + 0.5, this.posZ + 0.5));
             }
-            MCH_HBMUtil.EntityNukeTorex_statFac(world, this.posX + 0.5, this.posY + 0.5, this.posZ + 0.5, (float) this.getInfo().nukeYield);
+            HBMUtil.EntityNukeTorex_statFac(world, this.posX + 0.5, this.posY + 0.5, this.posZ + 0.5, (float) this.getInfo().nukeYield);
         }
 
         //moved to onimpact
