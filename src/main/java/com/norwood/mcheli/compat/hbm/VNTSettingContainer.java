@@ -1,8 +1,6 @@
 package com.norwood.mcheli.compat.hbm;
 
 
-import com.hbm.explosion.vanillant.ExplosionVNT;
-import com.hbm.explosion.vanillant.interfaces.*;
 import lombok.Builder;
 import net.minecraft.entity.Entity;
 import net.minecraft.world.World;
@@ -53,28 +51,29 @@ public class VNTSettingContainer {
 
     @Optional.Method(modid = "hbm")
     public void loadRuntimeInstances() {
-        blockAllocator = loadInstance(blockAllocatorPath, IBlockAllocator.class);
-        entityProcessor = loadInstance(entityProcessorPath, IEntityProcessor.class);
-        blockProcessor = loadInstance(blockProcessorPath, IBlockProcessor.class);
-        playerProcessor = loadInstance(playerProcessorPath, IPlayerProcessor.class);
-        rangeMutator = loadInstance(rangeMutatorPath, IEntityRangeMutator.class);
-        blockMutator = loadInstance(blockMutatorPath, IBlockMutator.class);
-        damageHandler = loadInstance(customDamageHandlerPath, ICustomDamageHandler.class);
-        fortuneMutator = loadInstance(fortuneMutatorPath, IFortuneMutator.class);
+        blockAllocator = loadInstance(blockAllocatorPath,  com.hbm.explosion.vanillant.interfaces.IBlockAllocator.class);
+        entityProcessor = loadInstance(entityProcessorPath,  com.hbm.explosion.vanillant.interfaces.IEntityProcessor.class);
+        blockProcessor = loadInstance(blockProcessorPath, com.hbm.explosion.vanillant.interfaces.IBlockProcessor.class);
+        playerProcessor = loadInstance(playerProcessorPath, com.hbm.explosion.vanillant.interfaces.IPlayerProcessor.class);
+        rangeMutator = loadInstance(rangeMutatorPath, com.hbm.explosion.vanillant.interfaces.IEntityRangeMutator.class);
+        blockMutator = loadInstance(blockMutatorPath, com.hbm.explosion.vanillant.interfaces.IBlockMutator.class);
+        damageHandler = loadInstance(customDamageHandlerPath, com.hbm.explosion.vanillant.interfaces.ICustomDamageHandler.class);
+        fortuneMutator = loadInstance(fortuneMutatorPath, com.hbm.explosion.vanillant.interfaces.IFortuneMutator.class);
 
         if (explosionSFXPath != null) {
-            List<IExplosionSFX> list = new ArrayList<>();
+            List<com.hbm.explosion.vanillant.interfaces.IExplosionSFX> list = new ArrayList<>();
             for (String sfxPath : explosionSFXPath) {
-                IExplosionSFX s = loadInstance(sfxPath, IExplosionSFX.class);
+                com.hbm.explosion.vanillant.interfaces.IExplosionSFX s = loadInstance(sfxPath, com.hbm.explosion.vanillant.interfaces.IExplosionSFX.class);
                 if (s != null) list.add(s);
             }
-            sfx = list.toArray(new IExplosionSFX[0]);
+            sfx = list.toArray(new com.hbm.explosion.vanillant.interfaces.IExplosionSFX[0]);
         } else {
-            sfx = new IExplosionSFX[0];
+            sfx = new com.hbm.explosion.vanillant.interfaces.IExplosionSFX[0];
         }
     }
-    public ExplosionVNT buildExplosion(World world, double x, double y, double z, float size, Entity exploder  ){
-        var vnt = new ExplosionVNT(world,x,y,z,size,exploder);
+    public Object buildExplosion(World world, double x, double y, double z, float size, Entity exploder  ){
+        var vnt = new com.hbm.explosion.vanillant.ExplosionVNT(world,x,y,z,size,exploder);
+        vnt.
 
 
         return vnt;

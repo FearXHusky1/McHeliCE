@@ -1176,15 +1176,15 @@ public class TxtParser implements IParser {
                     }
                 }
             } else if (item.equalsIgnoreCase("nukeYield")) {
-                info.nukeYield = info.toInt(data, 0, 100000);
+//                info.nukeYield = info.toInt(data, 0, 100000);
             } else if (item.equalsIgnoreCase("chemYield")) {
-                info.chemYield = info.toInt(data, 0, 100000);
+//                info.chemYield = info.toInt(data, 0, 100000);
             } else if (item.equalsIgnoreCase("chemSpeed")) {
-                info.chemSpeed = info.toDouble(data);
+//                info.chemSpeed = info.toDouble(data);
             } else if (item.equalsIgnoreCase("chemType")) {
-                info.chemType = info.toInt(data, 0, 3);
+//                info.chemType = info.toInt(data, 0, 3);
             } else if (item.equalsIgnoreCase("NukeEffectOnly")) {
-                info.nukeEffectOnly = info.toBool(data);
+//                info.nukeEffectOnly = info.toBool(data);
             } else if (item.equalsIgnoreCase("MaxDegreeOfMissile")) {
                 info.maxDegreeOfMissile = info.toInt(data, 0, 100000);
             } else if (item.equalsIgnoreCase("TickEndHoming")) {
