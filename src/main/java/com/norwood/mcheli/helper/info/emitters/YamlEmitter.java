@@ -53,16 +53,20 @@ public class YamlEmitter implements IEmitter {
         return s != null && !s.trim().isEmpty();
     }
 
-//    @SafeVarargs
+
+    //    @SafeVarargs
 //    private static <E> InlineSeq<E> inline(E... values) {
 //        InlineSeq<E> seq = new InlineSeq<>(values.length);
 //        Collections.addAll(seq, values);
 //        return seq;
 //    }
+    private static double round3(double value) {
+        return Math.round(value * 1000.0) / 1000.0;
+    }
 
     private static InlineSeq<Double> inline(double... values) {
         InlineSeq<Double> seq = new InlineSeq<>(values.length);
-        for (double v : values) seq.add(v);
+        for (double v : values) seq.add(round3(v));
         return seq;
     }
 
@@ -73,6 +77,7 @@ public class YamlEmitter implements IEmitter {
     private static InlineSeq<Double> vecMinusYOffset(Vec3d v) {
         return inline(v.x, v.y - W_Entity.GLOBAL_Y_OFFSET, v.z);
     }
+
 
     private static String tankWeight(int ordinal) {
         return ordinal == 1 ? "TANK" : ordinal == 2 ? "CAR" : "UKNOWN";
@@ -107,7 +112,8 @@ public class YamlEmitter implements IEmitter {
 
     @Override
     public String emitHelicopter(MCH_HeliInfo info) {
-        Map<String, Object> root = baseAircraft(info);
+        MCH_HeliInfo dummyInfo = new MCH_HeliInfo(info.getLocation(), info.getContentPath());
+        Map<String, Object> root = baseAircraft(info, dummyInfo);
         Map<String, Object> heli = new LinkedHashMap<>();
         heli.put("IsFoldableBlade", info.isEnableFoldBlade);
         root.put("HeliFeatures", heli);
@@ -119,7 +125,8 @@ public class YamlEmitter implements IEmitter {
 
     @Override
     public String emitPlane(MCH_PlaneInfo info) {
-        Map<String, Object> root = baseAircraft(info);
+        var dummyInfo = new MCH_PlaneInfo(info.getLocation(), info.getContentPath());
+        Map<String, Object> root = baseAircraft(info, dummyInfo);
         Map<String, Object> plane = new LinkedHashMap<>();
         plane.put("VariableSweepWing", info.isVariableSweepWing);
         plane.put("SweepWingSpeed", info.sweepWingSpeed);
@@ -175,7 +182,8 @@ public class YamlEmitter implements IEmitter {
 
     @Override
     public String emitShip(MCH_ShipInfo info) {
-        Map<String, Object> root = baseAircraft(info);
+        var dummyInfo = new MCH_ShipInfo(info.getLocation(), info.getContentPath());
+        Map<String, Object> root = baseAircraft(info, dummyInfo);
         Map<String, List<Map<String, Object>>> components = new LinkedHashMap<>();
         addCommonComponents(components, info);
         if (!components.isEmpty()) root.put("Components", components);
@@ -184,7 +192,8 @@ public class YamlEmitter implements IEmitter {
 
     @Override
     public String emitTank(MCH_TankInfo info) {
-        Map<String, Object> root = baseAircraft(info);
+        var dummyInfo = new MCH_TankInfo(info.getLocation(), info.getContentPath());
+        Map<String, Object> root = baseAircraft(info, dummyInfo);
         Map<String, Object> tank = new LinkedHashMap<>();
         tank.put("WeightType", tankWeight(info.weightType));
         tank.put("WeightedCenterZ", info.weightedCenterZ);
@@ -197,7 +206,8 @@ public class YamlEmitter implements IEmitter {
 
     @Override
     public String emitVehicle(MCH_VehicleInfo info) {
-        Map<String, Object> root = baseAircraft(info);
+        var dummyInfo = new MCH_VehicleInfo(info.getLocation(), info.getContentPath());
+        Map<String, Object> root = baseAircraft(info, dummyInfo);
         Map<String, Object> veh = new LinkedHashMap<>();
         veh.put("CanMove", info.isEnableMove);
         veh.put("CanRotate", info.isEnableRot);
@@ -448,7 +458,8 @@ public class YamlEmitter implements IEmitter {
         return YAML.dump(root);
     }
 
-    private Map<String, Object> baseAircraft(MCH_AircraftInfo info) {
+    private Map<String, Object> baseAircraft(MCH_AircraftInfo info, MCH_AircraftInfo dummyInfo) {
+
         Map<String, Object> root = new LinkedHashMap<>();
 
         if (info.displayNameLang != null && !info.displayNameLang.isEmpty()) {
@@ -469,38 +480,51 @@ public class YamlEmitter implements IEmitter {
             root.put("Recepie", rec);
         }
 
-        root.put("CanRide", info.canRide);
-        root.put("RotorSpeed", info.rotorSpeed);
-        if (info.turretPosition != null) root.put("TurretPosition", vec(info.turretPosition));
+        if(info.canRide != dummyInfo.canRide)root.put("CanRide", info.canRide);
+        if(info.rotorSpeed != dummyInfo.rotorSpeed)root.put("RotorSpeed", info.rotorSpeed);
+        if (info.turretPosition != Vec3d.ZERO) root.put("TurretPosition", vec(info.turretPosition));
         if (info.unmountPosition != null) root.put("GlobalUnmountPos", vec(info.unmountPosition));
-        root.put("CreativeOnly", info.creativeOnly);
-        root.put("Regeneration", info.regeneration);
-        root.put("Invulnerable", info.invulnerable);
-        root.put("MaxFuel", info.maxFuel);
-        root.put("MaxHP", info.maxHp);
-        root.put("Stealth", info.stealth);
-        root.put("FuelConsumption", info.fuelConsumption);
-        root.put("FuelSupplyRange", info.fuelSupplyRange);
-        root.put("AmmoSupplyRange", info.ammoSupplyRange);
+        if (info.creativeOnly != dummyInfo.creativeOnly) root.put("CreativeOnly", info.creativeOnly);
+        if (info.regeneration != dummyInfo.regeneration) root.put("Regeneration", info.regeneration);
+        if (info.invulnerable != dummyInfo.invulnerable) root.put("Invulnerable", info.invulnerable);
+        if (info.maxFuel != dummyInfo.maxFuel) root.put("MaxFuel", info.maxFuel);
+        if (info.maxHp != dummyInfo.maxHp) root.put("MaxHP", info.maxHp);
+        if (info.stealth != dummyInfo.stealth) root.put("Stealth", info.stealth);
+        if (info.fuelConsumption != dummyInfo.fuelConsumption) root.put("FuelConsumption", info.fuelConsumption);
+        if (info.fuelSupplyRange != dummyInfo.fuelSupplyRange) root.put("FuelSupplyRange", info.fuelSupplyRange);
+        if (info.ammoSupplyRange != dummyInfo.ammoSupplyRange) root.put("AmmoSupplyRange", info.ammoSupplyRange);
+
         if (info.repairOtherVehiclesRange != 0.0F || info.repairOtherVehiclesValue != 0) {
             Map<String, Object> repair = new LinkedHashMap<>();
             repair.put("range", info.repairOtherVehiclesRange);
             repair.put("value", info.repairOtherVehiclesValue);
             root.put("RepairOtherVehicles", repair);
         }
-        if (notBlank(info.nameOnModernAARadar)) root.put("NameOnModernAARadar", info.nameOnModernAARadar);
-        if (notBlank(info.nameOnEarlyAARadar)) root.put("NameOnEarlyAARadar", info.nameOnEarlyAARadar);
-        if (notBlank(info.nameOnModernASRadar)) root.put("NameOnModernASRadar", info.nameOnModernASRadar);
-        if (notBlank(info.nameOnEarlyASRadar)) root.put("NameOnEarlyASRadar", info.nameOnEarlyASRadar);
-        if (info.explosionSizeByCrash != 5) root.put("ExplosionSizeByCrash", (int) info.explosionSizeByCrash);
-        if (info.throttleDownFactor != 1) root.put("ThrottleDownFactor", info.throttleDownFactor);
+        if (notBlank(info.nameOnModernAARadar) && !info.nameOnModernAARadar.equals(dummyInfo.nameOnModernAARadar))
+            root.put("NameOnModernAARadar", info.nameOnModernAARadar);
+
+        if (notBlank(info.nameOnEarlyAARadar) && !info.nameOnEarlyAARadar.equals(dummyInfo.nameOnEarlyAARadar))
+            root.put("NameOnEarlyAARadar", info.nameOnEarlyAARadar);
+
+        if (notBlank(info.nameOnModernASRadar) && !info.nameOnModernASRadar.equals(dummyInfo.nameOnModernASRadar))
+            root.put("NameOnModernASRadar", info.nameOnModernASRadar);
+
+        if (notBlank(info.nameOnEarlyASRadar) && !info.nameOnEarlyASRadar.equals(dummyInfo.nameOnEarlyASRadar))
+            root.put("NameOnEarlyASRadar", info.nameOnEarlyASRadar);
+
+        if (info.explosionSizeByCrash != dummyInfo.explosionSizeByCrash)
+            root.put("ExplosionSizeByCrash", (int) info.explosionSizeByCrash);
+        if (info.throttleDownFactor != dummyInfo.explosionSizeByCrash)
+            root.put("ThrottleDownFactor", info.throttleDownFactor);
 
         // Global camera section
         Map<String, Object> camera = new LinkedHashMap<>();
-        camera.put("ThirdPersonDist", info.thirdPersonDist);
-        camera.put("Zoom", info.cameraZoom);
-        camera.put("DefaultFreeLook", info.defaultFreelook);
-        camera.put("RotationSpeed", info.cameraRotationSpeed);
+        if (info.thirdPersonDist != dummyInfo.thirdPersonDist) camera.put("ThirdPersonDist", info.thirdPersonDist);
+        if (info.cameraZoom != dummyInfo.cameraZoom) camera.put("Zoom", info.cameraZoom);
+        if (info.defaultFreelook != dummyInfo.defaultFreelook) camera.put("DefaultFreeLook", info.defaultFreelook);
+        if (info.cameraRotationSpeed != dummyInfo.cameraRotationSpeed)
+            camera.put("RotationSpeed", info.cameraRotationSpeed);
+
         if (info.cameraPosition != null && !info.cameraPosition.isEmpty()) {
             List<Map<String, Object>> camList = new ArrayList<>();
             for (MCH_AircraftInfo.CameraPosition cp : info.cameraPosition) {
@@ -513,107 +537,174 @@ public class YamlEmitter implements IEmitter {
             }
             camera.put("Pos", camList);
         }
-        root.put("Camera", camera);
+        if (!camera.isEmpty()) root.put("Camera", camera);
         if (info.alwaysCameraView) root.put("AlwaysCameraView", true);
 
         // Sound
         Map<String, Object> sound = new LinkedHashMap<>();
-        if (notBlank(info.soundMove)) sound.put("MoveSound", info.soundMove.toLowerCase(Locale.ROOT));
-        sound.put("Vol", info.soundVolume);
-        sound.put("Pitch", info.soundPitch);
-        sound.put("Range", info.soundRange);
-        root.put("Sound", sound);
+
+        if (notBlank(info.soundMove) && !info.soundMove.equalsIgnoreCase(dummyInfo.soundMove))
+            sound.put("MoveSound", info.soundMove.toLowerCase(Locale.ROOT));
+
+        if (info.soundVolume != dummyInfo.soundVolume) sound.put("Vol", info.soundVolume);
+
+        if (info.soundPitch != dummyInfo.soundPitch) sound.put("Pitch", info.soundPitch);
+
+        if (info.soundRange != dummyInfo.soundRange) sound.put("Range", info.soundRange);
+
+        if (!sound.isEmpty()) root.put("Sound", sound);
 
         // Physical properties
         Map<String, Object> phys = new LinkedHashMap<>();
-        phys.put("Speed", info.speed);
-        phys.put("CanFloat", info.isFloat);
-        phys.put("FloatOffset", -info.floatOffset);
-        phys.put("MotionFactor", info.motionFactor);
-        phys.put("Gravity", info.gravity);
-        phys.put("RotationSnapValue", info.autoPilotRot);
-        phys.put("GravityInWater", info.gravityInWater);
-        phys.put("StepHeight", info.stepHeight);
-        phys.put("CanRotOnGround", info.canRotOnGround);
-        phys.put("CanMoveOnGround", info.canMoveOnGround);
-        phys.put("OnGroundPitch", info.onGroundPitch);
-        phys.put("PivotTurnThrottle", info.pivotTurnThrottle);
+
+        if (info.speed != dummyInfo.speed) phys.put("Speed", info.speed);
+
+        if (info.isFloat != dummyInfo.isFloat) phys.put("CanFloat", info.isFloat);
+
+        if (info.floatOffset != dummyInfo.floatOffset) phys.put("FloatOffset", -info.floatOffset);
+
+        if (info.motionFactor != dummyInfo.motionFactor) phys.put("MotionFactor", info.motionFactor);
+
+        if (info.gravity != dummyInfo.gravity) phys.put("Gravity", info.gravity);
+
+        if (info.autoPilotRot != dummyInfo.autoPilotRot) phys.put("RotationSnapValue", info.autoPilotRot);
+
+        if (info.gravityInWater != dummyInfo.gravityInWater) phys.put("GravityInWater", info.gravityInWater);
+
+        if (info.stepHeight != dummyInfo.stepHeight) phys.put("StepHeight", info.stepHeight);
+
+        if (info.canRotOnGround != dummyInfo.canRotOnGround) phys.put("CanRotOnGround", info.canRotOnGround);
+
+        if (info.canMoveOnGround != dummyInfo.canMoveOnGround) phys.put("CanMoveOnGround", info.canMoveOnGround);
+
+        if (info.onGroundPitch != dummyInfo.onGroundPitch) phys.put("OnGroundPitch", info.onGroundPitch);
+
+        if (info.pivotTurnThrottle != dummyInfo.pivotTurnThrottle)
+            phys.put("PivotTurnThrottle", info.pivotTurnThrottle);
+
+// Mobility
         Map<String, Object> mobility = new LinkedHashMap<>();
-        mobility.put("Yaw", info.mobilityYaw);
-        mobility.put("Pitch", info.mobilityPitch);
-        mobility.put("Roll", info.mobilityRoll);
-        mobility.put("YawOnGround", info.mobilityYawOnGround);
-        phys.put("Mobility", mobility);
+        if (info.mobilityYaw != dummyInfo.mobilityYaw) mobility.put("Yaw", info.mobilityYaw);
+        if (info.mobilityPitch != dummyInfo.mobilityPitch) mobility.put("Pitch", info.mobilityPitch);
+        if (info.mobilityRoll != dummyInfo.mobilityRoll) mobility.put("Roll", info.mobilityRoll);
+        if (info.mobilityYawOnGround != dummyInfo.mobilityYawOnGround)
+            mobility.put("YawOnGround", info.mobilityYawOnGround);
+        if (!mobility.isEmpty()) phys.put("Mobility", mobility);
+
+        // Ground pitch factors
         Map<String, Object> gpf = new LinkedHashMap<>();
-        gpf.put("Pitch", info.onGroundPitchFactor);
-        gpf.put("Roll", info.onGroundRollFactor);
-        phys.put("GroundPitchFactors", gpf);
+        if (info.onGroundPitchFactor != dummyInfo.onGroundPitchFactor) gpf.put("Pitch", info.onGroundPitchFactor);
+        if (info.onGroundRollFactor != dummyInfo.onGroundRollFactor) gpf.put("Roll", info.onGroundRollFactor);
+        if (!gpf.isEmpty()) phys.put("GroundPitchFactors", gpf);
+
+        // Body size
         Map<String, Object> bodySize = new LinkedHashMap<>();
-        bodySize.put("Height", info.bodyHeight);
-        bodySize.put("Width", info.bodyWidth);
-        phys.put("BodySize", bodySize);
+        if (info.bodyHeight != dummyInfo.bodyHeight) bodySize.put("Height", info.bodyHeight);
+        if (info.bodyWidth != dummyInfo.bodyWidth) bodySize.put("Width", info.bodyWidth);
+        if (!bodySize.isEmpty()) phys.put("BodySize", bodySize);
+
+        // Rotation limits (only if enabled and non-default)
         if (info.limitRotation) {
             Map<String, Object> rotLimits = new LinkedHashMap<>();
             Map<String, Object> pitch = new LinkedHashMap<>();
-            pitch.put("Min", info.minRotationPitch);
-            pitch.put("Max", info.maxRotationPitch);
-            rotLimits.put("Pitch", pitch);
+            if (info.minRotationPitch != dummyInfo.minRotationPitch) pitch.put("Min", info.minRotationPitch);
+            if (info.maxRotationPitch != dummyInfo.maxRotationPitch) pitch.put("Max", info.maxRotationPitch);
+            if (!pitch.isEmpty()) rotLimits.put("Pitch", pitch);
+
             Map<String, Object> roll = new LinkedHashMap<>();
-            roll.put("Min", info.minRotationRoll);
-            roll.put("Max", info.maxRotationRoll);
-            rotLimits.put("Roll", roll);
-            phys.put("RotationLimits", rotLimits);
+            if (info.minRotationRoll != dummyInfo.minRotationRoll) roll.put("Min", info.minRotationRoll);
+            if (info.maxRotationRoll != dummyInfo.maxRotationRoll) roll.put("Max", info.maxRotationRoll);
+            if (!roll.isEmpty()) rotLimits.put("Roll", roll);
+
+            if (!rotLimits.isEmpty()) phys.put("RotationLimits", rotLimits);
         }
-        root.put("PhysicalProperties", phys);
+
+        if (!phys.isEmpty()) root.put("PhysicalProperties", phys);
+
 
         // Render
         Map<String, Object> render = new LinkedHashMap<>();
-        render.put("SmoothShading", info.smoothShading);
-        render.put("HideRiders", info.hideEntity);
-        render.put("ModelWidth", info.entityWidth);
-        render.put("ModelHeight", info.entityHeight);
-        render.put("ModelPitch", info.entityPitch);
-        render.put("ModelRoll", info.entityRoll);
-        render.put("ParticleScale", info.particlesScale);
-        render.put("OneProbeScale", info.oneProbeScale);
-        render.put("EnableSeaSurfaceParticle", info.enableSeaSurfaceParticle);
+
+        if (info.smoothShading != dummyInfo.smoothShading) render.put("SmoothShading", info.smoothShading);
+
+        if (info.hideEntity != dummyInfo.hideEntity) render.put("HideRiders", info.hideEntity);
+
+        if (info.entityWidth != dummyInfo.entityWidth) render.put("ModelWidth", info.entityWidth);
+
+        if (info.entityHeight != dummyInfo.entityHeight) render.put("ModelHeight", info.entityHeight);
+
+        if (info.entityPitch != dummyInfo.entityPitch) render.put("ModelPitch", info.entityPitch);
+
+        if (info.entityRoll != dummyInfo.entityRoll) render.put("ModelRoll", info.entityRoll);
+
+        if (info.particlesScale != dummyInfo.particlesScale) render.put("ParticleScale", info.particlesScale);
+
+        if (info.oneProbeScale != dummyInfo.oneProbeScale) render.put("OneProbeScale", info.oneProbeScale);
+
+        if (info.enableSeaSurfaceParticle != dummyInfo.enableSeaSurfaceParticle)
+            render.put("EnableSeaSurfaceParticle", info.enableSeaSurfaceParticle);
+
+        // Splash particles
         if (info.particleSplashs != null && !info.particleSplashs.isEmpty()) {
             List<Map<String, Object>> splash = new ArrayList<>();
+
             for (MCH_AircraftInfo.ParticleSplash ps : info.particleSplashs) {
                 Map<String, Object> pm = new LinkedHashMap<>();
-                pm.put("Position", vec(ps.pos));
-                pm.put("Count", ps.num);
-                pm.put("Size", ps.size);
-                pm.put("Acceleration", ps.acceleration);
-                pm.put("Age", ps.age);
-                pm.put("Motion", ps.motionY);
-                pm.put("Gravity", ps.gravity);
-                splash.add(pm);
+
+                MCH_AircraftInfo.ParticleSplash dummyPs = dummyInfo.particleSplashs != null && dummyInfo.particleSplashs.size() > splash.size() ? dummyInfo.particleSplashs.get(splash.size()) : null;
+
+                if (dummyPs == null || !ps.pos.equals(dummyPs.pos)) pm.put("Position", vec(ps.pos));
+                if (dummyPs == null || ps.num != dummyPs.num) pm.put("Count", ps.num);
+                if (dummyPs == null || ps.size != dummyPs.size) pm.put("Size", ps.size);
+                if (dummyPs == null || ps.acceleration != dummyPs.acceleration) pm.put("Acceleration", ps.acceleration);
+                if (dummyPs == null || ps.age != dummyPs.age) pm.put("Age", ps.age);
+                if (dummyPs == null || ps.motionY != dummyPs.motionY) pm.put("Motion", ps.motionY);
+                if (dummyPs == null || ps.gravity != dummyPs.gravity) pm.put("Gravity", ps.gravity);
+
+                if (!pm.isEmpty()) splash.add(pm);
             }
-            render.put("SplashParticles", splash);
+
+            if (!splash.isEmpty()) render.put("SplashParticles", splash);
         }
-        root.put("Render", render);
+
+        if (!render.isEmpty()) root.put("Render", render);
 
         // Armor
         Map<String, Object> armor = new LinkedHashMap<>();
-        armor.put("ArmorDamageFactor", info.armorDamageFactor);
-        armor.put("ArmorMinDamage", info.armorMinDamage);
-        armor.put("ArmorMaxDamage", info.armorMaxDamage);
-        armor.put("DamageFactor", info.damageFactor);
-        armor.put("SubmergedDamageHeight", info.submergedDamageHeight);
-        root.put("Armor", armor);
 
-        // Weapons list
+        if (info.armorDamageFactor != dummyInfo.armorDamageFactor)
+            armor.put("ArmorDamageFactor", info.armorDamageFactor);
+
+        if (info.armorMinDamage != dummyInfo.armorMinDamage) armor.put("ArmorMinDamage", info.armorMinDamage);
+
+        if (info.armorMaxDamage != dummyInfo.armorMaxDamage) armor.put("ArmorMaxDamage", info.armorMaxDamage);
+
+        if (info.damageFactor != dummyInfo.damageFactor) armor.put("DamageFactor", info.damageFactor);
+
+        if (info.submergedDamageHeight != dummyInfo.submergedDamageHeight)
+            armor.put("SubmergedDamageHeight", info.submergedDamageHeight);
+
+        if (!armor.isEmpty()) root.put("Armor", armor);
+
+// Weapons list
         List<Map<String, Object>> weapons = new ArrayList<>();
+
         if (info.weaponSetList != null) {
             for (MCH_AircraftInfo.WeaponSet set : info.weaponSetList) {
                 if (set.weapons == null) continue;
+
                 for (MCH_AircraftInfo.Weapon w : set.weapons) {
                     Map<String, Object> m = new LinkedHashMap<>();
+
                     m.put("Type", set.type);
                     m.put("Position", vecMinusYOffset(w.pos));
-                    if (w.yaw != 0) m.put("Yaw", w.yaw);
-                    if (w.pitch != 0) m.put("Pitch", w.pitch);
+
+                    if (w.yaw != 0 || (dummyInfo.weaponSetList != null && dummyInfo.weaponSetList.contains(set) && w.yaw != dummyInfo.weaponSetList.get(dummyInfo.weaponSetList.indexOf(set)).weapons.get(set.weapons.indexOf(w)).yaw))
+                        m.put("Yaw", w.yaw);
+
+                    if (w.pitch != 0 || (dummyInfo.weaponSetList != null && dummyInfo.weaponSetList.contains(set) && w.pitch != dummyInfo.weaponSetList.get(dummyInfo.weaponSetList.indexOf(set)).weapons.get(set.weapons.indexOf(w)).pitch))
+                        m.put("Pitch", w.pitch);
+
                     if (w.seatID > 0) m.put("SeatID", w.seatID + 1);
                     if (!w.canUsePilot) m.put("CanUsePilot", false);
                     if (w.defaultYaw != 0) m.put("DefaultYaw", w.defaultYaw);
@@ -622,11 +713,14 @@ public class YamlEmitter implements IEmitter {
                     if (w.minPitch != 0) m.put("MinPitch", w.minPitch);
                     if (w.maxPitch != 0) m.put("MaxPitch", w.maxPitch);
                     if (w.turret) m.put("Turret", true);
-                    weapons.add(m);
+
+                    if (!m.isEmpty()) weapons.add(m);
                 }
             }
         }
+
         if (!weapons.isEmpty()) root.put("Weapons", weapons);
+
 
         // Seats
         if (info.seatList != null && !info.seatList.isEmpty()) {
@@ -724,36 +818,45 @@ public class YamlEmitter implements IEmitter {
 
         // UAV
         Map<String, Object> uav = new LinkedHashMap<>();
-        uav.put("IsUav", info.isUAV);
-        uav.put("IsSmallUav", info.isSmallUAV);
-        uav.put("IsNewUav", info.isNewUAV);
-        uav.put("IsTargetDrone", info.isTargetDrone);
-        root.put("Uav", uav);
+        if (info.isUAV != dummyInfo.isUAV) uav.put("IsUav", info.isUAV);
+        if (info.isSmallUAV != dummyInfo.isSmallUAV) uav.put("IsSmallUav", info.isSmallUAV);
+        if (info.isNewUAV != dummyInfo.isNewUAV) uav.put("IsNewUav", info.isNewUAV);
+        if (info.isTargetDrone != dummyInfo.isTargetDrone) uav.put("IsTargetDrone", info.isTargetDrone);
+        if (!uav.isEmpty()) root.put("Uav", uav);
 
         // Aircraft features
         Map<String, Object> feats = new LinkedHashMap<>();
-        feats.put("GunnerMode", info.isEnableGunnerMode);
-        feats.put("InventorySize", info.inventorySize);
-        feats.put("NightVision", info.isEnableNightVision);
-        feats.put("EntityRadar", info.isEnableEntityRadar);
-        feats.put("CanReverse", info.enableBack);
-        feats.put("CanRotateOnGround", info.canRotOnGround);
-        feats.put("ConcurrentGunner", info.isEnableConcurrentGunnerMode);
-        feats.put("EjectionSeat", info.isEnableEjectionSeat);
-        feats.put("ThrottleUpDown", info.throttleUpDown);
-        feats.put("ThrottleUpDownEntity", info.throttleUpDownOnEntity);
+        if (info.isEnableGunnerMode != dummyInfo.isEnableGunnerMode) feats.put("GunnerMode", info.isEnableGunnerMode);
+        if (info.inventorySize != dummyInfo.inventorySize) feats.put("InventorySize", info.inventorySize);
+        if (info.isEnableNightVision != dummyInfo.isEnableNightVision)
+            feats.put("NightVision", info.isEnableNightVision);
+        if (info.isEnableEntityRadar != dummyInfo.isEnableEntityRadar)
+            feats.put("EntityRadar", info.isEnableEntityRadar);
+        if (info.enableBack != dummyInfo.enableBack) feats.put("CanReverse", info.enableBack);
+        if (info.canRotOnGround != dummyInfo.canRotOnGround) feats.put("CanRotateOnGround", info.canRotOnGround);
+        if (info.isEnableConcurrentGunnerMode != dummyInfo.isEnableConcurrentGunnerMode)
+            feats.put("ConcurrentGunner", info.isEnableConcurrentGunnerMode);
+        if (info.isEnableEjectionSeat != dummyInfo.isEnableEjectionSeat)
+            feats.put("EjectionSeat", info.isEnableEjectionSeat);
+        if (info.throttleUpDown != dummyInfo.throttleUpDown) feats.put("ThrottleUpDown", info.throttleUpDown);
+        if (info.throttleUpDownOnEntity != dummyInfo.throttleUpDownOnEntity)
+            feats.put("ThrottleUpDownEntity", info.throttleUpDownOnEntity);
+
+        // Parachuting
         if (info.isEnableParachuting) {
             Map<String, Object> parachute = new LinkedHashMap<>();
             if (info.mobDropOption != null) {
                 if (info.mobDropOption.pos != null) parachute.put("Pos", vec(info.mobDropOption.pos));
                 if (info.mobDropOption.interval != 0) parachute.put("Interval", info.mobDropOption.interval);
             }
-            if (parachute.isEmpty()) feats.put("Parachuting", true);
-            else feats.put("Parachuting", parachute);
+            feats.put("Parachuting", parachute.isEmpty() ? true : parachute);
         }
+
+        // Flare
         if (info.flare != null) {
             Map<String, Object> flare = new LinkedHashMap<>();
             flare.put("Pos", vec(info.flare.pos));
+
             if (info.flare.types != null && info.flare.types.length > 0) {
                 List<String> types = new ArrayList<>();
                 for (int t : info.flare.types) {
@@ -764,7 +867,9 @@ public class YamlEmitter implements IEmitter {
             }
             feats.put("Flare", flare);
         }
-        root.put("AircraftFeatures", feats);
+
+        if (!feats.isEmpty()) root.put("AircraftFeatures", feats);
+
 
         return root;
     }
