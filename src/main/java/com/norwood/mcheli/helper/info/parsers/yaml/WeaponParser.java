@@ -1,5 +1,6 @@
 package com.norwood.mcheli.helper.info.parsers.yaml;
 
+import com.norwood.mcheli.compat.hbm.VNTSettingContainer;
 import com.norwood.mcheli.helper.MCH_Utils;
 import com.norwood.mcheli.weapon.MCH_SightType;
 import com.norwood.mcheli.weapon.MCH_WeaponInfo;
@@ -142,8 +143,8 @@ public class WeaponParser {
             switch (entry.getKey()) {
                 case "PayloadType" -> info.payloadNTM =  parsePayload((String) entry.getValue());
                 case "EffectOnly" -> info.effectOnly =  (Boolean) entry.getValue();
-//                case "FluidType" =
-
+                case "VNT" -> info.vntSettingContainer = new VNTSettingContainer((Map<String,Object>) entry.getValue());
+                case "FluidType" -> info.fluidTypeNTM = (String)entry.getValue();
 
             }}
     }

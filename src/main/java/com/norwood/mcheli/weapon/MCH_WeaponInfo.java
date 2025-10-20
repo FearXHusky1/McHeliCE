@@ -4,6 +4,7 @@ import com.github.bsideup.jabel.Desugar;
 import com.norwood.mcheli.MCH_BaseInfo;
 import com.norwood.mcheli.MCH_Color;
 import com.norwood.mcheli.MCH_DamageFactor;
+import com.norwood.mcheli.compat.hbm.VNTSettingContainer;
 import com.norwood.mcheli.helper.addon.AddonResourceLocation;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.Item;
@@ -21,6 +22,7 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
     public Payload payloadNTM = Payload.NONE;
     public boolean effectOnly = false;
     public String fluidTypeNTM = null;
+    public VNTSettingContainer vntSettingContainer = null;
 
     public final String name;
     public static Random rand = new Random();

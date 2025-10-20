@@ -34,7 +34,7 @@ public class VNTSettingContainer {
     @Optional.Method(modid = "hbm")
     public void loadRuntimeInstances() {
         if (vanillantClassSet == null || vanillantClassSet.isEmpty())
-            vanillantClassSet = ModCompatManager.getClassesInPackage(ModCompatManager.MODID_HBM);
+            vanillantClassSet = ModCompatManager.getClassesInPackage(HBM_VANILLANT_PACKAGE);
 
         blockProcessor = processMap((Map<String, Object>) rawEntry.get("BlockProcessor"));
         blockAllocator = processMap((Map<String, Object>) rawEntry.get("BlockAllocator"));
@@ -44,6 +44,7 @@ public class VNTSettingContainer {
     }
 
 
+    @Optional.Method(modid = "hbm")
     public Object buildExplosion(World world, double x, double y, double z, float size, Entity exploder) {
         var vnt = new com.hbm.explosion.vanillant.ExplosionVNT(world, x, y, z, size, exploder);
         vnt.setBlockAllocator((com.hbm.explosion.vanillant.interfaces.IBlockAllocator) blockAllocator);
