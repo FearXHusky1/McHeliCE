@@ -818,14 +818,24 @@ public class YamlParser implements IParser {
                 case "ExcludeWith" -> {
                     exclusionList = new ArrayList<>();
                     var exclusionMap = (Map<String, List<Integer>>) entry.getValue();
-                    if (exclusionMap.containsKey("Seats")) {
-                        exclusionMap.get("Seats").stream().forEach(exclusionList::add);
+                    var seatYaml = exclusionMap.get("Seats");
+                    if (seatYaml != null) {
+                        for (Integer n : seatYaml) {
+                            if (n == null) continue;
+                            int idx0 = n - 1; // 1-based -> 0-based seat
+                            if (idx0 >= 0) exclusionList.add(idx0);
+                        }
                     }
-                    if (exclusionMap.containsKey("Racks")) {
-                        exclusionMap.get("Racks").stream().map(num -> num + seatCount).forEach(exclusionList::add);
+                    var rackYaml = exclusionMap.get("Racks");
+                    if (rackYaml != null) {
+                        for (Integer n : rackYaml) {
+                            if (n == null) continue;
+                            int idx0 = seatCount + (n - 1); // 1-based -> 0-based combined
+                            if (idx0 >= seatCount) exclusionList.add(idx0);
+                        }
                     }
-
                 }
+
                 default -> logUnkownEntry(entry, "Racks");
             }
         }
@@ -838,9 +848,14 @@ public class YamlParser implements IParser {
         }
 
         info.entityRackList.add(new MCH_SeatRackInfo(entityNames, position.x, position.y, position.z, cameraPos, range, openParaAlt, yaw, pitch, rotSeat));
-        final int rackIndex = info.entityRackList.size();
-        if (exclusionList != null)
-            exclusionList.stream().map(integers -> new Integer[]{seatCount + rackIndex, integers}).forEachOrdered(info.exclusionSeatList::add);
+        final int rackIndex0 = info.entityRackList.size() - 1;
+
+        if (exclusionList != null) {
+            for (Integer t : exclusionList) {
+                if (t == null) continue;
+                info.exclusionSeatList.add(new Integer[]{seatCount + rackIndex0, t});
+            }
+        }
     }
 
     private ParticleSplash parseParticleSplash(Map<String, Object> map) {
@@ -960,7 +975,7 @@ public class YamlParser implements IParser {
         boolean invertCameraPos = false;
         CameraPosition cameraPos = null;
         String hudName = "none";
-        List<Integer> exclusionList = null;
+        List<Integer> exclusionList = null; // 0-based
 
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             switch (entry.getKey()) {
@@ -979,15 +994,24 @@ public class YamlParser implements IParser {
                 case "ExcludeWith" -> {
                     exclusionList = new ArrayList<>();
                     var exclusionMap = (Map<String, List<Integer>>) entry.getValue();
-                    if (exclusionMap.containsKey("Seats")) {
-                        exclusionMap.get("Seats").stream().forEach(exclusionList::add);
-                    }
-                    if (exclusionMap.containsKey("Racks")) {
-                        exclusionMap.get("Racks").stream().map(num -> num + seatCount).forEach(exclusionList::add);
-                    }
 
+                    var seatYaml = exclusionMap.get("Seats");
+                    if (seatYaml != null) {
+                        for (Integer n : seatYaml) {
+                            if (n == null) continue;
+                            int idx0 = n - 1; // 1-based -> 0-based seat
+                            if (idx0 >= 0) exclusionList.add(idx0);
+                        }
+                    }
+                    var rackYaml = exclusionMap.get("Racks");
+                    if (rackYaml != null) {
+                        for (Integer n : rackYaml) {
+                            if (n == null) continue;
+                            int idx0 = seatCount + (n - 1); // 1-based -> 0-based combined
+                            if (idx0 >= seatCount) exclusionList.add(idx0);
+                        }
+                    }
                 }
-
 
                 default -> logUnkownEntry(entry, "Seats");
             }
@@ -1001,12 +1025,15 @@ public class YamlParser implements IParser {
 
         if (MCH_MOD.proxy.isRemote()) {
             info.hudList.add(MCH_HudManager.get(hudName) != null ? MCH_HudManager.get(hudName) : MCH_Hud.NoDisp);
-
         }
+        final int seatIndex0 = info.seatList.size() - 1;
 
-        final int seatIndex = info.seatList.size();
-        if (exclusionList != null)
-            exclusionList.stream().map(integers -> new Integer[]{seatIndex, integers}).forEachOrdered(info.exclusionSeatList::add);
+        if (exclusionList != null) {
+            for (Integer t : exclusionList) {
+                if (t == null) continue;
+                info.exclusionSeatList.add(new Integer[]{seatIndex0, t});
+            }
+        }
     }
 
 

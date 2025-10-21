@@ -61,13 +61,19 @@ public class YamlEmitter implements IEmitter {
         return s != null && !s.trim().isEmpty();
     }
 
-
     //    @SafeVarargs
 //    private static <E> InlineSeq<E> inline(E... values) {
 //        InlineSeq<E> seq = new InlineSeq<>(values.length);
 //        Collections.addAll(seq, values);
 //        return seq;
 //    }
+
+    private static <T> InlineSeq<T> inlineSeq(Collection<T> vals) {
+        InlineSeq<T> seq = new InlineSeq<>(vals.size());
+        seq.addAll(vals);
+        return seq;
+    }
+
     private static double round3(double value) {
         return Math.round(value * 1000.0) / 1000.0;
     }
@@ -806,8 +812,8 @@ public class YamlEmitter implements IEmitter {
                 if (r.range != 0.0f) rm.put("Range", r.range);
                 if (r.openParaAlt != 0.0f) rm.put("OpenParaAlt", r.openParaAlt);
             }
-//            if(info.exclusionSeatList != null && !info.exclusionSeatList.isEmpty())
-//                appendExlusionEntries(racks,info,true);
+            if (info.exclusionSeatList != null && !info.exclusionSeatList.isEmpty())
+                appendExlusionEntries(racks, info, true);
 
             root.put("Racks", racks);
         }
@@ -918,35 +924,65 @@ public class YamlEmitter implements IEmitter {
         return m;
     }
 
-    private void appendExlusionEntries(List<Map<String,Object>> listSeatMap, MCH_AircraftInfo info, boolean isRackList){
-        final int startIndex = isRackList ? info.getNumSeat() + 1 : 0;
-        final int endIndex = isRackList ? info.getNumSeatAndRack() : info.getNumSeat();
-        int  index = startIndex;
-        while ( index < endIndex ) {
-            Integer[] exclusion = info.exclusionSeatList.get(startIndex);
-            assert exclusion.length > 1;
-            int affectedSeatIndex = exclusion[0];
+    private void appendExlusionEntries(List<Map<String,Object>> targetList, MCH_AircraftInfo info, boolean isRackList) {
+        if (info.exclusionSeatList == null || info.exclusionSeatList.isEmpty()) return;
 
-            List<Integer> seatExclusions = new ArrayList<>();
-            List<Integer> rackExclusions = new ArrayList<>();
-            for (Integer anInt : exclusion) {
-                if(anInt > info.mobSeatNum)
-                    rackExclusions.add(anInt);
-                else if (anInt <= info.mobSeatNum)
-                    seatExclusions.add(anInt);
+        final int seatCount = info.getNumSeat();
+        final int rackCount = info.getNumRack();
+        final int total = seatCount + rackCount;
+        final Map<Integer, ExAgg> agg = new LinkedHashMap<>();
 
+        for (Integer[] raw : info.exclusionSeatList) {
+            if (raw == null || raw.length < 2) continue;
+
+            Integer ownerBoxed = raw[0];
+            if (ownerBoxed == null) continue;
+            int ownerZ = ownerBoxed;
+            if (ownerZ < 0 || ownerZ >= total) continue;
+
+            var ex = agg.computeIfAbsent(ownerZ, k -> new ExAgg());
+
+            for (int i = 1; i < raw.length; i++) {
+                Integer boxed = raw[i];
+                if (boxed == null) continue;
+                int tZ = boxed;
+                if (tZ < 0 || tZ >= total || tZ == ownerZ) continue;
+
+                if (tZ < seatCount) ex.seats.add(tZ);
+                else ex.racks.add(tZ - seatCount);
             }
-            var seatListMapIndex = isRackList? affectedSeatIndex - startIndex : affectedSeatIndex;
-            Map<String,Object> seatMap = listSeatMap.get(seatListMapIndex);
-            Map<String,Object> excusionMap = new LinkedHashMap<>();
-            if(!seatExclusions.isEmpty()) excusionMap.put("Seats", seatExclusions);
-            if(!rackExclusions.isEmpty()) excusionMap.put("Racks", rackExclusions);
-
-            if(!excusionMap.isEmpty())
-                seatMap.put("ExcludeWith", excusionMap);
-            index++;
         }
 
+        for (var e : agg.entrySet()) {
+            int ownerZ = e.getKey();
+            boolean ownerIsRack = ownerZ >= seatCount;
+            if (ownerIsRack != isRackList) continue;
+
+            int ownerIndexInTarget = ownerIsRack ? ownerZ - seatCount : ownerZ;
+            if (ownerIndexInTarget < 0 || ownerIndexInTarget >= targetList.size()) continue;
+
+            List<Integer> seats1 = new ArrayList<>();
+            for (int s : e.getValue().seats) seats1.add(s + 1);
+
+            List<Integer> racks1 = new ArrayList<>();
+            for (int r : e.getValue().racks) racks1.add(r + 1);
+
+            Collections.sort(seats1);
+            Collections.sort(racks1);
+
+            if (seats1.isEmpty() && racks1.isEmpty()) continue;
+
+            Map<String, Object> exMap = new LinkedHashMap<>();
+            if (!seats1.isEmpty()) exMap.put("Seats", inlineSeq(seats1));
+            if (!racks1.isEmpty()) exMap.put("Racks", inlineSeq(racks1));
+
+            targetList.get(ownerIndexInTarget).put("ExcludeWith", exMap);
+        }
+    }
+
+    private static final class ExAgg {
+        final Set<Integer> seats = new LinkedHashSet<>(); // 0-based
+        final Set<Integer> racks = new LinkedHashSet<>(); // 0-based
     }
 
     private void addCommonComponents(Map<String, List<Map<String, Object>>> components, MCH_AircraftInfo info) {
