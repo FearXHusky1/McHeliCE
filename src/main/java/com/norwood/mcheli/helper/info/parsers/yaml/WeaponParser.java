@@ -58,7 +58,7 @@ public class WeaponParser {
                 case "DisplayName" -> info.displayName = ((String) entry.getValue()).trim();
                 case "BaseDamage" -> info.power = ((Number) entry.getValue()).intValue();
                 case "Ballistics" -> parseBallisitcs(info, (Map<String, Object>) entry.getValue());
-                case "Radar" -> parseRadar(info, (Map<String, Object>) entry.getValue());
+                case "Camera" -> parseCam(info, (Map<String, Object>) entry.getValue());
                 case "Missile" -> parseMissile(info, (Map<String, Object>) entry.getValue());
                 case "Sound" -> parseSound(info, (Map<String, Object>) entry.getValue());
                 case "Type" -> info.type = ((String) entry.getValue()).trim().toLowerCase(Locale.ROOT);
@@ -109,8 +109,9 @@ public class WeaponParser {
     private void parseRadar(MCH_WeaponInfo info, Map<String, Object> map) {
         for (var entry : map.entrySet()) {
             switch (entry.getKey()) {
-                case "EnableMortarRadar" -> info.hasMortarRadar = (Boolean) entry.getValue();
-                case "MortarRadarMaxDist" -> info.mortarRadarMaxDist = ((Number) entry.getValue()).doubleValue();
+                case "IsRadarMissile" -> info.isRadarMissile = (Boolean) entry.getValue();
+                case "ActiveRadar" -> info.activeRadar = (Boolean) entry.getValue();
+                case "PassiveRadar" -> info.passiveRadar = (Boolean) entry.getValue();
                 default -> logUnkownEntry(entry, "Radar");
             }
         }
@@ -121,11 +122,8 @@ public class WeaponParser {
         for (var entry : map.entrySet()) {
             switch (entry.getKey()) {
                 case "MarkerRocket" -> parseMarkerRocket(info, (Map<String, Object>) entry.getValue());
-                case "IsRadarMissile" -> info.isRadarMissile = (Boolean) entry.getValue();
                 case "LaserGuidance" -> info.laserGuidance = (Boolean) entry.getValue();
                 case "HasLaserGuidancePod" -> info.hasLaserGuidancePod = (Boolean) entry.getValue();
-                case "ActiveRadar" -> info.activeRadar = (Boolean) entry.getValue();
-                case "PassiveRadar" -> info.passiveRadar = (Boolean) entry.getValue();
                 case "isOffAxis" -> info.enableOffAxis = (Boolean) entry.getValue();
                 case "GuidedTorpedo" -> info.isGuidedTorpedo = (Boolean) entry.getValue();
                 case "PredictTargetPos" -> info.predictTargetPos = (Boolean) entry.getValue();
@@ -144,6 +142,7 @@ public class WeaponParser {
 
                 case "CanBeIntercepted" -> info.canBeIntercepted = (Boolean) entry.getValue();
                 case "LockOn" -> parseLockOn(info, (Map<String, Object>) entry.getValue());
+                case "Radar" -> parseRadar(info, (Map<String, Object>) entry.getValue());
 
                 default -> logUnkownEntry(entry, "Missile");
             }
@@ -159,7 +158,6 @@ public class WeaponParser {
                 case "MaxAngle" -> info.maxLockOnAngle = getClamped(200, entry.getValue());
                 case "MinHeight" -> info.lockMinHeight = getClamped(-1, 100, entry.getValue());
                 case "PassiveRadarLockOutCount" -> info.passiveRadarLockOutCount = getClamped(200, entry.getValue());
-                case "AntiFlareCount" -> info.antiFlareCount = getClamped(-1, 200, entry.getValue());
                 case "LockedChaffMax" -> info.numLockedChaffMax = ((Number) entry.getValue()).intValue();
                 default -> logUnkownEntry(entry, "LockOn");
             }
@@ -171,6 +169,7 @@ public class WeaponParser {
                 case "isHeatMissile" -> info.isHeatSeekerMissile = (Boolean) entry.getValue();
                 case "HeatCount" -> info.heatCount = getClamped(100000, entry.getValue());
                 case "MaxHeatCount" -> info.maxHeatCount = getClamped(100000, entry.getValue());
+                case "AntiFlareCount" -> info.antiFlareCount = getClamped(-1, 200, entry.getValue());
                 default -> logUnkownEntry(entry, "Heat");
             }
         }
@@ -220,9 +219,11 @@ public class WeaponParser {
     private void parseCam(MCH_WeaponInfo info, Map<String, Object> value) {
         for (Map.Entry<String, Object> entry : value.entrySet()) {
             switch (entry.getKey()) {
+                case "EnableMortarRadar" -> info.hasMortarRadar = (Boolean) entry.getValue();
+                case "MortarRadarMaxDist" -> info.mortarRadarMaxDist = ((Number) entry.getValue()).doubleValue();
                 case "DisplayMortarDistance" -> info.displayMortarDistance = ((Boolean) entry.getValue());
-                case "FixCameraPitch" -> info.fixCameraPitch = ((Boolean) entry.getValue());
-                case "CameraRotationSpeedPitch" ->
+                case "FixPitch" -> info.fixCameraPitch = ((Boolean) entry.getValue());
+                case "RotationSpeedPitch" ->
                         info.cameraRotationSpeedPitch = getClamped(0.0F, 100.0F, entry.getValue());
                 case "Sight" -> {
                     String sight = ((String) entry.getValue()).toLowerCase(Locale.ROOT);
@@ -383,10 +384,10 @@ public class WeaponParser {
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             switch (entry.getKey()) {
 
-                case "MarkerRocketSpawnNum" -> info.markerRocketSpawnNum = ((Number) entry.getValue()).intValue();
-                case "MarkerRocketSpawnDiff" -> info.markerRocketSpawnDiff = ((Number) entry.getValue()).intValue();
-                case "MarkerRocketSpawnHeight" -> info.markerRocketSpawnHeight = ((Number) entry.getValue()).intValue();
-                case "MarkerRocketSpawnSpeed" -> info.markerRocketSpawnSpeed = ((Number) entry.getValue()).intValue();
+                case "Count" -> info.markerRocketSpawnNum = ((Number) entry.getValue()).intValue();
+                case "Spread" -> info.markerRocketSpawnDiff = ((Number) entry.getValue()).intValue();
+                case "SpawnHeight" -> info.markerRocketSpawnHeight = ((Number) entry.getValue()).intValue();
+                case "Acceleration" -> info.markerRocketSpawnSpeed = ((Number) entry.getValue()).intValue();
 
             }
         }
