@@ -21,6 +21,7 @@ public class MCH_HudItemColor extends MCH_HudItem {
         }
     }
 
+
     @Override
     public void execute() {
         double d = calc(this.updateColor);
