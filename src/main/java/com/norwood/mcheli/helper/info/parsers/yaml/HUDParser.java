@@ -2,11 +2,10 @@ package com.norwood.mcheli.helper.info.parsers.yaml;
 
 import com.norwood.mcheli.hud.*;
 import net.minecraft.util.Tuple;
+import net.minecraftforge.common.util.JsonUtils;
+import org.codehaus.plexus.util.CollectionUtils;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.norwood.mcheli.helper.info.parsers.yaml.YamlParser.logUnkownEntry;
@@ -37,7 +36,7 @@ public class HUDParser {
     }
 
     public static Map<String, String> toStringMap(Map<String, ?> map) {
-        if (map.isEmpty()) return Map.of();
+        if (map.isEmpty()) return new HashMap<>();
         Object firstValue = map.values().iterator().next();
         if (firstValue instanceof String) {
             return (Map<String, String>) map;
@@ -118,7 +117,7 @@ public class HUDParser {
             switch (entry.getKey()) {
                 case "Type" -> type = GraduationType.valueOf(((String) entry.getValue()).toUpperCase(Locale.ROOT).trim());
                 case "Pos", "Position" -> {
-                    Tuple<String, String> pos = setTuple(List.of("x", "y"), entry.getValue());
+                    Tuple<String, String> pos = setTuple(Arrays.asList("x", "y"), entry.getValue());
                     xCoord = MCH_HudItem.toFormula(pos.getFirst());
                     yCoord = MCH_HudItem.toFormula(pos.getSecond());
                 }
@@ -149,12 +148,12 @@ public class HUDParser {
             switch (entry.getKey()) {
                 case "EntityRadar" -> isEntityRadar = (Boolean) entry.getValue();
                 case "Pos", "Position" -> {
-                    Tuple<String, String> pos = setTuple(List.of("x", "y"), entry.getValue());
+                    Tuple<String, String> pos = setTuple(Arrays.asList("x", "y"), entry.getValue());
                     xCoord = MCH_HudItem.toFormula(pos.getFirst());
                     yCoord = MCH_HudItem.toFormula(pos.getSecond());
                 }
                 case "Size" -> {
-                    Tuple<String, String> size = setTuple(List.of("width", "height"), entry.getValue());
+                    Tuple<String, String> size = setTuple(Arrays.asList("width", "height"), entry.getValue());
                     width = MCH_HudItem.toFormula(size.getFirst());
                     height = MCH_HudItem.toFormula(size.getSecond());
                 }
@@ -178,7 +177,7 @@ public class HUDParser {
             switch (entry.getKey()) {
                 case "Striped" -> isStriped = (Boolean) entry.getValue();
                 case "Pos", "Position" -> {
-                    Tuple<String, String> pos = setTuple(List.of("x", "y"), entry.getValue());
+                    Tuple<String, String> pos = setTuple(Arrays.asList("x", "y"), entry.getValue());
                     xCoord = MCH_HudItem.toFormula(pos.getFirst());
                     yCoord = MCH_HudItem.toFormula(pos.getSecond());
                 }
@@ -202,7 +201,7 @@ public class HUDParser {
         for (Map.Entry<String, Object> entry : value.entrySet()) {
             switch (entry.getKey()) {
                 case "Pos", "Position" -> {
-                    Tuple<String, String> pos = setTuple(List.of("x", "y"), entry.getValue());
+                    Tuple<String, String> pos = setTuple(Arrays.asList("x", "y"), entry.getValue());
                     xCoord = MCH_HudItem.toFormula(pos.getFirst());
                     yCoord = MCH_HudItem.toFormula(pos.getSecond());
                 }
@@ -225,12 +224,12 @@ public class HUDParser {
         for (Map.Entry<String, Object> entry : value.entrySet()) {
             switch (entry.getKey()) {
                 case "Pos", "Position" -> {
-                    Tuple<String, String> pos = setTuple(List.of("x", "y"), entry.getValue());
+                    Tuple<String, String> pos = setTuple(Arrays.asList("x", "y"), entry.getValue());
                     xCoord = MCH_HudItem.toFormula(pos.getFirst());
                     yCoord = MCH_HudItem.toFormula(pos.getSecond());
                 }
                 case "Size" -> {
-                    Tuple<String, String> size = setTuple(List.of("width", "height"), entry.getValue());
+                    Tuple<String, String> size = setTuple(Arrays.asList("width", "height"), entry.getValue());
                     width = MCH_HudItem.toFormula(size.getFirst());
                     height = MCH_HudItem.toFormula(size.getSecond());
                 }
@@ -254,10 +253,10 @@ public class HUDParser {
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             switch (entry.getKey()) {
                 case "Format" -> format = toFormula((String) entry.getValue());
-                case "Arguments", "Arg" -> args = ((List<String>) entry.getValue()).toArray(String[]::new);
+                case "Arguments", "Arg" -> args = ((List<String>) entry.getValue()).toArray(new String[0]);
                 case "Center" -> center = (Boolean) entry.getValue();
                 case "Pos", "Position" -> {
-                    Tuple<String, String> pos = setTuple(List.of("x", "y"), entry.getValue());
+                    Tuple<String, String> pos = setTuple(Arrays.asList("x", "y"), entry.getValue());
                     xCoord = pos.getFirst();
                     yCoord = pos.getSecond();
                 }
@@ -289,22 +288,22 @@ public class HUDParser {
             switch (entry.getKey()) {
                 case "Texture" -> name = (String) entry.getValue();
                 case "Pos", "Position" -> {
-                    Tuple<String, String> pos = setTuple(List.of("x", "y"), entry.getValue());
+                    Tuple<String, String> pos = setTuple(Arrays.asList("x", "y"), entry.getValue());
                     xCoord = MCH_HudItem.toFormula(pos.getFirst());
                     yCoord = MCH_HudItem.toFormula(pos.getSecond());
                 }
                 case "Size" -> {
-                    Tuple<String, String> size = setTuple(List.of("width", "height"), entry.getValue());
+                    Tuple<String, String> size = setTuple(Arrays.asList("width", "height"), entry.getValue());
                     width = MCH_HudItem.toFormula(size.getFirst());
                     height = MCH_HudItem.toFormula(size.getSecond());
                 }
                 case "UVPos" -> {
-                    Tuple<String, String> uvPos = setTuple(List.of("x", "y"), entry.getValue());
+                    Tuple<String, String> uvPos = setTuple(Arrays.asList("x", "y"), entry.getValue());
                     uLeft = MCH_HudItem.toFormula(uvPos.getFirst());
                     vTop = MCH_HudItem.toFormula(uvPos.getSecond());
                 }
                 case "UVSize" -> {
-                    Tuple<String, String> uvSize = setTuple(List.of("width", "height"), entry.getValue());
+                    Tuple<String, String> uvSize = setTuple(Arrays.asList("width", "height"), entry.getValue());
                     uWidth = MCH_HudItem.toFormula(uvSize.getFirst());
                     vHeight = MCH_HudItem.toFormula(uvSize.getSecond());
                 }
