@@ -1,5 +1,6 @@
 package com.norwood.mcheli.helper.info.parsers.yaml;
 
+import com.norwood.mcheli.MCH_Color;
 import com.norwood.mcheli.aircraft.MCH_AircraftInfo;
 import com.norwood.mcheli.aircraft.MCH_BoundingBox;
 import com.norwood.mcheli.throwable.MCH_ThrowableInfo;
@@ -11,8 +12,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.norwood.mcheli.helper.info.parsers.yaml.YamlParser.getClamped;
-import static com.norwood.mcheli.helper.info.parsers.yaml.YamlParser.logUnkownEntry;
+import static com.norwood.mcheli.helper.info.parsers.yaml.YamlParser.*;
 
 public class ThrowableParser {
 
@@ -55,6 +55,78 @@ public class ThrowableParser {
                     }
 
                 }
+                case "Power" ->
+                        info.power = getClamped(0, Integer.MAX_VALUE, entry.getValue());
+
+                case "Acceleration" ->
+                        info.acceleration = getClamped(100.0F, entry.getValue());
+
+                case "AccelerationInWater" ->
+                        info.accelerationInWater = getClamped(100.0F, entry.getValue());
+
+                case "DispenseAcceleration" ->
+                        info.dispenseAcceleration = getClamped(1000.0F, entry.getValue());
+
+                case "Explosion" ->
+                        info.explosion = getClamped(0, 50, entry.getValue());
+
+                case "DelayFuse" ->
+                        info.delayFuse = getClamped(0, 100000, entry.getValue());
+
+                case "Bound" ->
+                        info.bound = getClamped(100000.0F, entry.getValue());
+
+                case "TimeFuse" ->
+                        info.timeFuse = getClamped(0, 100000, entry.getValue());
+
+                case "Flaming" ->
+                        info.flaming = (Boolean) entry.getValue();
+
+                case "StackSize" ->
+                        info.stackSize = getClamped(1, 64, entry.getValue());
+
+
+                case "ProximityFuseDist" ->
+                        info.proximityFuseDist = getClamped(20.0F, entry.getValue());
+
+                case "Accuracy" ->
+                        info.accuracy = getClamped(1000.0F, entry.getValue());
+
+                case "Alivetime" ->
+                        info.aliveTime = getClamped(0, 1_000_000, entry.getValue());
+
+                case "Bomblet" ->
+                        info.bomblet = getClamped(0, 1000, entry.getValue());
+
+                case "BombletSpread" ->
+                        info.bombletDiff = getClamped(1000.0F, entry.getValue());
+
+                case "SmokeSize" ->
+                        info.smokeSize = getClamped(1000.0F, entry.getValue());
+
+                case "SmokeCount" ->
+                        info.smokeNum = getClamped(0, 1000, entry.getValue());
+
+                case "SmokeVelocityVertical" ->
+                        info.smokeVelocityVertical = getClamped(-100.0F, 100.0F, entry.getValue());
+
+                case "SmokeVelocityHorizontal" ->
+                        info.smokeVelocityHorizontal = getClamped(1000.0F, entry.getValue());
+
+                case "Gravity" ->
+                        info.gravity = getClamped(-50.0F, 50.0F, entry.getValue());
+
+                case "GravityInWater" ->
+                        info.gravityInWater = getClamped(-50.0F, 50.0F, entry.getValue());
+
+                case "Particle" -> {
+                }
+
+                case "DisableSmoke" ->
+                        info.disableSmoke = (Boolean) entry.getValue();
+
+                case "SmokeColor" -> { info.smokeColor = new MCH_Color(parseHexColor(((String)entry.getValue()).trim()));
+                }
 
                 default -> logUnkownEntry(entry, "ThrowableInfo");
             }
@@ -69,7 +141,7 @@ public class ThrowableParser {
         for (Map.Entry<String, Object> entry : soundSettings.entrySet()) {
             switch (entry.getKey()) {
                 case "Volume", "Vol" -> info.soundVolume = getClamped(10F, entry.getValue());
-                case "Pitch" -> info.soundVolume = getClamped(1F, 10F, entry.getValue());
+                case "Pitch" -> info.soundPitch = getClamped(1F, 10F, entry.getValue());
             }
 
         }
