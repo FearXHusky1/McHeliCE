@@ -1,5 +1,8 @@
 package com.norwood.mcheli.hud;
 
+import lombok.Getter;
+
+@Getter
 public class MCH_HudItemRect extends MCH_HudItem {
     private final String left;
     private final String top;

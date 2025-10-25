@@ -42,6 +42,7 @@ import net.minecraft.util.math.Vec3d;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.function.Supplier;
 
 // TODO: refactor the if-else chain with a massive switch or something
@@ -1176,15 +1177,15 @@ public class TxtParser implements IParser {
                     }
                 }
             } else if (item.equalsIgnoreCase("nukeYield")) {
-                info.nukeYield = info.toInt(data, 0, 100000);
+//                info.nukeYield = info.toInt(data, 0, 100000);
             } else if (item.equalsIgnoreCase("chemYield")) {
-                info.chemYield = info.toInt(data, 0, 100000);
+//                info.chemYield = info.toInt(data, 0, 100000);
             } else if (item.equalsIgnoreCase("chemSpeed")) {
-                info.chemSpeed = info.toDouble(data);
+//                info.chemSpeed = info.toDouble(data);
             } else if (item.equalsIgnoreCase("chemType")) {
-                info.chemType = info.toInt(data, 0, 3);
+//                info.chemType = info.toInt(data, 0, 3);
             } else if (item.equalsIgnoreCase("NukeEffectOnly")) {
-                info.nukeEffectOnly = info.toBool(data);
+//                info.nukeEffectOnly = info.toBool(data);
             } else if (item.equalsIgnoreCase("MaxDegreeOfMissile")) {
                 info.maxDegreeOfMissile = info.toInt(data, 0, 100000);
             } else if (item.equalsIgnoreCase("TickEndHoming")) {
@@ -1269,7 +1270,7 @@ public class TxtParser implements IParser {
                     info.dispenseDamege = info.toInt(sx[1], 0, 100000000);
                 }
 
-                info.dispenseItem = W_Item.getItemByName(sx[0]);
+                info.dispenseItemLoc = sx[0].toLowerCase().trim();
             } else if (item.equalsIgnoreCase("DispenseRange")) {
                 info.dispenseRange = info.toInt(data, 1, 100);
             } else if (item.equalsIgnoreCase("Length")) {

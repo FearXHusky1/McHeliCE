@@ -4,26 +4,34 @@ import com.github.bsideup.jabel.Desugar;
 import com.norwood.mcheli.MCH_BaseInfo;
 import com.norwood.mcheli.MCH_Color;
 import com.norwood.mcheli.MCH_DamageFactor;
+import com.norwood.mcheli.compat.hbm.VNTSettingContainer;
 import com.norwood.mcheli.helper.addon.AddonResourceLocation;
+import com.norwood.mcheli.helper.info.parsers.yaml.YamlParser;
+import lombok.Getter;
+import lombok.Setter;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.common.registry.ForgeRegistries;
+import org.yaml.snakeyaml.Yaml;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 
 public class MCH_WeaponInfo extends MCH_BaseInfo {
-    public static Random rand = new Random();
+
+    //HBM compat
+    public Payload payloadNTM = Payload.NONE;
+    public boolean effectOnly = false;
+    public String fluidTypeNTM = null;
+    public VNTSettingContainer vntSettingContainer = null;
+
     public final String name;
+    public static Random rand = new Random();
     public String explosionType;
-    public int nukeYield;
-    public float chemYield;
-    public int chemType = 0;
-    public double chemSpeed;
-    public int effectYield = 0;
-    public boolean nukeEffectOnly;
     public String displayName;
     public String type;
     public int power;
@@ -79,6 +87,7 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
     public float smokeSize;
     public int smokeNum;
     public int smokeMaxAge;
+    public String dispenseItemLoc = null;
     public Item dispenseItem;
     public int dispenseDamege;
     public int dispenseRange;
@@ -363,13 +372,15 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
         this.displayMortarDistance = false;
         this.fixCameraPitch = false;
         this.cameraRotationSpeedPitch = 1.0F;
-        this.nukeYield = 0;
-        this.chemYield = 0;
     }
 
     @Override
     public void onPostReload() {
         MCH_WeaponInfoManager.setRoundItems();
+        if(dispenseItemLoc != null){
+            Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(dispenseItemLoc));
+            if(item != null) dispenseItem = item;
+        }
     }
 
 
@@ -417,6 +428,7 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
         return this.damageFactor != null ? this.damageFactor.getDamageFactor(e) : 1.0F;
     }
 
+    //TODO:Enumify
     public String getWeaponTypeName() {
         return switch (this.type.toLowerCase()) {
             case "machinegun1", "machinegun2", "railgun" -> "MachineGun";
@@ -447,6 +459,17 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
     }
 
 
+    public static enum Payload {
+        NONE,
+        NTM_EXP_SMALL,
+        NTM_EXP_LARGE,
+        NTM_MINI_NUKE,
+        NTM_NUKE,
+        NTM_CHLORINE,
+        NTM_MIST
+    }
+
+
     public static class RoundItem {
         public final int num;
         public final ResourceLocation itemName;
@@ -460,17 +483,17 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
         }
     }
 
-    @Desugar
-    public record MuzzleFlashRaw(
-            float Distance,
-            float Size,
-            float Range,
-            int Age,
-            int Count,
-            int Color //ARGB
-    ) {}
-
-
+    @Getter
+    @Setter
+    public static class MuzzleFlashRaw
+     {
+        float Distance;
+        float Size;
+        float Range;
+        int Age;
+        int Count;
+        String Color; //ARGB
+    }
 
     public static class MuzzleFlash {
 
@@ -486,13 +509,13 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
 
 
         public MuzzleFlash(MuzzleFlashRaw raw) {
-            this.dist = raw.Distance();
-            this.size = raw.Size();
-            this.range = raw.Range();
-            this.age = raw.Age();
-            this.num = raw.Count();
+            this.dist = raw.getDistance();
+            this.size = raw.getSize();
+            this.range = raw.getRange();
+            this.age = raw.getAge();
+            this.num = raw.getCount();
 
-            int color = raw.Color();
+            int color = YamlParser.parseHexColor(raw.getColor());
             this.a = ((color >> 24) & 0xFF) / 255.0F;
             this.r = ((color >> 16) & 0xFF) / 255.0F;
             this.g = ((color >> 8) & 0xFF) / 255.0F;

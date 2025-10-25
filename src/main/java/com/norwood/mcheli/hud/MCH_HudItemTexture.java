@@ -2,8 +2,10 @@ package com.norwood.mcheli.hud;
 
 import com.norwood.mcheli.Tags;
 import com.norwood.mcheli.wrapper.W_TextureUtil;
+import lombok.Getter;
 import org.lwjgl.opengl.GL11; import net.minecraft.client.renderer.GlStateManager;
 
+@Getter
 public class MCH_HudItemTexture extends MCH_HudItem {
     private final String name;
     private final String left;

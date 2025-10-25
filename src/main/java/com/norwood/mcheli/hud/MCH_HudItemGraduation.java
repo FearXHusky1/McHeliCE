@@ -1,9 +1,11 @@
 package com.norwood.mcheli.hud;
 
 import com.norwood.mcheli.MCH_Lib;
+import lombok.Getter;
 import net.minecraft.client.renderer.GlStateManager;
 import org.lwjgl.opengl.GL11; import net.minecraft.client.renderer.GlStateManager;
 
+@Getter
 public class MCH_HudItemGraduation extends MCH_HudItem {
     private final String drawRot;
     private final String drawRoll;

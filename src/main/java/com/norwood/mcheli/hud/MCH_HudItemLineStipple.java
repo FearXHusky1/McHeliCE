@@ -1,5 +1,8 @@
 package com.norwood.mcheli.hud;
 
+import lombok.Getter;
+
+@Getter
 public class MCH_HudItemLineStipple extends MCH_HudItem {
     private final String pat;
     private final String fac;

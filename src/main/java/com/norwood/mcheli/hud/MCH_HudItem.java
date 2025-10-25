@@ -66,7 +66,7 @@ public abstract class MCH_HudItem extends Gui {
     protected static Map<Object, Object> varMap = null;
     protected static float partialTicks;
     private static final MCH_HudItemExit dummy = new MCH_HudItemExit(0);
-    public final int fileLine;
+    public final int fileLine;//It does NOTHING
     protected MCH_Hud parent;
 
     public MCH_HudItem(int fileLine) {

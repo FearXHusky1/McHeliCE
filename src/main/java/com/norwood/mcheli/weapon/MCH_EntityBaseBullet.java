@@ -2,7 +2,7 @@ package com.norwood.mcheli.weapon;
 
 import com.norwood.mcheli.MCH_Config;
 import com.norwood.mcheli.MCH_Explosion;
-import com.norwood.mcheli.MCH_HBMUtil;
+import com.norwood.mcheli.compat.hbm.HBMUtil;
 import com.norwood.mcheli.MCH_Lib;
 import com.norwood.mcheli.aircraft.MCH_EntityAircraft;
 import com.norwood.mcheli.aircraft.MCH_EntityHitBox;
@@ -797,80 +797,96 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
     }
 
     protected void onImpact(RayTraceResult m, float damageFactor) {
-
-        if (!this.world.isRemote) {
+        if (!world.isRemote) {
 
             try {
-                if (this.getInfo().chemYield > 0 && ModCompatManager.isLoaded(ModCompatManager.MODID_HBM)) {
-                    System.out.println("chem yield detected");
-                    MCH_HBMUtil.ExplosionChaos_spawnChlorine(world, posX, posY + 0.5, posZ, this.getInfo().chemYield, this.getInfo().chemSpeed, this.getInfo().chemType);
+                MCH_WeaponInfo info = getInfo();
+
+                // --- HBM Compatibility ---
+//                if (info.chemYield > 0 && ModCompatManager.isLoaded(ModCompatManager.MODID_HBM)) {
+//                    HBMUtil.ExplosionChaos_spawnChlorine(
+//                            world, posX, posY + 0.5, posZ,
+//                            info.chemYield, info.chemSpeed, info.chemType
+//                    );
+//                }
+
+                // --- Entity Impact ---
+                if (m.entityHit != null) {
+                    onImpactEntity(m.entityHit, damageFactor);
+                    piercing = 0;
                 }
+
+                // --- Explosion Setup ---
+                float expPower = explosionPower * damageFactor;
+                float expPowerInWater = explosionPowerInWater * damageFactor;
+                Vec3d hit = m.hitVec;
+
+                // --- Piercing Logic ---
+                if (piercing > 0) {
+                    piercing--;
+                    if (expPower > 0.0F) {
+                        newExplosion(hit.x, hit.y, hit.z, 1.0F, 1.0F, false);
+                    }
+                    return;
+                }
+
+                // --- Explosion Behavior ---
+                if (expPowerInWater == 0.0F) {
+                    if (info.isFAE) {
+                        newFAExplosion(posX, posY, posZ, expPower, info.explosionBlock);
+                    } else if (expPower > 0.0F) {
+                        newExplosion(hit.x, hit.y, hit.z, expPower, info.explosionBlock, false);
+                    } else if (expPower < 0.0F) {
+                        playExplosionSound();
+                    }
+                } else if (m.entityHit != null) {
+                    if (isInWater()) {
+                        newExplosion(hit.x, hit.y, hit.z, expPowerInWater, expPowerInWater, true);
+                    } else {
+                        newExplosion(hit.x, hit.y, hit.z, expPower, info.explosionBlock, false);
+                    }
+                } else {
+                    boolean inWater = isInWater() ||
+                            (m.getBlockPos() != null && MCH_Lib.isBlockInWater(
+                                    world, m.getBlockPos().getX(), m.getBlockPos().getY(), m.getBlockPos().getZ()
+                            ));
+
+                    if (inWater) {
+                        newExplosion(hit.x, hit.y, hit.z, expPowerInWater, expPowerInWater, true);
+                    } else if (expPower > 0.0F) {
+                        newExplosion(hit.x, hit.y, hit.z, expPower, info.explosionBlock, false);
+                    } else if (expPower < 0.0F) {
+                        playExplosionSound();
+                    }
+                }
+
+                setDead();
+
             } catch (Exception e) {
                 MCH_Lib.Log(this, "Error in onImpact: %s", e.getMessage());
                 e.printStackTrace();
             }
 
-            if (m.entityHit != null) {
-                this.onImpactEntity(m.entityHit, damageFactor);
-                this.piercing = 0;
-            }
+        } else if (getInfo() != null &&
+                (getInfo().explosion == 0 || getInfo().modeNum >= 2) &&
+                W_MovingObjectPosition.isHitTypeTile(m)) {
 
-            float expPower = this.explosionPower * damageFactor;
-            float expPowerInWater = this.explosionPowerInWater * damageFactor;
-            double dx = 0.0;
-            double dy = 0.0;
-            double dz = 0.0;
-            if (this.piercing > 0) {
-                this.piercing--;
-                if (expPower > 0.0F) {
-                    this.newExplosion(m.hitVec.x + dx, m.hitVec.y + dy, m.hitVec.z + dz, 1.0F, 1.0F, false);
-                }
-            } else {
-                if (expPowerInWater == 0.0F) {
-                    if (this.getInfo().isFAE) {
-                        this.newFAExplosion(this.posX, this.posY, this.posZ, expPower, this.getInfo().explosionBlock);
-                    } else if (expPower > 0.0F) {
-                        this.newExplosion(m.hitVec.x + dx, m.hitVec.y + dy, m.hitVec.z + dz, expPower, this.getInfo().explosionBlock, false);
-                    } else if (expPower < 0.0F) {
-                        this.playExplosionSound();
-                    }
-                } else if (m.entityHit != null) {
-                    if (this.isInWater()) {
-                        this.newExplosion(m.hitVec.x + dx, m.hitVec.y + dy, m.hitVec.z + dz, expPowerInWater, expPowerInWater, true);
-                    } else {
-                        this.newExplosion(m.hitVec.x + dx, m.hitVec.y + dy, m.hitVec.z + dz, expPower, this.getInfo().explosionBlock, false);
-                    }
-                } else //noinspection ConstantValue
-                    if (this.isInWater() || m.getBlockPos() != null &&
-                            MCH_Lib.isBlockInWater(this.world, m.getBlockPos().getX(), m.getBlockPos().getY(),
-                                    m.getBlockPos().getZ())) {
-                        this.newExplosion(m.hitVec.x + dx, m.hitVec.y + dy, m.hitVec.z + dz, expPowerInWater, expPowerInWater, true);
-                    } else if (expPower > 0.0F) {
-                        this.newExplosion(m.hitVec.x + dx, m.hitVec.y + dy, m.hitVec.z + dz, expPower, this.getInfo().explosionBlock, false);
-                    } else if (expPower < 0.0F) {
-                        this.playExplosionSound();
-                    }
-
-                this.setDead();
-            }
-        } else if (this.getInfo() != null && (this.getInfo().explosion == 0 || this.getInfo().modeNum >= 2) && W_MovingObjectPosition.isHitTypeTile(m)) {
-            float p = this.getInfo().power;
+            // --- Client-side Particle Effects ---
+            float p = getInfo().power;
+            BlockPos pos = m.getBlockPos();
 
             for (int i = 0; i < p / 3.0F; i++) {
                 MCH_ParticlesUtil.spawnParticleTileCrack(
-                        this.world,
-                        m.getBlockPos().getX(),
-                        m.getBlockPos().getY(),
-                        m.getBlockPos().getZ(),
-                        m.hitVec.x + (this.rand.nextFloat() - 0.5) * p / 10.0,
+                        world, pos.getX(), pos.getY(), pos.getZ(),
+                        m.hitVec.x + (rand.nextFloat() - 0.5) * p / 10.0,
                         m.hitVec.y + 0.1,
-                        m.hitVec.z + (this.rand.nextFloat() - 0.5) * p / 10.0,
-                        -this.motionX * p / 2.0,
-                        p / 2.0F,
-                        -this.motionZ * p / 2.0
+                        m.hitVec.z + (rand.nextFloat() - 0.5) * p / 10.0,
+                        -motionX * p / 2.0, p / 2.0F, -motionZ * p / 2.0
                 );
             }
         }
+
+
     }
 
     public void onImpactEntity(Entity entity, float damageFactor) {
@@ -943,12 +959,12 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
             );
         }
 
-        if (this.getInfo().nukeYield > 0 && ModCompatManager.isLoaded(ModCompatManager.MODID_HBM)) {
-            if (!this.getInfo().nukeEffectOnly) {
-                world.spawnEntity(MCH_HBMUtil.EntityNukeExplosionMK5_statFac(world, this.getInfo().nukeYield, this.posX + 0.5, this.posY + 0.5, this.posZ + 0.5));
-            }
-            MCH_HBMUtil.EntityNukeTorex_statFac(world, this.posX + 0.5, this.posY + 0.5, this.posZ + 0.5, (float) this.getInfo().nukeYield);
-        }
+//        if (this.getInfo().nukeYield > 0 && ModCompatManager.isLoaded(ModCompatManager.MODID_HBM)) {
+//            if (!this.getInfo().nukeEffectOnly) {
+//                world.spawnEntity(HBMUtil.EntityNukeExplosionMK5_statFac(world, this.getInfo().nukeYield, this.posX + 0.5, this.posY + 0.5, this.posZ + 0.5));
+//            }
+//            HBMUtil.EntityNukeTorex_statFac(world, this.posX + 0.5, this.posY + 0.5, this.posZ + 0.5, (float) this.getInfo().nukeYield);
+//        }
 
         //moved to onimpact
         //if(this.getInfo().chemYield > 0) {

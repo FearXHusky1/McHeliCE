@@ -51,7 +51,7 @@ public abstract class MCH_WeaponBase {
         this.displayName = wi != null ? wi.displayName : "";
         this.power = 0;
         this.acceleration = 0.0F;
-        this.nukeYield = wi.nukeYield;
+        this.nukeYield = 0; //REMOVE ME
         this.explosionPower = 0;
         this.explosionPowerInWater = 0;
         this.interval = 1;
@@ -252,4 +252,6 @@ public abstract class MCH_WeaponBase {
             return -1.0;
         }
     }
+
+
 }
