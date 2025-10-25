@@ -1,5 +1,8 @@
 package com.norwood.mcheli.hud;
 
+import lombok.Getter;
+
+@Getter
 public class MCH_HudItemLine extends MCH_HudItem {
     private final String[] pos;
 

@@ -45,20 +45,16 @@ public class HUDParser {
         throw new ClassCastException("Map values are not String or Number");
     }
 
-    public void parse(MCH_Hud info, LinkedHashMap<String, Object> root) {
-        for (Map.Entry<String, Object> entry : root.entrySet()) {
-            if (entry.getKey().equals("Conditional")) {
-                parseConditional(info, (LinkedHashMap<String, Object>) entry.getValue());
-            } else {
-                var element = parseHUDCommands(entry);
-                if (element == null)
-                    logUnkownEntry(entry, "Hud");
-                else info.list.add(element);
+    public void parse(MCH_Hud info, Object rootObj) {
+        if (rootObj instanceof List<?>) {
+            for (Object item : (List<?>) rootObj) {
+                parseHudItem(info, item);
             }
+        } else {
+            throw new IllegalArgumentException("Root object must be a List");
         }
-
-
     }
+
 
     private MCH_HudItem parseHUDCommands(Map.Entry<String, Object> entry) {
         switch (entry.getKey()) {
@@ -74,7 +70,7 @@ public class HUDParser {
                 return parseDrawString((Map<String, Object>) entry.getValue());
             }
 
-            case "CameraRot" -> {
+            case "CameraRot", "CameraRotation" -> {
                 return parseCameraRot((Map<String, Object>) entry.getValue());
             }
 
@@ -164,27 +160,45 @@ public class HUDParser {
     }
 
     private MCH_HudItem parseLine(Map<String, Object> value) {
-        String xCoord = null;
-        String yCoord = null;
         boolean isStriped = false;
+        List<List<String>> positions = new ArrayList<>();
 
         for (Map.Entry<String, Object> entry : value.entrySet()) {
             switch (entry.getKey()) {
                 case "Striped" -> isStriped = (Boolean) entry.getValue();
-                case "Pos", "Position" -> {
-                    Tuple<String, String> pos = setTuple(Arrays.asList("x", "y"), entry.getValue());
-                    xCoord = MCH_HudItem.toFormula(pos.getFirst());
-                    yCoord = MCH_HudItem.toFormula(pos.getSecond());
+                case "StartPos", "Position", "Start" -> {
+                    Object raw = entry.getValue();
+
+                    if (raw instanceof List<?> rawList) {
+                        for (Object pairObj : rawList) {
+                            if (pairObj instanceof List<?> pair && pair.size() == 2) {
+                                String x = MCH_HudItem.toFormula(pair.get(0).toString());
+                                String y = MCH_HudItem.toFormula(pair.get(1).toString());
+                                positions.add(Arrays.asList(x, y));
+                            } else {
+                                throw new IllegalArgumentException("Each position must be a list of exactly 2 elements.");
+                            }
+                        }
+                    } else {
+                        throw new IllegalArgumentException("Position field must be a list of lists.");
+                    }
                 }
-                default -> logUnkownEntry(entry, "VehicleFeatures");
+                default -> logUnkownEntry(entry, "Line");
             }
         }
 
-        if (xCoord == null || yCoord == null)
-            throw new IllegalArgumentException("Pos fields are required for Line element.");
-        String[] coordsArr = new String[]{xCoord, yCoord};
-        if (isStriped) return new MCH_HudItemLineStipple(0, coordsArr);
-        else return new MCH_HudItemLine(0, coordsArr);
+        if (positions.isEmpty()) {
+            throw new IllegalArgumentException("At least one position is required for Line element.");
+        }
+
+        // Flatten the list of lists into a single String[] array
+        String[] coordsArr = positions.stream()
+                .flatMap(List::stream)
+                .toArray(String[]::new);
+
+        return isStriped
+                ? new MCH_HudItemLineStipple(0, coordsArr)
+                : new MCH_HudItemLine(0, coordsArr);
     }
 
     private MCH_HudItem parseCameraRot(Map<String, Object> value) {
@@ -312,19 +326,49 @@ public class HUDParser {
 
     }
 
-    private void parseConditional(MCH_Hud info, LinkedHashMap<String, Object> map) {
+    private void parseHudItem(MCH_Hud info, Object obj) {
+        if (obj instanceof Map<?, ?> map) {
+            if (map.containsKey("If")) {
+                parseConditional(info, (LinkedHashMap<String, Object>) map);
+            } else {
+                Map.Entry<String,Object> entry = ((Map<String,Object>) map).entrySet().iterator().next();
+                var element = parseHUDCommands(entry);
+                if (element == null) logUnkownEntry(entry, "Hud");
+                else info.list.add(element);
+            }
+        } else {
+            throw new IllegalArgumentException("Each HUD item must be a Map");
+        }
+    }
+
+
+    private void parseConditional(MCH_Hud info, Map<String, Object> map) {
         String condition = ((String) map.get("If")).trim();
-        if (condition == null || condition.isEmpty()) throw new IllegalArgumentException("Condition cannot be blank!");
+        if (condition == null || condition.isEmpty())
+            throw new IllegalArgumentException("Condition cannot be blank!");
+
         var conditional = new MCH_HudItemConditional(0, false, condition);
-        var doBlock = (LinkedHashMap<String, Object>) map.get("Do");
-        if (doBlock.isEmpty()) throw new IllegalArgumentException("Conditional cannot do nothing!");
-
-        List<MCH_HudItem> parsedDo = doBlock.entrySet().stream().map(this::parseHUDCommands).collect(Collectors.toList());
-
         info.list.add(conditional);
-        info.list.addAll(parsedDo);
+
+        List<Object> doBlock = (List<Object>) map.get("Do");
+        if (doBlock.isEmpty())
+            throw new IllegalArgumentException("Conditional cannot do nothing!");
+
+        for (Object obj : doBlock) {
+            if (obj instanceof Map<?, ?> objMap) {
+                for (Map.Entry<String, Object> entry : ((Map<String,Object>) objMap).entrySet()) {
+                    MCH_HudItem element = parseHUDCommands(entry);
+                    if (element != null) info.list.add(element);
+                    else logUnkownEntry(entry, "Hud");
+                }
+            } else {
+                throw new IllegalArgumentException("Each Do block item must be a Map");
+            }
+        }
+
         info.list.add(new MCH_HudItemConditional(0, true, null));
     }
+
 
     public static enum GraduationType {
         YAW, PITCH, PITCH_ROLL, PITCH_ROLL_ALT;

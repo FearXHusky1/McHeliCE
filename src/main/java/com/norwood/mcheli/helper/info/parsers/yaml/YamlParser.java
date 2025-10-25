@@ -245,12 +245,12 @@ public class YamlParser implements IParser {
 
     @Override
     public @Nullable MCH_Hud parseHud(AddonResourceLocation location, String filepath, List<String> lines, boolean reload) throws Exception {
-        //Order absolutely matters with this one. As far as I know the map is already linked but this just makes sure
-        LinkedHashMap<String, Object> root = YAML_INSTANCE.load(lines.stream().collect(Collectors.joining("\n")));
+        Object root = YAML_INSTANCE.load(lines.stream().collect(Collectors.joining("\n")));
         var info = new MCH_Hud(location, filepath);
         HUD_PARSER.parse(info, root);
         return info;
     }
+
 
     @Override
     public @Nullable MCH_ItemInfo parseItem(AddonResourceLocation location, String filepath, List<String> lines, boolean reload) throws Exception {

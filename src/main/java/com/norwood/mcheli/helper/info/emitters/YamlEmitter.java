@@ -7,7 +7,8 @@ import com.norwood.mcheli.aircraft.MCH_SeatInfo;
 import com.norwood.mcheli.aircraft.MCH_SeatRackInfo;
 import com.norwood.mcheli.helicopter.MCH_HeliInfo;
 import com.norwood.mcheli.helper.info.parsers.yaml.ComponentParser;
-import com.norwood.mcheli.hud.MCH_Hud;
+import com.norwood.mcheli.helper.info.parsers.yaml.HUDParser;
+import com.norwood.mcheli.hud.*;
 import com.norwood.mcheli.item.MCH_ItemInfo;
 import com.norwood.mcheli.plane.MCH_PlaneInfo;
 import com.norwood.mcheli.ship.MCH_ShipInfo;
@@ -88,6 +89,14 @@ public class YamlEmitter implements IEmitter {
         return seq;
     }
 
+    private static InlineSeq<String> inline(String... values) {
+        InlineSeq<String> seq = new InlineSeq<>(values.length);
+        for (String v : values) {
+            seq.add(v);
+        }
+        return seq;
+    }
+
     private static InlineSeq<Double> vec(Vec3d v) {
         return inline(v.x, v.y, v.z);
     }
@@ -126,6 +135,18 @@ public class YamlEmitter implements IEmitter {
     private static String toHexRGB(int color) {
         int rgb = color & 0xFFFFFF;
         return String.format("#%06X", rgb);
+    }
+
+    private static String targetToString(int flags) {
+        if ((flags & 64) != 0) return "Block";
+        List<String> parts = new ArrayList<>();
+        if ((flags & 32) != 0) parts.add("Planes");
+        if ((flags & 16) != 0) parts.add("Helicopters");
+        if ((flags & 8) != 0) parts.add("Vehicles");
+        if ((flags & 4) != 0) parts.add("Players");
+        if ((flags & 2) != 0) parts.add("Monsters");
+        if ((flags & 1) != 0) parts.add("Others");
+        return String.join(",", parts);
     }
 
     @Override
@@ -300,7 +321,8 @@ public class YamlEmitter implements IEmitter {
         if (notBlank(info.hitSound)) sndLoc.put("Hit", info.hitSound.toLowerCase(Locale.ROOT));
         if (notBlank(info.hitSoundIron)) sndLoc.put("HitMetal", info.hitSoundIron.toLowerCase(Locale.ROOT));
         if (notBlank(info.railgunSound)) sndLoc.put("Railgun", info.railgunSound.toLowerCase(Locale.ROOT));
-        if (notBlank(info.weaponSwitchSound)) sndLoc.put("WeaponSwitch", info.weaponSwitchSound.toLowerCase(Locale.ROOT));
+        if (notBlank(info.weaponSwitchSound))
+            sndLoc.put("WeaponSwitch", info.weaponSwitchSound.toLowerCase(Locale.ROOT));
         if (!sndLoc.isEmpty()) snd.put("Locations", sndLoc);
         if (!snd.isEmpty()) root.put("Sound", snd);
 
@@ -345,7 +367,8 @@ public class YamlEmitter implements IEmitter {
         if (info.scanInterval != 20) missile.put("ScanInterval", info.scanInterval);
         if (info.tickEndHoming != -1) missile.put("TickEndHoming", info.tickEndHoming);
         if (info.pdHDNMaxDegree != 1000.0f) missile.put("PDHDNMaxDegree", info.pdHDNMaxDegree);
-        if (info.pdHDNMaxDegreeLockOutCount != 10) missile.put("PDHDNMaxDegreeLockOutCount", info.pdHDNMaxDegreeLockOutCount);
+        if (info.pdHDNMaxDegreeLockOutCount != 10)
+            missile.put("PDHDNMaxDegreeLockOutCount", info.pdHDNMaxDegreeLockOutCount);
         if (info.turningFactor != 0.5) missile.put("TurningFactor", info.turningFactor);
         if (info.maxDegreeOfMissile != 60) missile.put("MaxDegreeOfMissile", info.maxDegreeOfMissile);
         if (info.canBeIntercepted) missile.put("CanBeIntercepted", true);
@@ -478,7 +501,8 @@ public class YamlEmitter implements IEmitter {
         if (notBlank(info.bulletModelName)) render.put("BulletModel", info.bulletModelName);
         if (notBlank(info.bombletModelName)) render.put("BombletModel", info.bombletModelName);
         if (notBlank(info.trajectoryParticleName)) render.put("TrajectoryParticle", info.trajectoryParticleName);
-        if (info.trajectoryParticleStartTick != 0) render.put("TrajectoryParticleStartTick", info.trajectoryParticleStartTick);
+        if (info.trajectoryParticleStartTick != 0)
+            render.put("TrajectoryParticleStartTick", info.trajectoryParticleStartTick);
         if (info.flakParticlesCrack != 10) render.put("FlakParticlesCrack", info.flakParticlesCrack);
         if (info.numParticlesFlak != 3) render.put("ParticlesFlak", info.numParticlesFlak);
         // Smoke sub-block
@@ -516,12 +540,177 @@ public class YamlEmitter implements IEmitter {
 
     @Override
     public String emitHud(MCH_Hud hud) {
-        Map<String, Object> root = new LinkedHashMap<>();
-        root.put("Name", hud.name);
-        root.put("FileName", hud.fileName);
-        root.put("Items", hud.list == null ? 0 : hud.list.size());
-        return YAML.dump(root);
+        List<Object> rootList = new ArrayList<>();
+        ListIterator<MCH_HudItem> iterator = hud.list.listIterator();
+
+        while (iterator.hasNext()) {
+            MCH_HudItem item = iterator.next();
+
+            if (item instanceof MCH_HudItemConditional conditional && !conditional.isEndif()) {
+                Map<String, Object> conditionalMap = new LinkedHashMap<>();
+                conditionalMap.put("If", conditional.getConditional());
+                conditionalMap.put("Do", collectConditionalList(iterator));
+                rootList.add(conditionalMap);
+            } else if (!(item instanceof MCH_HudItemConditional conditional && conditional.isEndif())) {
+                Map.Entry<String, Object> entry = getHudEntry(item);
+                if (entry != null) {
+                    Map<String, Object> itemMap = new LinkedHashMap<>();
+                    itemMap.put(entry.getKey(), entry.getValue());
+                    rootList.add(itemMap);
+                }
+            }
+        }
+
+        return YAML.dump(rootList);
     }
+
+    private List<Object> collectConditionalList(Iterator<MCH_HudItem> iterator) {
+        List<Object> list = new ArrayList<>();
+
+        while (iterator.hasNext()) {
+            MCH_HudItem item = iterator.next();
+
+            if (item instanceof MCH_HudItemConditional conditional && conditional.isEndif()) {
+                break;
+            }
+
+            // Handle nested conditionals
+            if (item instanceof MCH_HudItemConditional nested && !nested.isEndif()) {
+                Map<String, Object> nestedMap = new LinkedHashMap<>();
+                nestedMap.put("If", nested.getConditional());
+                nestedMap.put("Do", collectConditionalList(iterator));
+                list.add(nestedMap);
+            } else {
+                Map.Entry<String, Object> entry = getHudEntry(item);
+                if (entry != null) {
+                    Map<String, Object> itemMap = new LinkedHashMap<>();
+                    itemMap.put(entry.getKey(), entry.getValue());
+                    list.add(itemMap);
+                }
+            }
+        }
+
+        return list;
+    }
+
+
+    public Map.Entry<String, Object> getHudEntry(MCH_HudItem hudItem) {
+        if (hudItem instanceof MCH_HudItemColor) {
+            MCH_HudItemColor color = (MCH_HudItemColor) hudItem;
+            return new AbstractMap.SimpleEntry<>("Color", color.getUpdateColor());
+        }
+
+        if (hudItem instanceof MCH_HudItemTexture) {
+            MCH_HudItemTexture texture = (MCH_HudItemTexture) hudItem;
+            Map<String, Object> textureSettings = new LinkedHashMap<>();
+            textureSettings.put("Name", texture.getName());
+            textureSettings.put("Position", inline(texture.getLeft(), texture.getTop()));
+            textureSettings.put("Size", inline(texture.getWidth(), texture.getHeight()));
+            textureSettings.put("UVPos", inline(texture.getULeft(), texture.getVTop()));
+            textureSettings.put("UVSize", inline(texture.getUWidth(), texture.getVHeight()));
+            textureSettings.put("Rotation", texture.getRot());
+            return new AbstractMap.SimpleEntry<>("DrawTexture", textureSettings);
+        }
+
+        if (hudItem instanceof MCH_HudItemString) {
+            MCH_HudItemString string = (MCH_HudItemString) hudItem;
+            Map<String, Object> stringSettings = new LinkedHashMap<>();
+            stringSettings.put("Format", string.getFormat());
+            stringSettings.put("Position", inline(string.getPosX(), string.getPosY()));
+            stringSettings.put("Arguments", inline(
+                    Arrays.stream(string.getArgs())
+                            .map(x -> x.name().toLowerCase())
+                            .toArray(String[]::new)
+            ));
+            stringSettings.put("Center", string.isCenteredString());
+            return new AbstractMap.SimpleEntry<>("DrawString", stringSettings);
+        }
+
+        if (hudItem instanceof MCH_HudItemCameraRot) {
+            MCH_HudItemCameraRot cameraRot = (MCH_HudItemCameraRot) hudItem;
+            Map<String, Object> rotSettings = new LinkedHashMap<>();
+            rotSettings.put("Position", inline(cameraRot.getDrawPosX(), cameraRot.getDrawPosY()));
+            return new AbstractMap.SimpleEntry<>("CameraRotation", rotSettings);
+        }
+
+        if (hudItem instanceof MCH_HudItemRect) {
+            MCH_HudItemRect rect = (MCH_HudItemRect) hudItem;
+            Map<String, Object> rectSettings = new LinkedHashMap<>();
+            rectSettings.put("Position", inline(rect.getLeft(), rect.getTop()));
+            rectSettings.put("Size", inline(rect.getWidth(), rect.getHeight()));
+            return new AbstractMap.SimpleEntry<>("DrawRectangle", rectSettings);
+        }
+
+        if (hudItem instanceof MCH_HudItemLine) {
+            MCH_HudItemLine line = (MCH_HudItemLine) hudItem;
+            Map<String, Object> lineSettings = new LinkedHashMap<>();
+            String[] posArray = line.getPos();
+
+            List<List<String>> positions = new ArrayList<>();
+            for (int i = 0; i < posArray.length; i += 2) {
+                positions.add(
+                        inline(posArray[i], posArray[i + 1])
+                );
+            }
+
+            lineSettings.put("Position", positions);
+            lineSettings.put("Striped", false);
+            return new AbstractMap.SimpleEntry<>("DrawLine", lineSettings);
+        }
+
+        if (hudItem instanceof MCH_HudItemLineStipple) {
+            MCH_HudItemLineStipple line = (MCH_HudItemLineStipple) hudItem;
+            Map<String, Object> lineSettings = new LinkedHashMap<>();
+            String[] posArray = line.getPos();
+
+            List<List<String>> positions = new ArrayList<>();
+            for (int i = 0; i < posArray.length; i += 2) {
+                positions.add(
+                        inline(posArray[i], posArray[i + 1])
+                );
+            }
+
+            lineSettings.put("Position", positions);
+            lineSettings.put("Striped", true);
+            return new AbstractMap.SimpleEntry<>("DrawLine", lineSettings);
+        }
+
+        if (hudItem instanceof MCH_HudItemCall) {
+            MCH_HudItemCall call = (MCH_HudItemCall) hudItem;
+            return new AbstractMap.SimpleEntry<>("Call", call.getHudName());
+        }
+
+        if (hudItem instanceof MCH_HudItemRadar) {
+            MCH_HudItemRadar radar = (MCH_HudItemRadar) hudItem;
+            Map<String, Object> radarSettings = new LinkedHashMap<>();
+            radarSettings.put("Position", inline(radar.getLeft(), radar.getTop()));
+            radarSettings.put("Size", inline(radar.getWidth(), radar.getHeight()));
+            radarSettings.put("Rotation", radar.getRot());
+            radarSettings.put("EntityRadar", radar.isEntityRadar());
+            return new AbstractMap.SimpleEntry<>("DrawRadar", radarSettings);
+        }
+
+        if (hudItem instanceof MCH_HudItemGraduation) {
+            MCH_HudItemGraduation grad = (MCH_HudItemGraduation) hudItem;
+            Map<String, Object> gradSettings = new LinkedHashMap<>();
+
+            HUDParser.GraduationType typeEnum = grad.getType() >= 0
+                    ? HUDParser.GraduationType.values()[grad.getType()]
+                    : null;
+            if (typeEnum != null) {
+                gradSettings.put("Type", typeEnum.name());
+            }
+
+            gradSettings.put("Position", inline(grad.getDrawPosX(), grad.getDrawPosY()));
+            gradSettings.put("Rotation", grad.getDrawRot());
+            gradSettings.put("Roll", grad.getDrawRoll());
+
+            return new AbstractMap.SimpleEntry<>("DrawGraduation", gradSettings);
+        }
+
+        return null;
+    }
+
 
     @Override
     public String emitItem(MCH_ItemInfo info) {
@@ -530,21 +719,9 @@ public class YamlEmitter implements IEmitter {
         return YAML.dump(root);
     }
 
-    private static String targetToString(int flags) {
-        if ((flags & 64) != 0) return "Block";
-        List<String> parts = new ArrayList<>();
-        if ((flags & 32) != 0) parts.add("Planes");
-        if ((flags & 16) != 0) parts.add("Helicopters");
-        if ((flags & 8) != 0) parts.add("Vehicles");
-        if ((flags & 4) != 0) parts.add("Players");
-        if ((flags & 2) != 0) parts.add("Monsters");
-        if ((flags & 1) != 0) parts.add("Others");
-        return String.join(",", parts);
-    }
-
-    private float convertRotorSpeed(float speed){
+    private float convertRotorSpeed(float speed) {
         float rounded = round3(speed);
-            if (rounded > 0.01F) rounded -= 0.01F;
+        if (rounded > 0.01F) rounded -= 0.01F;
         if (rounded < -0.01F) rounded += 0.01F;
         return rounded;
     }
@@ -573,7 +750,7 @@ public class YamlEmitter implements IEmitter {
 
         if (info.canRide != dummyInfo.canRide) root.put("CanRide", info.canRide);
         if (info.rotorSpeed != dummyInfo.rotorSpeed) root.put("RotorSpeed", convertRotorSpeed(info.rotorSpeed));
-        if (!info.turretPosition.equals( Vec3d.ZERO)) root.put("TurretPosition", vec(info.turretPosition));
+        if (!info.turretPosition.equals(Vec3d.ZERO)) root.put("TurretPosition", vec(info.turretPosition));
         if (info.unmountPosition != null) root.put("GlobalUnmountPos", vec(info.unmountPosition));
         if (info.creativeOnly != dummyInfo.creativeOnly) root.put("CreativeOnly", info.creativeOnly);
         if (info.regeneration != dummyInfo.regeneration) root.put("Regeneration", info.regeneration);
@@ -856,8 +1033,8 @@ public class YamlEmitter implements IEmitter {
                     seats.get(index).put("Hud", name);
                 }
             }
-           if(info.exclusionSeatList != null &&  !info.exclusionSeatList.isEmpty())
-               appendExlusionEntries(seats,info,false);
+            if (info.exclusionSeatList != null && !info.exclusionSeatList.isEmpty())
+                appendExlusionEntries(seats, info, false);
 
 
             root.put("Seats", seats);
@@ -866,7 +1043,7 @@ public class YamlEmitter implements IEmitter {
         // Racks
         if (info.getNumSeat() < info.getNumSeatAndRack()) {
             List<Map<String, Object>> racks = new ArrayList<>();
-            List<MCH_SeatRackInfo> rackInfos =   info.seatList.stream().filter(instanceOf(MCH_SeatRackInfo.class)).map(MCH_SeatRackInfo.class::cast).collect(Collectors.toList());
+            List<MCH_SeatRackInfo> rackInfos = info.seatList.stream().filter(instanceOf(MCH_SeatRackInfo.class)).map(MCH_SeatRackInfo.class::cast).collect(Collectors.toList());
             for (MCH_SeatRackInfo r : rackInfos) {
                 Map<String, Object> rm = new LinkedHashMap<>();
                 rm.put("Position", vec(r.pos));
@@ -998,7 +1175,7 @@ public class YamlEmitter implements IEmitter {
         return m;
     }
 
-    private void appendExlusionEntries(List<Map<String,Object>> targetList, MCH_AircraftInfo info, boolean isRackList) {
+    private void appendExlusionEntries(List<Map<String, Object>> targetList, MCH_AircraftInfo info, boolean isRackList) {
         if (info.exclusionSeatList == null || info.exclusionSeatList.isEmpty()) return;
 
         final int seatCount = info.getNumSeat();
@@ -1052,11 +1229,6 @@ public class YamlEmitter implements IEmitter {
 
             targetList.get(ownerIndexInTarget).put("ExcludeWith", exMap);
         }
-    }
-
-    private static final class ExAgg {
-        final Set<Integer> seats = new LinkedHashSet<>(); // 0-based
-        final Set<Integer> racks = new LinkedHashSet<>(); // 0-based
     }
 
     private void addCommonComponents(Map<String, List<Map<String, Object>>> components, MCH_AircraftInfo info) {
@@ -1273,6 +1445,11 @@ public class YamlEmitter implements IEmitter {
             }
             if (!list.isEmpty()) components.put("RepelHook", list);
         }
+    }
+
+    private static final class ExAgg {
+        final Set<Integer> seats = new LinkedHashSet<>(); // 0-based
+        final Set<Integer> racks = new LinkedHashSet<>(); // 0-based
     }
 
     private static final class InlineSeq<E> extends ArrayList<E> {
