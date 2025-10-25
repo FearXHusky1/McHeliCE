@@ -567,6 +567,7 @@ public class YamlParser implements IParser {
 
                 default -> logUnkownEntry(entry, "BoundingBox");
             }
+        }
 
             if (pos == null) throw new IllegalArgumentException("Bounding box must have a position!");
             if (size == null) throw new IllegalArgumentException("Bounding box must have a size!");
@@ -574,7 +575,7 @@ public class YamlParser implements IParser {
             var parsedBox = new MCH_BoundingBox(pos.x, pos.y, pos.z, (float) size.x, (float) size.y, (float) size.z, damageFact);
             parsedBox.setBoundingBoxType(type);
             info.extraBoundingBox.add(parsedBox);
-        }
+
 
     }
 
@@ -802,6 +803,7 @@ public class YamlParser implements IParser {
             case "Zoom", "CameraZoom" -> info.cameraZoom = getClamped(1, 10, entry.getValue());
             case "DefaultFreeLook" -> info.defaultFreelook = ((Boolean) entry.getValue()).booleanValue();
             case "RotationSpeed" -> info.cameraRotationSpeed = getClamped(10000.0F, entry.getValue());
+            case "AlwaysCameraView" -> info.alwaysCameraView = (Boolean) entry.getValue();
             case "Pos", "Positons" -> {
                 List<Map<String, Object>> cameraList = (List<Map<String, Object>>) entry.getValue();
                 info.cameraPosition.addAll(cameraList.stream().map(camera -> parseCameraPosition(camera, info)).collect(Collectors.toList()));
@@ -946,10 +948,6 @@ public class YamlParser implements IParser {
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             switch (entry.getKey()) {
                 case "Pos", "Position" -> pos = parseVector(entry.getValue());
-                case "AlwaysCameraView" -> {
-                    if (info == null) continue;
-                    info.alwaysCameraView = (Boolean) entry.getValue();
-                }
                 case "FixedRot" -> fixRot = (Boolean) entry.getValue();
                 case "Yaw" -> yaw = ((Number) entry.getValue()).floatValue();
                 case "Pitch" -> pitch = ((Number) entry.getValue()).floatValue();
