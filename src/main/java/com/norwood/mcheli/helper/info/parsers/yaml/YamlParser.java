@@ -526,6 +526,7 @@ public class YamlParser implements IParser {
             switch (entry.getKey()) {
                 case "Hitboxes" -> {
                     List<Map<String, Object>> wheels = (List<Map<String, Object>>) entry.getValue();
+                    info.wheels.clear();
                     info.wheels.addAll(wheels.stream().map(this::parseWheel).sorted((o1, o2) -> o1.pos.z > o2.pos.z ? -1 : 1).collect(Collectors.toList()));
                 }
                 case "WheelRotation" -> info.partWheelRot = getClamped(-10000.0F, 10000.0F, entry.getValue());
