@@ -375,9 +375,9 @@ public class YamlParser implements IParser {
                 case "AmmoSupplyRange" -> info.ammoSupplyRange = getClamped(1000, entry.getValue());
                 case "RepairOtherVehicles" -> {
                     Map<String, Number> repairMap = (HashMap<String, Number>) entry.getValue();
-                    if (repairMap.containsKey("range"))
+                    if (repairMap.containsKey("Range"))
                         info.repairOtherVehiclesRange = getClamped(1_000.0F, (Object) repairMap.get("range"));
-                    if (repairMap.containsKey("value"))
+                    if (repairMap.containsKey("Value"))
                         info.repairOtherVehiclesValue = getClamped(10_000_000, (Object) repairMap.get("value"));
                 }
 

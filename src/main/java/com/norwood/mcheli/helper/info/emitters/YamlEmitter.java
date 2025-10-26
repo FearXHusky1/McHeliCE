@@ -534,7 +534,7 @@ public class YamlEmitter implements IEmitter {
     @Override
     public String emitThrowable(MCH_ThrowableInfo info) {
         Map<String, Object> root = new LinkedHashMap<>();
-        var dummy = new MCH_ThrowableInfo(info.location,info.filePath); //Contains default values
+        var dummy = new MCH_ThrowableInfo(info.location, info.filePath); //Contains default values
 
         // DisplayName
         if (!Objects.equals(info.displayName, dummy.displayName) || !info.displayNameLang.isEmpty()) {
@@ -573,8 +573,10 @@ public class YamlEmitter implements IEmitter {
         // Numeric & boolean fields
         if (info.power != dummy.power) root.put("Power", info.power);
         if (info.acceleration != dummy.acceleration) root.put("Acceleration", info.acceleration);
-        if (info.accelerationInWater != dummy.accelerationInWater) root.put("AccelerationInWater", info.accelerationInWater);
-        if (info.dispenseAcceleration != dummy.dispenseAcceleration) root.put("DispenseAcceleration", info.dispenseAcceleration);
+        if (info.accelerationInWater != dummy.accelerationInWater)
+            root.put("AccelerationInWater", info.accelerationInWater);
+        if (info.dispenseAcceleration != dummy.dispenseAcceleration)
+            root.put("DispenseAcceleration", info.dispenseAcceleration);
         if (info.explosion != dummy.explosion) root.put("Explosion", info.explosion);
         if (info.delayFuse != dummy.delayFuse) root.put("DelayFuse", info.delayFuse);
         if (info.bound != dummy.bound) root.put("Bound", info.bound);
@@ -604,8 +606,10 @@ public class YamlEmitter implements IEmitter {
             if (info.smokeColor != null) smokeMap.put("Color", info.smokeColor.toHexString());
 
             Map<String, Object> velMap = new LinkedHashMap<>();
-            if (info.smokeVelocityVertical != dummy.smokeVelocityVertical) velMap.put("Vertical", info.smokeVelocityVertical);
-            if (info.smokeVelocityHorizontal != dummy.smokeVelocityHorizontal) velMap.put("Horizontal", info.smokeVelocityHorizontal);
+            if (info.smokeVelocityVertical != dummy.smokeVelocityVertical)
+                velMap.put("Vertical", info.smokeVelocityVertical);
+            if (info.smokeVelocityHorizontal != dummy.smokeVelocityHorizontal)
+                velMap.put("Horizontal", info.smokeVelocityHorizontal);
             if (!velMap.isEmpty()) smokeMap.put("Velocity", velMap);
 
             root.put("Smoke", smokeMap);
@@ -697,13 +701,12 @@ public class YamlEmitter implements IEmitter {
             Map<String, Object> textMap = new LinkedHashMap<>();
 
 
-
             textMap.put("Fmt", string.getFormat());
             textMap.put("Vars",
-                   inline(Arrays.stream(string.getArgs()).map(Enum::name).toArray(String[]::new))
-                    );
+                    inline(Arrays.stream(string.getArgs()).map(Enum::name).toArray(String[]::new))
+            );
 
-            stringSettings.put("Text",textMap);
+            stringSettings.put("Text", textMap);
 
             stringSettings.put("Position", inline(string.getPosX(), string.getPosY()));
             stringSettings.put("Center", string.isCenteredString());
@@ -849,8 +852,8 @@ public class YamlEmitter implements IEmitter {
 
         if (info.repairOtherVehiclesRange != 0.0F || info.repairOtherVehiclesValue != 0) {
             Map<String, Object> repair = new LinkedHashMap<>();
-            repair.put("range", info.repairOtherVehiclesRange);
-            repair.put("value", info.repairOtherVehiclesValue);
+            repair.put("Range", info.repairOtherVehiclesRange);
+            repair.put("Value", info.repairOtherVehiclesValue);
             root.put("RepairOtherVehicles", repair);
         }
         if (notBlank(info.nameOnModernAARadar) && !info.nameOnModernAARadar.equals(dummyInfo.nameOnModernAARadar))
@@ -1189,8 +1192,8 @@ public class YamlEmitter implements IEmitter {
                 hitboxes.add(wm);
             }
             wheels.put("Hitboxes", hitboxes);
-            wheels.put("WheelRotation", info.partWheelRot);
-            wheels.put("TrackRotation", info.trackRollerRot);
+            if (info.partWheelRot != dummyInfo.partWheelRot) wheels.put("WheelRotation", info.partWheelRot);
+            if (info.trackRollerRot != dummyInfo.trackRollerRot) wheels.put("TrackRotation", info.trackRollerRot);
             root.put("Wheels", wheels);
         }
 
@@ -1231,7 +1234,7 @@ public class YamlEmitter implements IEmitter {
         }
 
         // Flare
-        if (info.flare != null) {
+        if (info.flare.types.length != 0) {
             Map<String, Object> flare = new LinkedHashMap<>();
             flare.put("Pos", vec(info.flare.pos));
 
