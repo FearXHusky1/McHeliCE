@@ -185,10 +185,21 @@ public class YamlEmitter implements IEmitter {
         // Plane-specific
         if (info.rotorList != null && !info.rotorList.isEmpty()) {
             List<Map<String, Object>> list = new ArrayList<>();
-            for (MCH_PlaneInfo.Rotor r : info.rotorList) {
-                Map<String, Object> m = drawnPart(r);
-                if (r.maxRotFactor != 0) m.put("RotFactor", r.maxRotFactor * 90.0F);
-                list.add(m);
+            for (MCH_PlaneInfo.Rotor rotor : info.rotorList) {
+                Map<String, Object> rotMap = drawnPart(rotor);
+                if (rotor.maxRotFactor != 0) rotMap.put("RotFactor", rotor.maxRotFactor * 90.0F);
+                if(!rotor.blades.isEmpty()){
+                    List<Map<String,Object>> blades = new ArrayList<>();
+                   for(var blade : rotor.blades) {
+                       var bladeMap = drawnPart(blade);
+                       bladeMap.put("BladeNum",blade.numBlade);
+                       bladeMap.put("BladeRot",blade.rotBlade);
+                       blades.add(bladeMap);
+                   }
+                   rotMap.put("Blades",blades);
+
+                }
+                list.add(rotMap);
             }
             components.put("PlaneRotor", list);
         }
