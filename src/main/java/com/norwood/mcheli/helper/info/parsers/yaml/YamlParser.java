@@ -376,9 +376,9 @@ public class YamlParser implements IParser {
                 case "RepairOtherVehicles" -> {
                     Map<String, Number> repairMap = (HashMap<String, Number>) entry.getValue();
                     if (repairMap.containsKey("Range"))
-                        info.repairOtherVehiclesRange = getClamped(1_000.0F, (Object) repairMap.get("range"));
+                        info.repairOtherVehiclesRange = getClamped(1_000.0F, (Object) repairMap.get("Range"));
                     if (repairMap.containsKey("Value"))
-                        info.repairOtherVehiclesValue = getClamped(10_000_000, (Object) repairMap.get("value"));
+                        info.repairOtherVehiclesValue = getClamped(10_000_000, (Object) repairMap.get("Value"));
                 }
 
                 //UNUSED in reforged too,
