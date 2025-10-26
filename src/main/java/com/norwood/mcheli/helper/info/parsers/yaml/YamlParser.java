@@ -506,6 +506,7 @@ public class YamlParser implements IParser {
                 }
 
 
+                case "PlaneFeatures","TankFeatures","HeliFeatures","VehicleFeatures"->{}
                 default -> logUnkownEntry(entry, "AircraftInfo");
             }
         }

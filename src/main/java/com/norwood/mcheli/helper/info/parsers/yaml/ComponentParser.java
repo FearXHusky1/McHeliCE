@@ -130,7 +130,7 @@ public class ComponentParser {
                             }
 
                             return gear;
-                        }, info.landingGear, new HashSet<>(Arrays.asList("maxRotation", "IsReverse", "IsHatch", "ArticulatedRotation", "MaxArticulatedRotation", "SlideVec")))).forEachOrdered(info.landingGear::add);
+                        }, info.landingGear, new HashSet<>(Arrays.asList("MaxRotation", "IsReverse", "IsHatch", "ArticulatedRotation", "MaxArticulatedRotation", "SlideVec")))).forEachOrdered(info.landingGear::add);
 
                 case "Weapon" ->
                         componentList.stream().map(component -> parseDrawnPart("weapon", component, drawnPart -> {
@@ -169,9 +169,10 @@ public class ComponentParser {
                             }
 
                             return weapon;
-                        }, info.partWeapon, new HashSet<>(Arrays.asList("WeaponNames", "RotBarrel", "IsMissile", "Yaw", "Pitch", "RecoilBuf", "Turret", "Children")))).forEachOrdered(info.partWeapon::add);
+                        }, info.partWeapon, new HashSet<>(Arrays.asList( "HideGM", "WeaponNames", "RotBarrel", "IsMissile", "Yaw", "Pitch", "RecoilBuf", "Turret", "Children", "BarrelRot")))).forEachOrdered(info.partWeapon::add);
 
-                case "SearchLight" -> info.searchLights.add(parseSearchLights((Map<String, Object>) entry));
+                case "SearchLight" -> componentList.stream().map(component -> parseSearchLights(component)).forEach(info.searchLights::add);
+//                        info.searchLights.add(parseSearchLights((Map<String, Object>) entry));
 
                 case "TrackRoller" ->
                         componentList.stream().map(component -> parseDrawnPart("track_roller", component, MCH_AircraftInfo.TrackRoller::new, info.partTrackRoller, new HashSet<>())).forEachOrdered(info.partTrackRoller::add);
@@ -466,7 +467,7 @@ public class ComponentParser {
                                             maxRot = getClamped(-180F, 180F,  entryWing.getValue());
                                     case "Pylons" -> {
                                         var pylonList = (List<Map<String, Object>>) entryWing.getValue();
-                                        pylonList.stream().map(pylonMap -> parseDrawnPart("wing" + info.wingList.size() + "_pylon", pylonMap, drawnPylon -> new MCH_PlaneInfo.Pylon(drawnPylon, (Float) MCH_Utils.getAny(pylonMap, Arrays.asList("MaxRot", "MaxRotation"), 0F)), pylons, new HashSet<>(Arrays.asList("MaxRotation", "MaxRot")))).forEach(pylons::add);
+                                        pylonList.stream().map(pylonMap -> parseDrawnPart("wing" + info.wingList.size() + "_pylon", pylonMap, drawnPylon -> new MCH_PlaneInfo.Pylon(drawnPylon, ((Number) MCH_Utils.getAny(pylonMap, Arrays.asList("MaxRot", "MaxRotation"), 0F)).floatValue()), pylons, new HashSet<>(Arrays.asList("MaxRotation", "MaxRot")))).forEach(pylons::add);
                                     }
                                 }
                             }
@@ -474,7 +475,7 @@ public class ComponentParser {
                             if (!pylons.isEmpty()) wing.pylonList = pylons;
                             return wing;
 
-                        }, info.wingList, new HashSet<>(Arrays.asList("MaxRotation", "MaxRot")))
+                        }, info.wingList, new HashSet<>(Arrays.asList("MaxRotation", "MaxRot","Pylons")))
 
 
                 ).forEach(info.wingList::add);
