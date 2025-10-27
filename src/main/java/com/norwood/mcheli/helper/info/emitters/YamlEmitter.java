@@ -554,11 +554,12 @@ public class YamlEmitter implements IEmitter {
                 mm.put("Range", mf.range);
                 mm.put("Age", mf.age);
                 mm.put("Count", mf.num);
+                int a = (int) Math.round(Math.max(0, Math.min(1, mf.a)) * 255.0);
                 int r = (int) Math.round(Math.max(0, Math.min(1, mf.r)) * 255.0);
                 int g = (int) Math.round(Math.max(0, Math.min(1, mf.g)) * 255.0);
                 int b = (int) Math.round(Math.max(0, Math.min(1, mf.b)) * 255.0);
-                int rgb = (r << 16) | (g << 8) | b;
-                mm.put("Color", String.format("#%06X", rgb));
+                int argb = (a <<24) | (r << 16) | (g << 8) | b;
+                mm.put("Color", String.format("#%06X", argb));
                 flashes.add(mm);
             }
             render.put("MuzzleFlashes", flashes);
@@ -572,11 +573,12 @@ public class YamlEmitter implements IEmitter {
                 mm.put("Range", mf.range);
                 mm.put("Age", mf.age);
                 mm.put("Count", mf.num);
+                int a = (int) Math.round(Math.max(0, Math.min(1, mf.a)) * 255.0);
                 int r = (int) Math.round(Math.max(0, Math.min(1, mf.r)) * 255.0);
                 int g = (int) Math.round(Math.max(0, Math.min(1, mf.g)) * 255.0);
                 int b = (int) Math.round(Math.max(0, Math.min(1, mf.b)) * 255.0);
-                int rgb = (r << 16) | (g << 8) | b;
-                mm.put("Color", String.format("#%06X", rgb));
+                int argb = (a <<24) | (r << 16) | (g << 8) | b;
+                mm.put("Color", String.format("#%06X", argb));
                 flashes.add(mm);
             }
             render.put("MuzzleSmoke", flashes);
