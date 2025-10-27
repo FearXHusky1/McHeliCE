@@ -157,7 +157,7 @@ public class ComponentParser {
                                     Vec3d childRot = childPart.containsKey("Rotation") ? parseVector(childPart.get("Rotation")) : Vec3d.ZERO;
                                     float childRecoil = childPart.containsKey("RecoilBuf") ? ((Number) childPart.get("RecoilBuf")).floatValue() : 0.0F;
 
-                                    MCH_AircraftInfo.PartWeaponChild child = new MCH_AircraftInfo.PartWeaponChild(childPos, childRot, weapon.modelName, weapon.name, childYaw, childPitch, childRecoil);
+                                    MCH_AircraftInfo.PartWeaponChild child = new MCH_AircraftInfo.PartWeaponChild(childPos, childRot, weapon.modelName + "_" + weapon.child.size(), weapon.name, childYaw, childPitch, childRecoil);
                                     weapon.child.add(child);
 
                                     for (Map.Entry<String, Object> argument : childPart.entrySet()) {
