@@ -13,38 +13,49 @@ import java.util.List;
 
 public class MCH_HeliInfo extends MCH_AircraftInfo {
     public MCH_ItemHeli item = null;
-    public boolean isEnableFoldBlade;
-    public final List<MCH_HeliInfo.Rotor> rotorList;
+    public boolean isEnableFoldBlade = false;
+    public final List<MCH_HeliInfo.Rotor> rotorList = new ArrayList<>();
 
     public MCH_HeliInfo(AddonResourceLocation location, String path) {
         super(location, path);
-        this.isEnableGunnerMode = false;
-        this.isEnableFoldBlade = false;
-        this.rotorList = new ArrayList<>();
-        this.minRotationPitch = -20.0F;
-        this.maxRotationPitch = 20.0F;
+        //        this.minRotationPitch = -20.0F;
+//        this.maxRotationPitch = 20.0F;
     }
+
+    public float getMinRotationPitch() {
+        return -20F;
+    }
+
+    public float getMaxRotationPitch() {
+        return 20F;
+    }
+
     @Override
     public boolean validate() throws Exception {
         this.speed = (float) (this.speed * MCH_Config.AllHeliSpeed.prmDouble);
         return super.validate();
     }
+
     @Override
     public float getDefaultSoundRange() {
         return 80.0F;
     }
+
     @Override
     public float getDefaultRotorSpeed() {
         return 79.99F;
     }
+
     @Override
     public int getDefaultMaxZoom() {
         return 8;
     }
+
     @Override
     public Item getItem() {
         return this.item;
     }
+
     @Override
     public String getDefaultHudName(int seatId) {
         if (seatId <= 0) {
@@ -53,14 +64,17 @@ public class MCH_HeliInfo extends MCH_AircraftInfo {
             return seatId == 1 ? "heli_gnr" : "gunner";
         }
     }
+
     @Override
     public String getDirectoryName() {
         return "helicopters";
     }
+
     @Override
     public String getKindName() {
         return "helicopter";
     }
+
     @Override
     public void onPostReload() {
         item = (MCH_ItemHeli) ForgeRegistries.ITEMS.getValue(new ResourceLocation(MCH_MOD.MOD_ID, name));
