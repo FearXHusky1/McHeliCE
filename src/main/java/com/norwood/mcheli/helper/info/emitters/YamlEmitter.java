@@ -356,6 +356,26 @@ public class YamlEmitter implements IEmitter {
         if (!snd.isEmpty())
             root.put("Sound", snd);
 
+        // Recoil
+        Map<String, Object> recoil = new LinkedHashMap<>();
+        if (info.recoil != dummy.recoil)
+            recoil.put("Power", info.recoil);
+        if (info.recoilPitch != dummy.recoilPitch)
+            recoil.put("Pitch", info.recoilPitch);
+        if (info.recoilYaw != dummy.recoilYaw)
+            recoil.put("Yaw", info.recoilYaw);
+        if (info.recoilPitchRange != dummy.recoilPitchRange)
+            recoil.put("PitchRange", info.recoilPitchRange);
+        if (info.recoilYawRange != dummy.recoilYawRange)
+            recoil.put("YawRange", info.recoilYawRange);
+        if (info.recoilRecoverFactor != dummy.recoilRecoverFactor)
+            recoil.put("RecoverFactor", info.recoilRecoverFactor);
+        if (info.recoilBufCount != dummy.recoilBufCount)
+            recoil.put("BufferCount", info.recoilBufCount);
+        if (info.recoilBufCountSpeed != dummy.recoilBufCountSpeed)
+            recoil.put("BufferSpeed", info.recoilBufCountSpeed);
+        if (!recoil.isEmpty())
+            root.put("Recoil", recoil);
 
         // Explosion
         Map<String, Object> expl = new LinkedHashMap<>();

@@ -26,7 +26,7 @@ import static com.norwood.mcheli.helper.info.parsers.yaml.YamlParser.*;
 @SuppressWarnings("unchecked")
 public class WeaponParser {
 
-    public static MCH_WeaponInfo.Payload parsePayload(String s) {
+    private static MCH_WeaponInfo.Payload parsePayload(String s) {
         if (s == null || s.isEmpty())
             return MCH_WeaponInfo.Payload.NONE;
 
@@ -40,7 +40,7 @@ public class WeaponParser {
         };
     }
 
-    public static @Nullable Class<? extends Entity> tryLoadClass(String fullClassName) {
+    private static @Nullable Class<? extends Entity> tryLoadClass(String fullClassName) {
         try {
             Class<?> clazz = Class.forName(fullClassName);
             if (Entity.class.isAssignableFrom(clazz)) {
@@ -52,7 +52,7 @@ public class WeaponParser {
         }
     }
 
-    public MCH_WeaponInfo parse(MCH_WeaponInfo info, Map<String, Object> root) {
+    public static MCH_WeaponInfo parse(MCH_WeaponInfo info, Map<String, Object> root) {
         for (Map.Entry<String, Object> entry : root.entrySet()) {
             switch (entry.getKey()) {
                 case "DisplayName" -> info.displayName = ((String) entry.getValue()).trim();
@@ -93,7 +93,7 @@ public class WeaponParser {
         return info;
     }
 
-    private void parseAmmo(MCH_WeaponInfo info, Map<String, Object> map) {
+    private static void parseAmmo(MCH_WeaponInfo info, Map<String, Object> map) {
         for (var entry : map.entrySet()) {
             switch (entry.getKey()) {
                 case "ReloadTime" -> info.reloadTime = getClamped(3, 1000, entry.getValue());
@@ -101,12 +101,12 @@ public class WeaponParser {
                 case "MaxAmmo" -> info.maxAmmo = getClamped(30000, entry.getValue());
                 case "ResupplyCount" -> info.suppliedNum = getClamped(1, 30000, entry.getValue());
                 case "AmmoItems" ->
-                        info.roundItems = ((List<Map<String, Object>>) entry.getValue()).stream().map(this::parseRoundMap).collect(Collectors.toList());
+                        info.roundItems = ((List<Map<String, Object>>) entry.getValue()).stream().map(WeaponParser::parseRoundMap).collect(Collectors.toList());
                 default -> logUnkownEntry(entry, "Ammo");
             }
         }
     }
-    private void parseRadar(MCH_WeaponInfo info, Map<String, Object> map) {
+    private static void parseRadar(MCH_WeaponInfo info, Map<String, Object> map) {
         for (var entry : map.entrySet()) {
             switch (entry.getKey()) {
                 case "IsRadarMissile" -> info.isRadarMissile = (Boolean) entry.getValue();
@@ -118,7 +118,7 @@ public class WeaponParser {
     }
 
     @SuppressWarnings("unchecked")
-    private void parseMissile(MCH_WeaponInfo info, Map<String, Object> map) {
+    private static void parseMissile(MCH_WeaponInfo info, Map<String, Object> map) {
         for (var entry : map.entrySet()) {
             switch (entry.getKey()) {
                 case "MarkerRocket" -> parseMarkerRocket(info, (Map<String, Object>) entry.getValue());
@@ -148,7 +148,7 @@ public class WeaponParser {
             }
         }
     }
-    private void parseLockOn(MCH_WeaponInfo info, Map<String, Object> map) {
+    private static void parseLockOn(MCH_WeaponInfo info, Map<String, Object> map) {
         for (var entry : map.entrySet()) {
             switch (entry.getKey()) {
                 case "CanLockMissile" -> info.canLockMissile = (Boolean) entry.getValue();
@@ -163,7 +163,7 @@ public class WeaponParser {
             }
         }
     }
-    private void parseHeat(MCH_WeaponInfo info, Map<String, Object> map) {
+    private static void parseHeat(MCH_WeaponInfo info, Map<String, Object> map) {
         for (var entry : map.entrySet()) {
             switch (entry.getKey()) {
                 case "isHeatMissile" -> info.isHeatSeekerMissile = (Boolean) entry.getValue();
@@ -176,7 +176,7 @@ public class WeaponParser {
     }
 
 
-    private void parseExplosion(MCH_WeaponInfo info, Map<String, Object> value) {
+    private static void parseExplosion(MCH_WeaponInfo info, Map<String, Object> value) {
         for (Map.Entry<String, Object> entry : value.entrySet()) {
             switch (entry.getKey()) {
                 case "Power" -> info.explosion = ((Number) entry.getValue()).intValue();
@@ -197,7 +197,7 @@ public class WeaponParser {
         }
     }
 
-    private void parseDispenseItem(MCH_WeaponInfo info, Map<String, Object> value) {
+    private static void parseDispenseItem(MCH_WeaponInfo info, Map<String, Object> value) {
         String loc = ((String) MCH_Utils.getAny(value, Arrays.asList("Location", "Loc", "Name"), null)).toLowerCase().trim();
         if (loc != null && !loc.isEmpty()) ;
         info.dispenseItemLoc = loc;
@@ -206,7 +206,7 @@ public class WeaponParser {
             info.dispenseRange = getClamped(1, 100, value.get("DispenseRange"));
     }
 
-    private void parseBomblet(MCH_WeaponInfo info, Map<String, Object> value) {
+    private static void parseBomblet(MCH_WeaponInfo info, Map<String, Object> value) {
         for (Map.Entry<String, Object> entry : value.entrySet()) {
             switch (entry.getKey()) {
                 case "Count" -> info.bomblet = getClamped(0, 1000, entry.getValue());
@@ -216,7 +216,7 @@ public class WeaponParser {
         }
     }
 
-    private void parseCam(MCH_WeaponInfo info, Map<String, Object> value) {
+    private static void parseCam(MCH_WeaponInfo info, Map<String, Object> value) {
         for (Map.Entry<String, Object> entry : value.entrySet()) {
             switch (entry.getKey()) {
                 case "EnableMortarRadar" -> info.hasMortarRadar = (Boolean) entry.getValue();
@@ -248,7 +248,7 @@ public class WeaponParser {
     }
 
     // Okay..?
-    private int parseTarget(String str) {
+    private static int parseTarget(String str) {
         str = str.toLowerCase(Locale.ROOT);
         int flags = 0;
         if (str.contains("block")) return 64;
@@ -261,7 +261,7 @@ public class WeaponParser {
         return flags;
     }
 
-    private void parseDamageFactor(MCH_WeaponInfo info, Map<String, Number> map) {
+    private static void parseDamageFactor(MCH_WeaponInfo info, Map<String, Number> map) {
         Map<Class<? extends Entity>, Integer> damageFactorMap = new HashMap<>();
         for (Map.Entry<String, Number> entry : map.entrySet()) {
             var clazz = switch (entry.getKey()) {
@@ -282,7 +282,7 @@ public class WeaponParser {
         }
     }
 
-    private MCH_Cartridge parseCardridge(Map<String, Object> map) {
+    private static MCH_Cartridge parseCardridge(Map<String, Object> map) {
         String name = null;
         float accel = 0F;
         float yaw = 0F;
@@ -305,7 +305,7 @@ public class WeaponParser {
         return new MCH_Cartridge(name, accel, yaw, pitch, bound, gravity, scale);
     }
 
-    private void parseRender(MCH_WeaponInfo info, Map<String, Object> value) {
+    private static void parseRender(MCH_WeaponInfo info, Map<String, Object> value) {
         for (Map.Entry<String, Object> entry : value.entrySet()) {
             switch (entry.getKey()) {
                 case "MuzzleFlashes" ->
@@ -329,7 +329,7 @@ public class WeaponParser {
         }
     }
 
-    private void parseSmoke(MCH_WeaponInfo info, Map<String, Object> value) {
+    private static void parseSmoke(MCH_WeaponInfo info, Map<String, Object> value) {
         for (Map.Entry<String, Object> entry : value.entrySet()) {
             switch (entry.getKey()) {
                 case "DisableSmoke" -> info.disableSmoke = (Boolean) entry.getValue();
@@ -344,7 +344,7 @@ public class WeaponParser {
         }
     }
 
-    private List<MCH_WeaponInfo.MuzzleFlash> parseMuzzleFlashes(List<Map<String, Object>> rawList) {
+    private static List<MCH_WeaponInfo.MuzzleFlash> parseMuzzleFlashes(List<Map<String, Object>> rawList) {
         if (rawList == null) return Collections.emptyList();
 
         return rawList.stream()
@@ -368,7 +368,7 @@ public class WeaponParser {
      * EffectOnly  - Whenever to only use the particle effect, but default to the explosion sfx selected by PayloadType
      * Fluid - Fluid to disperse on impact, works like the canisters
      */
-    private void parseHBM(MCH_WeaponInfo info, Map<String, Object> map) {
+    private static void parseHBM(MCH_WeaponInfo info, Map<String, Object> map) {
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             switch (entry.getKey()) {
                 case "PayloadType" -> info.payloadNTM = parsePayload((String) entry.getValue());
@@ -380,7 +380,7 @@ public class WeaponParser {
         }
     }
 
-    private void parseMarkerRocket(MCH_WeaponInfo info, Map<String, Object> map) {
+    private static void parseMarkerRocket(MCH_WeaponInfo info, Map<String, Object> map) {
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             switch (entry.getKey()) {
 
@@ -394,7 +394,7 @@ public class WeaponParser {
     }
 
     //TODO: Oredict
-    MCH_WeaponInfo.RoundItem parseRoundMap(Map<String, Object> roundMap) {
+    static MCH_WeaponInfo.RoundItem parseRoundMap(Map<String, Object> roundMap) {
         int count = getClamped(1, 64, MCH_Utils.getAny(roundMap, Arrays.asList("Count", "Num"), 1));
         String loc = ((String) MCH_Utils.getAny(roundMap, Arrays.asList("Loc", "Name"), null)).toLowerCase(Locale.ROOT).trim();
         int meta = getClamped(Short.MAX_VALUE, MCH_Utils.getAny(roundMap, Arrays.asList("Meta", "Damage"), 1));
@@ -403,7 +403,7 @@ public class WeaponParser {
     }
 
 
-    private void parseBallisitcs(MCH_WeaponInfo info, Map<String, Object> map) {
+    private static void parseBallisitcs(MCH_WeaponInfo info, Map<String, Object> map) {
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             switch (entry.getKey()) {
                 case "Acceleration", "Accel" -> info.acceleration = getClamped(0.0F, 100.0F, entry.getValue());
@@ -421,7 +421,7 @@ public class WeaponParser {
         }
     }
 
-    private void parseRecoil(MCH_WeaponInfo info, Map<String, Object> map) {
+    private static void parseRecoil(MCH_WeaponInfo info, Map<String, Object> map) {
         info.recoilBufCount = 1;
         info.recoilBufCountSpeed = 1;
         for (Map.Entry<String, Object> entry : map.entrySet()) {
@@ -446,7 +446,7 @@ public class WeaponParser {
         }
     }
 
-    private void parseSound(MCH_WeaponInfo info, Map<String, Object> map) {
+    private static void parseSound(MCH_WeaponInfo info, Map<String, Object> map) {
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             switch (entry.getKey()) {
                 case "Name" -> info.soundFileName = ((String) entry.getValue()).toLowerCase(Locale.ROOT).trim();//for txt parser this field is "Sound"
@@ -461,7 +461,7 @@ public class WeaponParser {
         }
     }
 
-    private void parseSoundLoc(MCH_WeaponInfo info, Map<String, Object> map) {
+    private static void parseSoundLoc(MCH_WeaponInfo info, Map<String, Object> map) {
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             switch (entry.getKey()) {
                 case "Hit" -> info.hitSound = ((String) entry.getValue()).toLowerCase(Locale.ROOT).trim();
@@ -474,7 +474,7 @@ public class WeaponParser {
         }
     }
 
-    private void parseDamage(MCH_WeaponInfo info, Map<String, Object> map) {
+    private static void parseDamage(MCH_WeaponInfo info, Map<String, Object> map) {
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             switch (entry.getKey()) {
                 case "ExplosionDamageVsLiving" ->
