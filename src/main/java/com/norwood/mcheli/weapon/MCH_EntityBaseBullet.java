@@ -17,6 +17,8 @@ import com.norwood.mcheli.wrapper.W_Entity;
 import com.norwood.mcheli.wrapper.W_EntityPlayer;
 import com.norwood.mcheli.wrapper.W_MovingObjectPosition;
 import com.norwood.mcheli.wrapper.W_WorldFunc;
+import lombok.Getter;
+import lombok.Setter;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.EntityVillager;
@@ -63,6 +65,8 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
     public double prevMotionY;
     public double prevMotionZ;
     private int countOnUpdate = 0;
+    @Getter
+    @Setter
     private int power;
     private MCH_WeaponInfo weaponInfo;
     private MCH_BulletModel model;
@@ -713,51 +717,32 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
     }
 
     public boolean canBeCollidedEntity(Entity entity) {
-        if (entity instanceof MCH_EntityChain) {
-            return false;
-        } else if (!entity.canBeCollidedWith()) {
-            return false;
-        } else {
-            if (entity instanceof MCH_EntityBaseBullet blt) {
-                if (this.world.isRemote) {
-                    return false;
-                }
+        if (entity instanceof MCH_EntityChain) return false;
+        if (!entity.canBeCollidedWith()) return false;
+        if (entity instanceof MCH_EntitySeat) return false;
+        if (entity instanceof MCH_EntityHitBox) return false;
 
-                if (W_Entity.isEqual(blt.shootingAircraft, this.shootingAircraft)) {
-                    return false;
-                }
-
-                if (W_Entity.isEqual(blt.shootingEntity, this.shootingEntity)) {
-                    return false;
-                }
-            }
-
-            if (entity instanceof MCH_EntitySeat) {
-                return false;
-            } else if (entity instanceof MCH_EntityHitBox) {
-                return false;
-            } else if (W_Entity.isEqual(entity, this.shootingEntity)) {
-                return false;
-            } else {
-                if (this.shootingAircraft instanceof MCH_EntityAircraft) {
-                    if (W_Entity.isEqual(entity, this.shootingAircraft)) {
-                        return false;
-                    }
-
-                    if (((MCH_EntityAircraft) this.shootingAircraft).isMountedEntity(entity)) {
-                        return false;
-                    }
-                }
-
-                for (String s : MCH_Config.IgnoreBulletHitList) {
-                    if (entity.getClass().getName().toLowerCase().contains(s.toLowerCase())) {
-                        return false;
-                    }
-                }
-
-                return true;
-            }
+        // Bullet vs. bullet
+        if (entity instanceof MCH_EntityBaseBullet blt) {
+            if (world.isRemote) return false;
+            if (W_Entity.isEqual(blt.shootingAircraft, this.shootingAircraft)) return false;
+            if (W_Entity.isEqual(blt.shootingEntity, this.shootingEntity)) return false;
         }
+
+        // Don’t hit self or own aircraft
+        if (W_Entity.isEqual(entity, this.shootingEntity)) return false;
+        if (this.shootingAircraft instanceof MCH_EntityAircraft aircraft) {
+            if (W_Entity.isEqual(entity, aircraft)) return false;
+            if (aircraft.isMountedEntity(entity)) return false;
+        }
+
+        // Config-based exclusions
+        String cls = entity.getClass().getName().toLowerCase();
+        for (String s : MCH_Config.IgnoreBulletHitList) {
+            if (cls.contains(s.toLowerCase())) return false;
+        }
+
+        return true;
     }
 
     public void notifyHitBullet() {
@@ -775,14 +760,6 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
 
             try {
                 MCH_WeaponInfo info = getInfo();
-
-                // --- HBM Compatibility ---
-//                if (info.chemYield > 0 && ModCompatManager.isLoaded(ModCompatManager.MODID_HBM)) {
-//                    HBMUtil.ExplosionChaos_spawnChlorine(
-//                            world, posX, posY + 0.5, posZ,
-//                            info.chemYield, info.chemSpeed, info.chemType
-//                    );
-//                }
 
                 // --- Entity Impact ---
                 if (m.entityHit != null) {
@@ -820,10 +797,9 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
                         newExplosion(hit.x, hit.y, hit.z, expPower, info.explosionBlock, false);
                     }
                 } else {
-                    boolean inWater = isInWater() ||
-                            (m.getBlockPos() != null && MCH_Lib.isBlockInWater(
-                                    world, m.getBlockPos().getX(), m.getBlockPos().getY(), m.getBlockPos().getZ()
-                            ));
+                    boolean inWater = isInWater() || MCH_Lib.isBlockInWater(
+                            world, m.getBlockPos().getX(), m.getBlockPos().getY(), m.getBlockPos().getZ()
+                    );
 
                     if (inWater) {
                         newExplosion(hit.x, hit.y, hit.z, expPowerInWater, expPowerInWater, true);
@@ -1020,20 +996,15 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
         return 0.0F;
     }
 
-    public float getBrightness(float par1) {
+    @Override
+    public float getBrightness() {
         return 1.0F;
     }
 
+    @Override
     @SideOnly(Side.CLIENT)
-    public int getBrightnessForRender(float par1) {
+    public int getBrightnessForRender() {
         return 15728880;
     }
 
-    public int getPower() {
-        return this.power;
-    }
-
-    public void setPower(int power) {
-        this.power = power;
-    }
 }
