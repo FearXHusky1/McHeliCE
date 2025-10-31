@@ -3,10 +3,7 @@ package com.norwood.mcheli.weapon;
 import com.norwood.mcheli.MCH_BaseInfo;
 import com.norwood.mcheli.MCH_Color;
 import com.norwood.mcheli.MCH_DamageFactor;
-import com.norwood.mcheli.compat.hbm.ChemicalContainer;
-import com.norwood.mcheli.compat.hbm.MistContainer;
-import com.norwood.mcheli.compat.hbm.NTSettingContainer;
-import com.norwood.mcheli.compat.hbm.VNTSettingContainer;
+import com.norwood.mcheli.compat.hbm.*;
 import com.norwood.mcheli.helper.MCH_Logger;
 import com.norwood.mcheli.helper.addon.AddonResourceLocation;
 import com.norwood.mcheli.helper.info.parsers.yaml.YamlParser;
@@ -31,11 +28,10 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
     public boolean useHBM = false;
     public Payload payloadNTM = Payload.NONE;
     public boolean effectOnly = false;
-    public String fluidTypeNTM = null;
-    public String mukeType = "SAFE";
     public VNTSettingContainer vntSettingContainer = null;
     public ChemicalContainer chemicalContainer = null;
     public MistContainer mistContainer = null;
+    public MukeContainer mukeContainer = null;
     public NTSettingContainer ntSettingContainer = null;
 
     public final String name;

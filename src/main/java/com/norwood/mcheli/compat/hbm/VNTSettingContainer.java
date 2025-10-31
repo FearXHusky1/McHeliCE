@@ -5,6 +5,7 @@ import com.norwood.mcheli.compat.ModCompatManager;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import net.minecraft.entity.Entity;
+import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.Optional;
 
@@ -26,6 +27,7 @@ public class VNTSettingContainer {
     private Object blockProcessor;
     private Object entityProcessor;
     private Object playerProcessor;
+    public ExplosionEffect explosionEffect = ExplosionEffect.standard();
 //    private Object[] sfx;
 
 
@@ -86,14 +88,18 @@ public class VNTSettingContainer {
     }
 
     @Optional.Method(modid = "hbm")
-    public void buildExplosion(World world, double x, double y, double z, float size, Entity exploder) {
-        var vnt = new com.hbm.explosion.vanillant.ExplosionVNT(world, x, y, z, size, exploder);
-        vnt.setBlockAllocator((com.hbm.explosion.vanillant.interfaces.IBlockAllocator) blockAllocator);
-        vnt.setEntityProcessor((com.hbm.explosion.vanillant.interfaces.IEntityProcessor) entityProcessor);
-        vnt.setBlockProcessor((com.hbm.explosion.vanillant.interfaces.IBlockProcessor) blockProcessor);
-        vnt.setPlayerProcessor((com.hbm.explosion.vanillant.interfaces.IPlayerProcessor) playerProcessor);
+    public void buildExplosion(World world, double x, double y, double z, float size, Entity exploder, boolean effectOnly) {
+        if(!effectOnly) {
+            var vnt = new com.hbm.explosion.vanillant.ExplosionVNT(world, x, y, z, size, exploder);
+            vnt.setBlockAllocator((com.hbm.explosion.vanillant.interfaces.IBlockAllocator) blockAllocator);
+            vnt.setEntityProcessor((com.hbm.explosion.vanillant.interfaces.IEntityProcessor) entityProcessor);
+            vnt.setBlockProcessor((com.hbm.explosion.vanillant.interfaces.IBlockProcessor) blockProcessor);
+            vnt.setPlayerProcessor((com.hbm.explosion.vanillant.interfaces.IPlayerProcessor) playerProcessor);
 //        vnt.setSFX((com.hbm.explosion.vanillant.interfaces.IExplosionSFX[]) sfx);
-        vnt.explode();
+            vnt.explode();
+        }
+        explosionEffect.execute(world, x, y, z);
+
     }
 
     public Object processMap(Map<String, Object> map) {
@@ -213,7 +219,34 @@ public class VNTSettingContainer {
             this.soundRange = soundRange;
         }
 
-
+        @Optional.Method(modid = "hbm")
+        public void execute(World world, double x, double y, double z) {
+            if (isSmall) {
+                com.hbm.particle.helper.ExplosionSmallCreator.composeEffect(
+                        world,
+                        x, y, z,
+                        cloudCount,
+                        cloudScale,
+                        cloudSpeedMult
+                );
+            } else {
+                com.hbm.particle.helper.ExplosionCreator.composeEffect(
+                        world,
+                        x, y, z,
+                        cloudCount,
+                        cloudScale,
+                        cloudSpeedMult,
+                        waveScale,
+                        debrisCount,
+                        debrisSize,
+                        debrisRetry,
+                        debrisVelocity,
+                        debrisHorizontalDeviation,
+                        debrisVerticalOffset,
+                        soundRange
+                );
+            }
+        }
 
 
         public static ExplosionEffect medium() {

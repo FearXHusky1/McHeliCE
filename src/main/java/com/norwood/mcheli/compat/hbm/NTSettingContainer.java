@@ -5,7 +5,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.Optional;
 
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -16,14 +16,15 @@ public class NTSettingContainer {
             "FIRE", "BALEFIRE", "DIGAMMA", "DIGAMMA_CIRCUIT", "LAVA", "LAVA_V", "ERRODE", "ALLMOD", "ALLDROP", "NODROP", "NOPARTICLE", "NOSOUND", "NOHURT"
     );
 
-    public final Set<String> attributes = new HashSet<>();
-    public final int strenght;
+    public final List<String> attributes = new ArrayList<>() {
+    };
+    public int strenght;
     List<Object> runtimeAttribs;
     private int resolution = 16;
 
-    public NTSettingContainer(int strenght, List<Object> runtimeAttribs, int resolution) {
-        this.strenght = strenght;
-        this.runtimeAttribs = runtimeAttribs;
+    public NTSettingContainer(List<String> runtimeAttribs, int resolution) {
+        if (runtimeAttribs != null)
+            this.attributes.addAll(runtimeAttribs);
         this.resolution = resolution;
     }
 

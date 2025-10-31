@@ -933,8 +933,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
             case NTM_VNT -> {
                 if (getInfo().vntSettingContainer == null) break;
                 var vnt = getInfo().vntSettingContainer;
-                if (!effectOnly)
-                    vnt.buildExplosion(this.world, x, y, z, expBlock, this);
+                    vnt.buildExplosion(this.world, x, y, z, expBlock, this, effectOnly);
 
             }
             case NTM_NT -> {
@@ -945,10 +944,15 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
 
             }
             case NTM_MINI_NUKE -> {
-                HBMUtil.explodeMuke(world, x, y, z, getInfo().mukeType, effectOnly);
+                if (getInfo().mukeContainer == null) break;
+                var muke = getInfo().mukeContainer;
+                    muke.explode(world,x,y,z,effectOnly);
             }
             case NTM_NUKE -> {
-                HBMUtil.EntityNukeExplosionMK5(world, explosionPower, x, y, z, effectOnly);
+                if (getInfo().mistContainer == null) break;
+                var mist = getInfo().mistContainer;
+                if (!effectOnly)
+                    mist.execute(world,x,y,z);
             }
             case NTM_CHLORINE -> {
                 HBMUtil.ExplosionChaos_spawnChlorine(world, x, y, z, getInfo().chemicalContainer);

@@ -2,6 +2,9 @@ package com.norwood.mcheli.helper.info.parsers.yaml;
 
 import com.norwood.mcheli.MCH_Color;
 import com.norwood.mcheli.MCH_DamageFactor;
+import com.norwood.mcheli.compat.hbm.MistContainer;
+import com.norwood.mcheli.compat.hbm.MukeContainer;
+import com.norwood.mcheli.compat.hbm.NTSettingContainer;
 import com.norwood.mcheli.compat.hbm.VNTSettingContainer;
 import com.norwood.mcheli.helicopter.MCH_EntityHeli;
 import com.norwood.mcheli.helper.MCH_Utils;
@@ -66,7 +69,6 @@ public class WeaponParser {
                 case "Submunition", "Bomblet" -> parseBomblet(info, (Map<String, Object>) entry.getValue());
                 case "Damage" -> parseDamage(info, (Map<String, Object>) entry.getValue());
                 case "Ammo" -> parseAmmo(info, (Map<String, Object>) entry.getValue());
-                case "NTM" -> parseHBM(info, (Map<String, Object>) entry.getValue());
                 case "Render" -> parseRender(info, (Map<String, Object>) entry.getValue());
                 case "Explosion" -> parseExplosion(info, (Map<String, Object>) entry.getValue());
                 case "Mode" -> info.modeNum = getClamped(1000, entry.getValue());
@@ -85,6 +87,7 @@ public class WeaponParser {
                 case "Target" -> info.target = parseTarget((String) entry.getValue());
                 case "MarkTime" -> info.markTime = getClamped(1, 30000, entry.getValue()) + 1;
                 case "DamageFactor" -> parseDamageFactor(info, (Map<String, Number>) entry.getValue());
+                case "NTM" -> parseHBM(info, (Map<String, Object>) entry.getValue());
 
 
                 default -> logUnkownEntry(entry, "Weapon");
@@ -374,12 +377,93 @@ public class WeaponParser {
             switch (entry.getKey()) {
                 case "PayloadType" -> info.payloadNTM = parsePayload((String) entry.getValue());
                 case "EffectOnly" -> info.effectOnly = (Boolean) entry.getValue();
-                case "MiniNukeType","MukeType" -> info.mukeType = ((String) entry.getValue()).toUpperCase();
+                case "Mist" -> parseMist(info, (Map<String,Object>) entry.getValue());
+                case "MiniNuke", "Muke" -> {
+                    Object muke = entry.getValue();
+                    if (muke instanceof String mukeString) {
+                        switch (mukeString.toUpperCase().trim()) {
+                            case "SAFE" -> info.mukeContainer = MukeContainer.PARAMS_SAFE;
+                            case "TOTS" -> info.mukeContainer = MukeContainer.PARAMS_TOTS;
+                            case "LOW" -> info.mukeContainer = MukeContainer.PARAMS_LOW;
+                            case "MEDIUM" -> info.mukeContainer = MukeContainer.PARAMS_MEDIUM;
+                            case "HIGH" -> info.mukeContainer = MukeContainer.PARAMS_HIGH;
+                            default -> throw new IllegalArgumentException(
+                                    "Unknown Muke type string: '" + mukeString + "'. Expected one of: SAFE, TOTS, LOW, MEDIUM, HIGH."
+                            );
+                        }
+                    } else if (muke instanceof Map<?, ?> mukeMap) {
+                        parseMukeContainer(info,(Map<String,Object>) mukeMap);
+                    } else {
+                        throw new IllegalArgumentException(
+                                "Invalid Muke type: expected a String or Map, but got: " + muke.getClass().getName()
+                        );
+                    }
+                }
+
                 case "VNT" ->
                         info.vntSettingContainer = new VNTSettingContainer((Map<String, Object>) entry.getValue());
-                case "FluidType" -> info.fluidTypeNTM = (String) entry.getValue();
+                case "NT" -> parseNTExplosion(info, (Map<String, Object>) entry.getValue());
             }
         }
+    }
+
+    private static void parseMist(MCH_WeaponInfo info, Map<String, Object> map) {
+            MistContainer container = new MistContainer();
+            for (Map.Entry<String, Object> entry : map.entrySet()) {
+                switch (entry.getKey()) {
+                    case "FluidType" -> container.fluidType = (String) entry.getValue();
+                    case "CloudCount" -> container.cloudCount = ((Number) entry.getValue()).intValue();
+                    case "Width" -> container.width = ((Number) entry.getValue()).floatValue();
+                    case "Height" -> container.height = ((Number) entry.getValue()).floatValue();
+                    case "AreaSpread" -> container.areaSpread = ((Number) entry.getValue()).intValue();
+                    case "Lifetime" -> container.lifetime = ((Number) entry.getValue()).intValue();
+                    case "LifetimeVariance" -> container.lifetimeVariance = ((Number) entry.getValue()).intValue();
+                    default -> logUnkownEntry(entry, "Mist");
+                }
+            }
+            info.mistContainer = container;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static void parseMukeContainer(MCH_WeaponInfo info, Map<String, Object> map) {
+        MukeContainer container = new MukeContainer();
+
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            switch (entry.getKey()) {
+                case "UseTorex" -> container.miniNuke = !((Boolean) entry.getValue());
+                case "Safe" -> container.safe = (Boolean) entry.getValue();
+                case "BlastRadius" -> container.blastRadius = ((Number) entry.getValue()).floatValue();
+                case "KillRadius" -> container.killRadius = ((Number) entry.getValue()).floatValue();
+                case "RadiationLevel" -> container.radiationLevel = ((Number) entry.getValue()).floatValue();
+                case "Particle" -> container.particle = (String) entry.getValue();
+                case "ShrapnelCount" -> container.shrapnelCount = ((Number) entry.getValue()).intValue();
+                case "Resolution", "Res" -> container.resolution = ((Number) entry.getValue()).intValue();
+                case "Attributes","Attrib" -> {
+                    Object val = entry.getValue();
+                    if (val instanceof List<?> list) {
+                        container.attributes = list.stream()
+                                .map(Object::toString)
+                                .collect(Collectors.toList());
+                    }
+                }
+
+                default -> logUnkownEntry(entry, "MiniNuke");
+            }
+        }
+        info.mukeContainer = container;
+    }
+
+
+    private static void parseNTExplosion(MCH_WeaponInfo info, Map<String, Object> map) {
+        int res = 16;
+        List<String> attribs = null;
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            switch (entry.getKey()) {
+                case "Resolution","Res" -> res = ((Number)entry.getValue()).intValue();
+                case "Attributes","Attrib" -> attribs = (List<String>) entry.getValue();
+            }
+        }
+        info.ntSettingContainer = new NTSettingContainer(attribs,res);
     }
 
     private static void parseMarkerRocket(MCH_WeaponInfo info, Map<String, Object> map) {
