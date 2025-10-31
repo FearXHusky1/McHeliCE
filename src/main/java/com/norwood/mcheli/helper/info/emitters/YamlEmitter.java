@@ -528,16 +528,6 @@ public class YamlEmitter implements IEmitter {
         if (info.weaponSwitchCount != dummy.weaponSwitchCount) root.put("SwitchCooldown", info.weaponSwitchCount);
         if (info.crossType != dummy.crossType) root.put("CrossType", info.crossType);
 
-        // HBM compat
-        Map<String, Object> ntm = new LinkedHashMap<>();
-        if (info.payloadNTM != dummy.payloadNTM && info.payloadNTM != null && info.payloadNTM != MCH_WeaponInfo.Payload.NONE) {
-            ntm.put("PayloadType", info.payloadNTM.name());
-        }
-        if (info.effectOnly != dummy.effectOnly) ntm.put("EffectOnly", info.effectOnly);
-        if (!Objects.equals(info.fluidTypeNTM, dummy.fluidTypeNTM) && info.fluidTypeNTM != null)
-            ntm.put("FluidType", info.fluidTypeNTM);
-        if (!ntm.isEmpty()) root.put("NTM", ntm);
-
         // Damage block
         Map<String, Object> dmg = new LinkedHashMap<>();
         if (info.explosionDamageVsLiving != dummy.explosionDamageVsLiving)

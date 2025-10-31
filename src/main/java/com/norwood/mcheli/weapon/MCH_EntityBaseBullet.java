@@ -949,16 +949,16 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
                     muke.explode(world,x,y,z,effectOnly);
             }
             case NTM_NUKE -> {
-                if (getInfo().mistContainer == null) break;
-                var mist = getInfo().mistContainer;
-                if (!effectOnly)
-                    mist.execute(world,x,y,z);
+                HBMUtil.EntityNukeExplosionMK5(this.world, (int) expBlock, x, y, z,effectOnly);
             }
             case NTM_CHLORINE -> {
                 HBMUtil.ExplosionChaos_spawnChlorine(world, x, y, z, getInfo().chemicalContainer);
             }
             case NTM_MIST -> {
-
+                if (getInfo().mistContainer == null) break;
+                var mist = getInfo().mistContainer;
+                if (!effectOnly)
+                    mist.execute(world,x,y,z);
             }
         }
     }
