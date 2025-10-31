@@ -109,6 +109,7 @@ public class WeaponParser {
             }
         }
     }
+
     private static void parseRadar(MCH_WeaponInfo info, Map<String, Object> map) {
         for (var entry : map.entrySet()) {
             switch (entry.getKey()) {
@@ -151,6 +152,7 @@ public class WeaponParser {
             }
         }
     }
+
     private static void parseLockOn(MCH_WeaponInfo info, Map<String, Object> map) {
         for (var entry : map.entrySet()) {
             switch (entry.getKey()) {
@@ -166,6 +168,7 @@ public class WeaponParser {
             }
         }
     }
+
     private static void parseHeat(MCH_WeaponInfo info, Map<String, Object> map) {
         for (var entry : map.entrySet()) {
             switch (entry.getKey()) {
@@ -226,8 +229,7 @@ public class WeaponParser {
                 case "MortarRadarMaxDist" -> info.mortarRadarMaxDist = ((Number) entry.getValue()).doubleValue();
                 case "DisplayMortarDistance" -> info.displayMortarDistance = ((Boolean) entry.getValue());
                 case "FixPitch" -> info.fixCameraPitch = ((Boolean) entry.getValue());
-                case "RotationSpeedPitch" ->
-                        info.cameraRotationSpeedPitch = getClamped(0.0F, 100.0F, entry.getValue());
+                case "RotationSpeedPitch" -> info.cameraRotationSpeedPitch = getClamped(0.0F, 100.0F, entry.getValue());
                 case "Sight" -> {
                     String sight = ((String) entry.getValue()).toLowerCase(Locale.ROOT);
                     if (sight.equals("movesight")) info.sight = MCH_SightType.ROCKET;
@@ -377,7 +379,7 @@ public class WeaponParser {
             switch (entry.getKey()) {
                 case "PayloadType" -> info.payloadNTM = parsePayload((String) entry.getValue());
                 case "EffectOnly" -> info.effectOnly = (Boolean) entry.getValue();
-                case "Mist" -> parseMist(info, (Map<String,Object>) entry.getValue());
+                case "Mist" -> parseMist(info, (Map<String, Object>) entry.getValue());
                 case "MiniNuke", "Muke" -> {
                     Object muke = entry.getValue();
                     if (muke instanceof String mukeString) {
@@ -392,7 +394,7 @@ public class WeaponParser {
                             );
                         }
                     } else if (muke instanceof Map<?, ?> mukeMap) {
-                        parseMukeContainer(info,(Map<String,Object>) mukeMap);
+                        parseMukeContainer(info, (Map<String, Object>) mukeMap);
                     } else {
                         throw new IllegalArgumentException(
                                 "Invalid Muke type: expected a String or Map, but got: " + muke.getClass().getName()
@@ -400,28 +402,70 @@ public class WeaponParser {
                     }
                 }
 
-                case "VNT" ->
-                        info.vntSettingContainer = new VNTSettingContainer((Map<String, Object>) entry.getValue());
+                case "VNT" -> parseVNT(info, (Map<String, Object>) entry.getValue());
+
                 case "NT" -> parseNTExplosion(info, (Map<String, Object>) entry.getValue());
             }
         }
     }
 
-    private static void parseMist(MCH_WeaponInfo info, Map<String, Object> map) {
-            MistContainer container = new MistContainer();
-            for (Map.Entry<String, Object> entry : map.entrySet()) {
-                switch (entry.getKey()) {
-                    case "FluidType" -> container.fluidType = (String) entry.getValue();
-                    case "CloudCount" -> container.cloudCount = ((Number) entry.getValue()).intValue();
-                    case "Width" -> container.width = ((Number) entry.getValue()).floatValue();
-                    case "Height" -> container.height = ((Number) entry.getValue()).floatValue();
-                    case "AreaSpread" -> container.areaSpread = ((Number) entry.getValue()).intValue();
-                    case "Lifetime" -> container.lifetime = ((Number) entry.getValue()).intValue();
-                    case "LifetimeVariance" -> container.lifetimeVariance = ((Number) entry.getValue()).intValue();
-                    default -> logUnkownEntry(entry, "Mist");
+    private static void parseVNT(MCH_WeaponInfo info, Map<String, Object> map) {
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            switch (entry.getKey()) {
+                case "Attributes" -> new VNTSettingContainer((Map<String, Object>) entry.getValue());
+                case "Effect" -> {
+                    if (entry.getValue() instanceof String str) {
+                        info.vntSettingContainer.explosionEffect = switch (str.toUpperCase(Locale.ROOT)) {
+                            case "LARGE" -> VNTSettingContainer.ExplosionEffect.large();
+                            case "STANDARD" -> VNTSettingContainer.ExplosionEffect.standard();
+                            case "MEDIUM", "LOW" -> VNTSettingContainer.ExplosionEffect.medium();
+                            default -> throw new IllegalArgumentException(
+                                    "Unknown Muke type string: '" + str + "'. Expected one of: LARGE, STANDARD, MEDIUM, LOW."
+                            );
+                        };
+                    } else if (entry.getValue() instanceof Map<?, ?> vntMapRaw) {
+                        var vntMap = (Map<String,Object>) vntMapRaw;
+                        var effect = VNTSettingContainer.ExplosionEffect.standard();
+                        for (Map.Entry<String, Object> vntEntry : vntMap.entrySet()) {
+                            var value = vntEntry.getValue();
+                            switch (entry.getKey()) {
+                                case "IsSmall" -> effect.isSmall = (boolean) value;
+                                case "CloudCount" -> effect.cloudCount = ((Number) value).intValue();
+                                case "CloudScale" -> effect.cloudScale = ((Number) value).floatValue();
+                                case "CloudSpeedMult" -> effect.cloudSpeedMult = ((Number) value).floatValue();
+                                case "WaveScale" -> effect.waveScale = ((Number) value).floatValue();
+                                case "DebrisCount" -> effect.debrisCount = ((Number) value).intValue();
+                                case "DebrisSize" -> effect.debrisSize = ((Number) value).intValue();
+                                case "DebrisRetry" -> effect.debrisRetry = ((Number) value).intValue();
+                                case "DebrisVelocity" -> effect.debrisVelocity = ((Number) value).floatValue();
+                                case "DebrisHorizontalDeviation" -> effect.debrisHorizontalDeviation = ((Number) value).floatValue();
+                                case "DebrisVerticalOffset" -> effect.debrisVerticalOffset = ((Number) value).floatValue();
+                                case "SoundRange" -> effect.soundRange = ((Number) value).floatValue();
+                            }
+                        }
+                        info.vntSettingContainer.explosionEffect = effect;
+                    }
                 }
             }
-            info.mistContainer = container;
+
+        }
+    }
+
+    private static void parseMist(MCH_WeaponInfo info, Map<String, Object> map) {
+        MistContainer container = new MistContainer();
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            switch (entry.getKey()) {
+                case "FluidType" -> container.fluidType = (String) entry.getValue();
+                case "CloudCount" -> container.cloudCount = ((Number) entry.getValue()).intValue();
+                case "Width" -> container.width = ((Number) entry.getValue()).floatValue();
+                case "Height" -> container.height = ((Number) entry.getValue()).floatValue();
+                case "AreaSpread" -> container.areaSpread = ((Number) entry.getValue()).intValue();
+                case "Lifetime" -> container.lifetime = ((Number) entry.getValue()).intValue();
+                case "LifetimeVariance" -> container.lifetimeVariance = ((Number) entry.getValue()).intValue();
+                default -> logUnkownEntry(entry, "Mist");
+            }
+        }
+        info.mistContainer = container;
     }
 
     @SuppressWarnings("unchecked")
@@ -438,7 +482,7 @@ public class WeaponParser {
                 case "Particle" -> container.particle = (String) entry.getValue();
                 case "ShrapnelCount" -> container.shrapnelCount = ((Number) entry.getValue()).intValue();
                 case "Resolution", "Res" -> container.resolution = ((Number) entry.getValue()).intValue();
-                case "Attributes","Attrib" -> {
+                case "Attributes", "Attrib" -> {
                     Object val = entry.getValue();
                     if (val instanceof List<?> list) {
                         container.attributes = list.stream()
@@ -459,11 +503,11 @@ public class WeaponParser {
         List<String> attribs = null;
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             switch (entry.getKey()) {
-                case "Resolution","Res" -> res = ((Number)entry.getValue()).intValue();
-                case "Attributes","Attrib" -> attribs = (List<String>) entry.getValue();
+                case "Resolution", "Res" -> res = ((Number) entry.getValue()).intValue();
+                case "Attributes", "Attrib" -> attribs = (List<String>) entry.getValue();
             }
         }
-        info.ntSettingContainer = new NTSettingContainer(attribs,res);
+        info.ntSettingContainer = new NTSettingContainer(attribs, res);
     }
 
     private static void parseMarkerRocket(MCH_WeaponInfo info, Map<String, Object> map) {
@@ -535,7 +579,8 @@ public class WeaponParser {
     private static void parseSound(MCH_WeaponInfo info, Map<String, Object> map) {
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             switch (entry.getKey()) {
-                case "Name" -> info.soundFileName = ((String) entry.getValue()).toLowerCase(Locale.ROOT).trim();//for txt parser this field is "Sound"
+                case "Name" ->
+                        info.soundFileName = ((String) entry.getValue()).toLowerCase(Locale.ROOT).trim();//for txt parser this field is "Sound"
                 case "Locations" -> parseSoundLoc(info, (Map<String, Object>) entry.getValue());
                 case "Delay" -> info.soundDelay = getClamped(0, 1000, entry.getValue());
                 case "Volume" -> info.soundVolume = getClamped(0.0F, 1000.0F, entry.getValue());
