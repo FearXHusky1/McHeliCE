@@ -23,6 +23,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.MouseEvent;
 import net.minecraftforge.client.event.RenderLivingEvent.Specials.Post;
 import net.minecraftforge.client.event.RenderLivingEvent.Specials.Pre;
+import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import org.lwjgl.opengl.GL11; import net.minecraft.client.renderer.GlStateManager;
 
@@ -34,6 +35,7 @@ public class MCH_ClientEventHook extends W_ClientEventHook {
     public static final List<MCH_EntityAircraft> haveSearchLightAircraft = new ArrayList<>();
     private static boolean cancelRender = true;
     MCH_TextureManagerDummy dummyTextureManager = null;
+    private RenderPlayerEvent.Pre event;
 
     public static void setCancelRender(boolean cancel) {
         cancelRender = cancel;
@@ -140,33 +142,22 @@ public class MCH_ClientEventHook extends W_ClientEventHook {
         MCH_ClientLightWeaponTickHandler.markEntity(event.getEntity(), event.getX(), event.getY() + event.getEntity().height / 2.0F, event.getZ());
     }
 
-    //@Override
-    public void renderPlayerPre(net.minecraftforge.client.event.RenderPlayerEvent.Pre event) {
-        if (event.getEntity() != null) {
-            if (event.getEntity().getRidingEntity() instanceof MCH_EntityAircraft) {
-                MCH_EntityAircraft v = (MCH_EntityAircraft)event.getEntity().getRidingEntity();
-                if (v.getAcInfo() != null && v.getAcInfo().hideEntity) {
-                    event.setCanceled(true);
-                }
-            }
-        }
-    }
 
-    /**1.7.10
-     * public void renderPlayerPre(net.minecraftforge.client.event.RenderPlayerEvent.Pre event) {
-     *       if(event.entity != null) {
-     *          if(event.entity.ridingEntity instanceof MCH_EntityAircraft) {
-     *             MCH_EntityAircraft v = (MCH_EntityAircraft)event.entity.ridingEntity;
-     *             if(v.getAcInfo() != null && v.getAcInfo().hideEntity) {
-     *                event.setCanceled(true);
-     *                return;
-     *             }
-     *          }
-     *
-     *       }
-     *    }
-     *
-     */
+
+      @Override
+      public void renderPlayerPre(net.minecraftforge.client.event.RenderPlayerEvent.Pre event) {
+          this.event = event;
+          if(event.getEntity() != null) {
+               if(event.getEntity().getRidingEntity() instanceof MCH_EntityAircraft riding) {
+                  if(riding.getAcInfo() != null && riding.getAcInfo().hideEntity) {
+                     event.setCanceled(true);
+                     return;
+                  }
+               }
+
+            }
+         }
+
 
     @Override
     public void entityJoinWorldEvent(EntityJoinWorldEvent event) {

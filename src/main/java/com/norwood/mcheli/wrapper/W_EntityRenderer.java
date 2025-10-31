@@ -26,6 +26,7 @@ public class W_EntityRenderer {
     public static void activateShader(ResourceLocation r) {
         Minecraft mc = Minecraft.getMinecraft();
         mc.entityRenderer.loadShader(r);
+
     }
 
     public static void deactivateShader() {

@@ -47,15 +47,15 @@ public class MCH_AircraftGui extends W_GuiContainer {
     public void initGui() {
         super.initGui();
         this.buttonList.clear();
-        this.buttonReload = new GuiButton(1, this.guiLeft + 85, this.guiTop + 40, 50, 20, "Reload");
-        this.buttonNext = new GuiButton(3, this.guiLeft + 140, this.guiTop + 40, 20, 20, "<<");
-        this.buttonPrev = new GuiButton(2, this.guiLeft + 160, this.guiTop + 40, 20, 20, ">>");
+        this.buttonReload = new GuiButton(BUTTON_RELOAD, this.guiLeft + 85, this.guiTop + 40, 50, 20, "Reload");
+        this.buttonNext = new GuiButton(BUTTON_PREV, this.guiLeft + 140, this.guiTop + 40, 20, 20, "<<");
+        this.buttonPrev = new GuiButton(BUTTON_NEXT, this.guiLeft + 160, this.guiTop + 40, 20, 20, ">>");
         this.buttonReload.enabled = this.canReload(this.thePlayer);
         this.buttonNext.enabled = this.aircraft.getWeaponNum() >= 2;
         this.buttonPrev.enabled = this.aircraft.getWeaponNum() >= 2;
-        this.buttonInventory = new GuiButton(6, this.guiLeft + 210 - 30 - 60, this.guiTop + 90, 80, 20, "Inventory");
-        this.buttonList.add(new GuiButton(5, this.guiLeft + 210 - 30 - 60, this.guiTop + 110, 80, 20, "MOD Options"));
-        this.buttonList.add(new GuiButton(4, this.guiLeft + 210 - 30 - 20, this.guiTop + 10, 40, 20, "Close"));
+        this.buttonInventory = new GuiButton(BUTTON_INVENTORY, this.guiLeft + 210 - 30 - 60, this.guiTop + 90, 80, 20, "Inventory");
+        this.buttonList.add(new GuiButton(BUTTON_CONFIG, this.guiLeft + 210 - 30 - 60, this.guiTop + 110, 80, 20, "MOD Options"));
+        this.buttonList.add(new GuiButton(BUTTON_CLOSE, this.guiLeft + 210 - 30 - 20, this.guiTop + 10, 40, 20, "Close"));
         this.buttonList.add(this.buttonReload);
         this.buttonList.add(this.buttonNext);
         this.buttonList.add(this.buttonPrev);
@@ -105,7 +105,7 @@ public class MCH_AircraftGui extends W_GuiContainer {
         super.actionPerformed(button);
         if (button.enabled) {
             switch (button.id) {
-                case 1:
+                case BUTTON_RELOAD:
                     this.buttonReload.enabled = this.canReload(this.thePlayer);
                     if (this.buttonReload.enabled) {
                         PacketRequestReload.send(this.aircraft, this.currentWeaponId);
@@ -114,7 +114,7 @@ public class MCH_AircraftGui extends W_GuiContainer {
                         this.buttonReload.enabled = false;
                     }
                     break;
-                case 2:
+                case BUTTON_NEXT:
                     this.currentWeaponId++;
                     if (this.currentWeaponId >= this.aircraft.getWeaponNum()) {
                         this.currentWeaponId = 0;
@@ -122,7 +122,7 @@ public class MCH_AircraftGui extends W_GuiContainer {
 
                     this.buttonReload.enabled = this.canReload(this.thePlayer);
                     break;
-                case 3:
+                case BUTTON_PREV:
                     this.currentWeaponId--;
                     if (this.currentWeaponId < 0) {
                         this.currentWeaponId = this.aircraft.getWeaponNum() - 1;
@@ -130,13 +130,13 @@ public class MCH_AircraftGui extends W_GuiContainer {
 
                     this.buttonReload.enabled = this.canReload(this.thePlayer);
                     break;
-                case 4:
+                case BUTTON_CLOSE:
                     this.closeScreen();
                     break;
-                case 5:
+                case BUTTON_CONFIG:
                     PacketOpenScreen.send(2);
                     break;
-                case 6:
+                case BUTTON_INVENTORY:
                     PacketOpenScreen.send(3);
             }
         }

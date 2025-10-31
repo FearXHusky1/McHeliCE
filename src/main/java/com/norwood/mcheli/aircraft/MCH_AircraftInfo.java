@@ -1,6 +1,8 @@
 package com.norwood.mcheli.aircraft;
 
 import com.norwood.mcheli.MCH_BaseInfo;
+import com.norwood.mcheli.RWRType;
+import com.norwood.mcheli.RadarType;
 import com.norwood.mcheli.helper.addon.AddonResourceLocation;
 import com.norwood.mcheli.helper.client._IModelCustom;
 import com.norwood.mcheli.helper.info.IItemContent;
@@ -160,12 +162,12 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo implements IItemCont
     /**
      * 雷达种类
      */
-    //public EnumRadarType radarType = EnumRadarType.EARLY_AA;
+    public RadarType radarType = RadarType.EARLY_AA;
 
     /**
      * RWR种类
      */
-    //public EnumRWRType rwrType = EnumRWRType.DIGITAL;
+    public RWRType rwrType = RWRType.DIGITAL;
     /**
      * 当前载具在早期对地雷达中显示的名字
      */

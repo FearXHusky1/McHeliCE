@@ -1,6 +1,8 @@
 package com.norwood.mcheli.helper.info.parsers.yaml;
 
 import com.norwood.mcheli.MCH_MOD;
+import com.norwood.mcheli.RWRType;
+import com.norwood.mcheli.RadarType;
 import com.norwood.mcheli.aircraft.MCH_AircraftInfo;
 import com.norwood.mcheli.aircraft.MCH_BoundingBox;
 import com.norwood.mcheli.aircraft.MCH_SeatInfo;
@@ -383,25 +385,24 @@ public class YamlParser implements IParser {
                         info.repairOtherVehiclesValue = getClamped(10_000_000, (Object) repairMap.get("Value"));
                 }
 
-                //UNUSED in reforged too,
-//                case "RadarType" -> {
-//                    if (entry.getValue() instanceof String data) {
-//                        try {
-//                            info.radarType = EnumRadarType.valueOf(data);
-//                        } catch (IllegalArgumentException e) {
-//                            info.radarType = EnumRadarType.MODERN_AA;
-//                        }
-//                    }
-//                }
-//                case "RWRType" -> {
-//                    if (entry.getValue() instanceof String data) {
-//                        try {
-//                            info.rwrType = EnumRWRType.valueOf(data);
-//                        } catch (IllegalArgumentException e) {
-//                            info.rwrType = EnumRWRType.DIGITAL;
-//                        }
-//                    }
-//                }
+                case "RadarType" -> {
+                    if (entry.getValue() instanceof String data) {
+                        try {
+                            info.radarType = RadarType.valueOf(data);
+                        } catch (IllegalArgumentException e) {
+                            info.radarType = RadarType.MODERN_AA;
+                        }
+                    }
+                }
+                case "RWRType" -> {
+                    if (entry.getValue() instanceof String data) {
+                        try {
+                            info.rwrType = RWRType.valueOf(data);
+                        } catch (IllegalArgumentException e) {
+                            info.rwrType = RWRType.DIGITAL;
+                        }
+                    }
+                }
                 case "NameOnModernAARadar" -> info.nameOnModernAARadar = ((String) entry.getValue()).trim();
                 case "NameOnEarlyAARadar" -> info.nameOnEarlyAARadar = ((String) entry.getValue()).trim();
                 case "NameOnModernASRadar" -> info.nameOnModernASRadar = ((String) entry.getValue()).trim();

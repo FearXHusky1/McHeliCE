@@ -8,6 +8,7 @@ import com.norwood.mcheli.helper.MCH_CriteriaTriggers;
 import com.norwood.mcheli.helper.MCH_SoundEvents;
 import com.norwood.mcheli.helper.entity.IEntitySinglePassenger;
 import com.norwood.mcheli.helper.entity.ITargetMarkerObject;
+import com.norwood.mcheli.helper.info.ContentRegistries;
 import com.norwood.mcheli.mob.MCH_EntityGunner;
 import com.norwood.mcheli.mob.MCH_ItemSpawnGunner;
 import com.norwood.mcheli.multiplay.MCH_Multiplay;
@@ -5851,6 +5852,28 @@ public abstract class MCH_EntityAircraft
     @Override
     public Entity getEntity() {
         return this;
+    }
+
+
+    public String getNameOnMyRadar(MCH_EntityAircraft other) {
+        switch (getAcInfo().radarType) {
+            case MODERN_AA:
+                return other.getAcInfo().nameOnModernAARadar;
+            case EARLY_AA:
+                return other.getAcInfo().nameOnEarlyAARadar;
+            case MODERN_AS:
+                return other.getAcInfo().nameOnModernASRadar;
+            case EARLY_AS:
+                return other.getAcInfo().nameOnEarlyASRadar;
+        }
+        return "?";
+    }
+
+    public String getNameOnMyRadar(EntityInfo other) {
+        if(this.world.getEntityByID(other.entityId) instanceof MCH_EntityAircraft aircraft) {
+         return getNameOnMyRadar(aircraft);
+        }
+        return "?";
     }
 
     public static class UnmountReserve {
