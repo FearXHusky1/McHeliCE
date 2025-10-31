@@ -1,6 +1,5 @@
 package com.norwood.mcheli;
 
-import com.hbm.main.ClientProxy;
 import com.norwood.mcheli.aircraft.*;
 import com.norwood.mcheli.block.MCH_DraftingTableBlock;
 import com.norwood.mcheli.block.MCH_DraftingTableTileEntity;
@@ -29,7 +28,7 @@ import com.norwood.mcheli.mob.MCH_EntityGunner;
 import com.norwood.mcheli.mob.MCH_ItemSpawnGunner;
 import com.norwood.mcheli.parachute.MCH_EntityParachute;
 import com.norwood.mcheli.parachute.MCH_ItemParachute;
-import com.norwood.mcheli.plane.MCP_EntityPlane;
+import com.norwood.mcheli.plane.MCH_EntityPlane;
 import com.norwood.mcheli.plane.MCP_ItemPlane;
 import com.norwood.mcheli.plane.MCH_PlaneInfo;
 import com.norwood.mcheli.ship.MCH_EntityShip;
@@ -53,9 +52,7 @@ import com.norwood.mcheli.wrapper.W_Item;
 import com.norwood.mcheli.wrapper.W_LanguageRegistry;
 import com.norwood.mcheli.wrapper.W_NetworkRegistry;
 import net.minecraft.command.CommandHandler;
-import net.minecraft.item.Item;
 import net.minecraft.item.Item.ToolMaterial;
-import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -67,7 +64,6 @@ import net.minecraftforge.fml.common.Mod.Instance;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.*;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import org.apache.logging.log4j.Logger;
 
@@ -407,7 +403,7 @@ public class MCH_MOD {
         MCH_Entities.register(MCH_EntitySeat.class, "MCH.E.Seat", 100, this, 600, 10, true);
         MCH_Entities.register(MCH_EntityHeli.class, "MCH.E.Heli", 101, this, 600, 10, true);
         MCH_Entities.register(MCH_EntityGLTD.class, "MCH.E.GLTD", 102, this, 600, 10, true);
-        MCH_Entities.register(MCP_EntityPlane.class, "MCH.E.Plane", 103, this, 600, 10, true);
+        MCH_Entities.register(MCH_EntityPlane.class, "MCH.E.Plane", 103, this, 600, 10, true);
         MCH_Entities.register(MCH_EntityShip.class, "MCH.E.Ship", 403, this, 600, 10, true);
 
         MCH_Entities.register(MCH_EntityChain.class, "MCH.E.Chain", 104, this, 600, 10, true);

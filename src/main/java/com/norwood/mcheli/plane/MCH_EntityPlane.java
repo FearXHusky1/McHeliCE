@@ -25,7 +25,7 @@ import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
 
-public class MCP_EntityPlane extends MCH_EntityAircraft {
+public class MCH_EntityPlane extends MCH_EntityAircraft {
     public float soundVolume;
     public MCH_Parts partNozzle;
     public MCH_Parts partWing;
@@ -35,7 +35,7 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
     private MCH_PlaneInfo planeInfo = null;
     private boolean addKeyFlag;
 
-    public MCP_EntityPlane(World world) {
+    public MCH_EntityPlane(World world) {
         super(world);
         this.currentSpeed = 0.07;
         this.preventEntitySpawning = true;

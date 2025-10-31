@@ -19,13 +19,13 @@ public class MCP_GuiPlane extends MCH_AircraftCommonGui {
 
     @Override
     public boolean isDrawGui(EntityPlayer player) {
-        return MCH_EntityAircraft.getAircraft_RiddenOrControl(player) instanceof MCP_EntityPlane;
+        return MCH_EntityAircraft.getAircraft_RiddenOrControl(player) instanceof MCH_EntityPlane;
     }
 
     @Override
     public void drawGui(EntityPlayer player, boolean isThirdPersonView) {
         MCH_EntityAircraft ac = MCH_EntityAircraft.getAircraft_RiddenOrControl(player);
-        if (ac instanceof MCP_EntityPlane plane && !ac.isDestroyed()) {
+        if (ac instanceof MCH_EntityPlane plane && !ac.isDestroyed()) {
             int seatID = ac.getSeatIdByEntity(player);
             GL11.glLineWidth(scaleFactor);
             if (plane.getCameraMode(player) == 1) {
@@ -53,7 +53,7 @@ public class MCP_GuiPlane extends MCH_AircraftCommonGui {
         }
     }
 
-    public void drawKeybind(MCP_EntityPlane plane, EntityPlayer player, int seatID) {
+    public void drawKeybind(MCH_EntityPlane plane, EntityPlayer player, int seatID) {
         if (!MCH_Config.HideKeybind.prmBool) {
             MCH_PlaneInfo info = plane.getPlaneInfo();
             if (info != null) {

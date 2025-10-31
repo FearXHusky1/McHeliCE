@@ -7,7 +7,7 @@ import com.norwood.mcheli.aircraft.MCH_EntityAircraft;
 import com.norwood.mcheli.helicopter.MCH_EntityHeli;
 import com.norwood.mcheli.networking.packet.PacketMarkPos;
 import com.norwood.mcheli.networking.packet.PacketSpotEnemy;
-import com.norwood.mcheli.plane.MCP_EntityPlane;
+import com.norwood.mcheli.plane.MCH_EntityPlane;
 import com.norwood.mcheli.ship.MCH_EntityShip;
 import com.norwood.mcheli.tank.MCH_EntityTank;
 import com.norwood.mcheli.vehicle.MCH_EntityVehicle;
@@ -45,7 +45,7 @@ public class MCH_Multiplay {
     };
 
     public static boolean canSpotEntityWithFilter(int filter, Entity entity) {
-        if (entity instanceof MCP_EntityPlane || entity instanceof MCH_EntityShip) { //spaghetti
+        if (entity instanceof MCH_EntityPlane || entity instanceof MCH_EntityShip) { //spaghetti
             return (filter & 32) != 0;
         } else if (entity instanceof MCH_EntityHeli) {
             return (filter & 16) != 0;

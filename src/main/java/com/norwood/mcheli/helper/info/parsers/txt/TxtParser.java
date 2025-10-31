@@ -18,7 +18,7 @@ import com.norwood.mcheli.helper.info.parsers.IParser;
 import com.norwood.mcheli.hud.*;
 import com.norwood.mcheli.item.MCH_ItemInfo;
 import com.norwood.mcheli.plane.MCH_PlaneInfo;
-import com.norwood.mcheli.plane.MCP_EntityPlane;
+import com.norwood.mcheli.plane.MCH_EntityPlane;
 import com.norwood.mcheli.ship.MCH_EntityShip;
 import com.norwood.mcheli.ship.MCH_ShipInfo;
 import com.norwood.mcheli.tank.MCH_EntityTank;
@@ -1300,7 +1300,7 @@ public class TxtParser implements IParser {
                     c = switch (className) {
                         case "player" -> EntityPlayer.class;
                         case "heli", "helicopter" -> MCH_EntityHeli.class;
-                        case "plane" -> MCP_EntityPlane.class;
+                        case "plane" -> MCH_EntityPlane.class;
                         case "ship" -> MCH_EntityShip.class;
                         case "tank" -> MCH_EntityTank.class;
                         case "vehicle" -> MCH_EntityVehicle.class;

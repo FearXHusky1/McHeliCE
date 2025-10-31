@@ -12,8 +12,8 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraft.client.renderer.GlStateManager;
 
 @SideOnly(Side.CLIENT)
-public class MCP_RenderPlane extends MCH_RenderAircraft<MCP_EntityPlane> {
-    public static final IRenderFactory<MCP_EntityPlane> FACTORY = MCP_RenderPlane::new;
+public class MCP_RenderPlane extends MCH_RenderAircraft<MCH_EntityPlane> {
+    public static final IRenderFactory<MCH_EntityPlane> FACTORY = MCP_RenderPlane::new;
 
     public MCP_RenderPlane(RenderManager renderManager) {
         super(renderManager);
@@ -23,7 +23,7 @@ public class MCP_RenderPlane extends MCH_RenderAircraft<MCP_EntityPlane> {
     @Override
     public void renderAircraft(MCH_EntityAircraft entity, double posX, double posY, double posZ, float yaw, float pitch, float roll, float tickTime) {
         MCH_PlaneInfo planeInfo;
-        if (entity instanceof MCP_EntityPlane plane) {
+        if (entity instanceof MCH_EntityPlane plane) {
             planeInfo = plane.getPlaneInfo();
             if (planeInfo != null) {
                 posY += W_Entity.GLOBAL_Y_OFFSET;
@@ -51,7 +51,7 @@ public class MCP_RenderPlane extends MCH_RenderAircraft<MCP_EntityPlane> {
         }
     }
 
-    public void renderRotor(MCP_EntityPlane plane, MCH_PlaneInfo planeInfo, float tickTime) {
+    public void renderRotor(MCH_EntityPlane plane, MCH_PlaneInfo planeInfo, float tickTime) {
         float rot = plane.getNozzleRotation();
         float prevRot = plane.getPrevNozzleRotation();
 
@@ -84,7 +84,7 @@ public class MCP_RenderPlane extends MCH_RenderAircraft<MCP_EntityPlane> {
         }
     }
 
-    public void renderWing(MCP_EntityPlane plane, MCH_PlaneInfo planeInfo, float tickTime) {
+    public void renderWing(MCH_EntityPlane plane, MCH_PlaneInfo planeInfo, float tickTime) {
         float rot = plane.getWingRotation();
         float prevRot = plane.getPrevWingRotation();
 
@@ -109,7 +109,7 @@ public class MCP_RenderPlane extends MCH_RenderAircraft<MCP_EntityPlane> {
         }
     }
 
-    public void renderNozzle(MCP_EntityPlane plane, MCH_PlaneInfo planeInfo, float tickTime) {
+    public void renderNozzle(MCH_EntityPlane plane, MCH_PlaneInfo planeInfo, float tickTime) {
         float rot = plane.getNozzleRotation();
         float prevRot = plane.getPrevNozzleRotation();
 
@@ -123,7 +123,7 @@ public class MCP_RenderPlane extends MCH_RenderAircraft<MCP_EntityPlane> {
         }
     }
 
-    protected ResourceLocation getEntityTexture(MCP_EntityPlane entity) {
+    protected ResourceLocation getEntityTexture(MCH_EntityPlane entity) {
         return TEX_DEFAULT;
     }
 }

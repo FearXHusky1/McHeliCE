@@ -45,7 +45,6 @@ public class MCH_ParticlesUtil {
     public static boolean spawnParticleTileDust(World w, int blockX, int blockY, int blockZ, double x, double y, double z, double mx, double my, double mz, float scale) {
         boolean ret = false;
         int[][] offset = new int[][]{{0, 0, 0}, {0, 0, -1}, {0, 0, 1}, {1, 0, 0}, {-1, 0, 0}};
-        int len = offset.length;
 
         for (int[] ints : offset) {
             W_Particle.BlockParticleParam name = W_Particle.getParticleTileDustName(w, blockX + ints[0], blockY + ints[1], blockZ + ints[2]);

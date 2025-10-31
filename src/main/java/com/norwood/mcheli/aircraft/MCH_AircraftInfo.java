@@ -8,13 +8,20 @@ import com.norwood.mcheli.helper.client._IModelCustom;
 import com.norwood.mcheli.helper.info.IItemContent;
 import com.norwood.mcheli.hud.MCH_Hud;
 import com.norwood.mcheli.hud.MCH_HudManager;
+import com.norwood.mcheli.hud.direct_drawable.DirectDrawable;
+import com.norwood.mcheli.hud.direct_drawable.HudRWR;
+import com.norwood.mcheli.weapon.MCH_WeaponInfoManager;
 import com.norwood.mcheli.wrapper.W_Entity;
 import lombok.AllArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.Vec3d;
+import net.minecraftforge.fml.common.registry.ForgeRegistries;
 
+import java.sql.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -145,73 +152,49 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo implements IItemCont
     public float soundVolume = 1.0F;
     public float soundPitch = 1.0F;
     public _IModelCustom model = null;
-    /**
-     * 当前载具在现代对空雷达中显示的名字
-     */
-    public String nameOnModernAARadar = "?";
-    /**
-     * 当前载具在早期对空雷达中显示的名字
-     */
-    public String nameOnEarlyAARadar = "?";
-    /**
-     * 当前载具在现代对地雷达中显示的名字
-     */
-    public String nameOnModernASRadar = "?";
-
-
-    /**
-     * 雷达种类
-     */
+    /** Radar type */
     public RadarType radarType = RadarType.EARLY_AA;
-
-    /**
-     * RWR种类
-     */
+    /** RWR type */
     public RWRType rwrType = RWRType.DIGITAL;
-    /**
-     * 当前载具在早期对地雷达中显示的名字
-     */
-    public String nameOnEarlyASRadar = "?";
-    /**
-     * 载具被摧毁时爆炸范围
-     */
+    /** Display name on modern air-to-air radar */
+    public String nameOnModernAARadar = "";
+    /** Display name on early air-to-air radar */
+    public String nameOnEarlyAARadar = "";
+    /** Display name on modern air-to-surface radar */
+    public String nameOnModernASRadar = "";
+    /** Display name on early air-to-surface radar */
+    public String nameOnEarlyASRadar = "";
+    /** Explosion radius when the vehicle is destroyed */
     public float explosionSizeByCrash = 5;
-    /**
-     * 倒车速度倍率，默认1
-     */
+    /** Reverse speed multiplier (default 1) */
     public float throttleDownFactor = 1;
-    /**
-     * 箔条生效时长
-     */
+    /** Duration of chaff effectiveness */
     public int chaffUseTime = 100;
-    /**
-     * 箔条冷却时长
-     */
+    /** Chaff cooldown time */
     public int chaffWaitTime = 400;
-    /**
-     * 维修系统生效时长 （时长即为回血百分比）
-     */
+    /** Duration of repair system (duration = heal percentage) */
     public int maintenanceUseTime = 20;
-    /**
-     * 维修系统冷却时长
-     */
+    /** Repair system cooldown time */
     public int maintenanceWaitTime = 300;
-    /**
-     * 载具瘫痪阈值，血量低于此百分比将关闭载具引擎
-     */
+    /** Vehicle paralysis threshold; engine shuts down below this HP percentage */
     public int engineShutdownThreshold = 20;
-    /**
-     * APS生效时长
-     */
+    /** APS active duration */
     public int apsUseTime = 100;
-    /**
-     * APS冷却时长
-     */
+    /** APS cooldown time */
     public int apsWaitTime = 400;
-    /**
-     * APS范围
-     */
+    /** APS range */
     public int apsRange = 8;
+    /** Whether the vehicle has RWR */
+    public boolean hasRWR = false;
+    /** HUD custom field for vehicle HUD type */
+    public int hudType = 0;
+    /** HUD custom field for vehicle weapon group type */
+    public int weaponGroupType = 0;
+    /** Explosion damage multiplier; final damage = base * multiplier */
+    public float armorExplosionDamageMultiplier = 1.0f;
+    /** Whether the vehicle has a photoelectric jammer (immune to laser lock-on) */
+    public boolean hasPhotoelectricJammer = false;
+
 
 
     /**
@@ -222,6 +205,25 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo implements IItemCont
     private String lastWeaponType = "";
     private int lastWeaponIndex = -1;
     private MCH_AircraftInfo.PartWeapon lastWeaponPart = null;
+
+    private List<DirectDrawable> hudCache = null;
+
+    public List<DirectDrawable> getHudCache(){
+        if(hudCache == null){
+            hudCache = buildHudCache();
+        }
+        return hudCache;
+    }
+
+    private List<DirectDrawable> buildHudCache(){
+        var list = new ArrayList<DirectDrawable>();
+        if(hasRWR);
+        list.add(HudRWR.INSTANCE);
+
+        return list;
+    }
+
+
 
 
     public MCH_AircraftInfo(AddonResourceLocation location, String path) {
@@ -1426,6 +1428,11 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo implements IItemCont
                     ", model=" + model +
                     '}';
         }
+    }
+
+    @Override
+    public void onPostReload() {
+        hudCache = null;
     }
 
     public static class Weapon {

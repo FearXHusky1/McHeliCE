@@ -4,8 +4,8 @@
     "srcrgb": "one",
     "dstrgb": "zero"
   },
-  "vertex": "thermal",
-  "fragment": "thermal",
+  "vertex": "mcheli:thermal",
+  "fragment": "mcheli:thermal",
   "attributes": [ "Position" ],
   "samplers": [
     { "name": "DiffuseSampler" }

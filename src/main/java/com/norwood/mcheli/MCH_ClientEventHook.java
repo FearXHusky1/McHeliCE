@@ -1,9 +1,9 @@
 package com.norwood.mcheli;
 
-import com.norwood.mcheli.helper.entity.ITargetMarkerObject;
 import com.norwood.mcheli.aircraft.MCH_EntityAircraft;
 import com.norwood.mcheli.aircraft.MCH_EntitySeat;
 import com.norwood.mcheli.aircraft.MCH_RenderAircraft;
+import com.norwood.mcheli.helper.entity.ITargetMarkerObject;
 import com.norwood.mcheli.lweapon.MCH_ClientLightWeaponTickHandler;
 import com.norwood.mcheli.multiplay.MCH_GuiTargetMarker;
 import com.norwood.mcheli.particles.MCH_ParticlesUtil;
@@ -25,14 +25,14 @@ import net.minecraftforge.client.event.RenderLivingEvent.Specials.Post;
 import net.minecraftforge.client.event.RenderLivingEvent.Specials.Pre;
 import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
-import org.lwjgl.opengl.GL11; import net.minecraft.client.renderer.GlStateManager;
+import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class MCH_ClientEventHook extends W_ClientEventHook {
-    private static final ResourceLocation ir_strobe = new ResourceLocation(Tags.MODID, "textures/ir_strobe.png");
     public static final List<MCH_EntityAircraft> haveSearchLightAircraft = new ArrayList<>();
+    private static final ResourceLocation ir_strobe = new ResourceLocation(Tags.MODID, "textures/ir_strobe.png");
     private static boolean cancelRender = true;
     MCH_TextureManagerDummy dummyTextureManager = null;
     private RenderPlayerEvent.Pre event;
@@ -64,7 +64,7 @@ public class MCH_ClientEventHook extends W_ClientEventHook {
                         int k = 240;
                         OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, j, k);
                         RenderManager rm = event.getRenderer().getRenderManager();
-                         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+                        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
                         float f1 = 0.080000006F;
                         GlStateManager.pushMatrix();
                         GlStateManager.translate(event.getX(), event.getY() + (float) (entity.height * 0.75), event.getZ());
@@ -143,20 +143,19 @@ public class MCH_ClientEventHook extends W_ClientEventHook {
     }
 
 
-
-      @Override
-      public void renderPlayerPre(net.minecraftforge.client.event.RenderPlayerEvent.Pre event) {
-          this.event = event;
-          if(event.getEntity() != null) {
-               if(event.getEntity().getRidingEntity() instanceof MCH_EntityAircraft riding) {
-                  if(riding.getAcInfo() != null && riding.getAcInfo().hideEntity) {
-                     event.setCanceled(true);
-                     return;
-                  }
-               }
-
+    @Override
+    public void renderPlayerPre(net.minecraftforge.client.event.RenderPlayerEvent.Pre event) {
+        this.event = event;
+        if (event.getEntity() != null) {
+            if (event.getEntity().getRidingEntity() instanceof MCH_EntityAircraft riding) {
+                if (riding.getAcInfo() != null && riding.getAcInfo().hideEntity) {
+                    event.setCanceled(true);
+                    return;
+                }
             }
-         }
+
+        }
+    }
 
 
     @Override

@@ -2,9 +2,15 @@ package com.norwood.mcheli.helper.client;
 
 import com.norwood.mcheli.MCH_ViewEntityDummy;
 import com.norwood.mcheli.aircraft.MCH_EntityAircraft;
+import com.norwood.mcheli.aircraft.MCH_EntitySeat;
+import com.norwood.mcheli.hud.direct_drawable.DirectDrawable;
 import com.norwood.mcheli.tool.rangefinder.MCH_ItemRangeFinder;
+import com.norwood.mcheli.uav.MCH_EntityUavStation;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.Tuple;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.client.event.EntityViewRenderEvent.CameraSetup;
 import net.minecraftforge.client.event.EntityViewRenderEvent.FOVModifier;
@@ -27,11 +33,49 @@ public class MCH_CameraManager {
     private static float cameraZoom = 1.0F;
     private static MCH_EntityAircraft ridingAircraft = null;
 
+    //For hud canceling
     @SubscribeEvent
-    public void onRenderCrosshair(RenderGameOverlayEvent event) {
-        if(ridingAircraft != null && event.getType() == RenderGameOverlayEvent.ElementType.CROSSHAIRS)
-            event.setCanceled(true);
+    public void onRenderOverlay(RenderGameOverlayEvent.Pre event) {
     }
+
+    @SubscribeEvent
+    public void onRenderOverlay(RenderGameOverlayEvent.Post event) {
+        if (event.getType() != RenderGameOverlayEvent.ElementType.ALL) return;
+        Tuple<EntityPlayer, MCH_EntityAircraft> ctx = getActivePilotContext();
+        if (ctx == null) return;
+        if(ctx.getSecond().getAcInfo() == null) return;
+        ctx.getSecond().getAcInfo().getHudCache().forEach(drawable -> drawable.renderHud(event,ctx));
+    }
+
+
+    @Nullable
+    private static Tuple<EntityPlayer, MCH_EntityAircraft> getActivePilotContext() {
+        Minecraft mc = Minecraft.getMinecraft();
+        EntityPlayer player = mc.player;
+        if (player == null || mc.world == null)
+            return null;
+
+        MCH_EntityAircraft ac = getRiddenAircraft(mc,player);
+        if (ac == null)
+            return null;
+
+        return new Tuple<>(player, ac);
+    }
+
+    @Nullable
+    private static MCH_EntityAircraft getRiddenAircraft(Minecraft mc, EntityPlayer player) {
+        Entity riding = player.getRidingEntity();
+        if (riding instanceof MCH_EntityAircraft) {
+            return (MCH_EntityAircraft) riding;
+        } else if (riding instanceof MCH_EntitySeat) {
+            return ((MCH_EntitySeat) riding).getParent();
+        } else if (riding instanceof MCH_EntityUavStation) {
+            return ((MCH_EntityUavStation) riding).getControlAircract();
+        }
+        return null;
+    }
+
+
 
 
     @SubscribeEvent

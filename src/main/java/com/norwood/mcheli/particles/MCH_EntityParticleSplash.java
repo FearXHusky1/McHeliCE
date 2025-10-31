@@ -5,6 +5,7 @@ import com.norwood.mcheli.wrapper.W_McClient;
 import com.norwood.mcheli.wrapper.W_WorldFunc;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.EnumParticleTypes;
@@ -137,6 +138,12 @@ public class MCH_EntityParticleSplash extends MCH_EntityParticleBase {
                 .color(this.particleRed * brightnessFactor, this.particleGreen * brightnessFactor, this.particleBlue * brightnessFactor, this.particleAlpha)
                 .lightmap(lightU, lightV)
                 .endVertex();
+        Tessellator.getInstance().draw();
+    }
+
+    @Override
+    public int getFXLayer() {
+        return 3;
     }
 
 }

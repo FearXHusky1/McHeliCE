@@ -18,7 +18,7 @@ import com.norwood.mcheli.multiplay.MCH_GuiTargetMarker;
 import com.norwood.mcheli.multiplay.MCH_MultiplayClient;
 import com.norwood.mcheli.networking.packet.PacketOpenScreen;
 import com.norwood.mcheli.plane.MCP_ClientPlaneTickHandler;
-import com.norwood.mcheli.plane.MCP_EntityPlane;
+import com.norwood.mcheli.plane.MCH_EntityPlane;
 import com.norwood.mcheli.plane.MCP_GuiPlane;
 import com.norwood.mcheli.ship.MCH_GuiShip;
 import com.norwood.mcheli.ship.MCH_ClientShipTickHandler;
@@ -432,7 +432,7 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
 
                 MCH_EntityAircraft ac = null;
                 if (player.getRidingEntity() instanceof MCH_EntityHeli
-                        || player.getRidingEntity() instanceof MCP_EntityPlane
+                        || player.getRidingEntity() instanceof MCH_EntityPlane
                         || player.getRidingEntity() instanceof MCH_EntityShip
                         || player.getRidingEntity() instanceof MCH_EntityTank) {
                     ac = (MCH_EntityAircraft) player.getRidingEntity();
@@ -447,7 +447,7 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
                     stickMode = MCH_Config.MouseControlStickModeHeli.prmBool;
                 }
 
-                if (ac instanceof MCP_EntityPlane || ac instanceof MCH_EntityShip) { //do the stanky leg
+                if (ac instanceof MCH_EntityPlane || ac instanceof MCH_EntityShip) { //do the stanky leg
                     stickMode = MCH_Config.MouseControlStickModePlane.prmBool;
                 }
 

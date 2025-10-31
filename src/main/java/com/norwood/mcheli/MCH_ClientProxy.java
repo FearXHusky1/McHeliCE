@@ -17,6 +17,7 @@ import com.norwood.mcheli.helicopter.MCH_HeliInfo;
 import com.norwood.mcheli.helicopter.MCH_RenderHeli;
 import com.norwood.mcheli.helper.addon.AddonManager;
 import com.norwood.mcheli.helper.addon.AddonPack;
+import com.norwood.mcheli.helper.client.MCH_CameraManager;
 import com.norwood.mcheli.helper.client.MCH_ItemModelRenderers;
 import com.norwood.mcheli.helper.client._IModelCustom;
 import com.norwood.mcheli.helper.client.model.LegacyModelLoader;
@@ -27,9 +28,8 @@ import com.norwood.mcheli.mob.MCH_RenderGunner;
 import com.norwood.mcheli.multiplay.MCH_MultiplayClient;
 import com.norwood.mcheli.parachute.MCH_EntityParachute;
 import com.norwood.mcheli.parachute.MCH_RenderParachute;
-import com.norwood.mcheli.particles.MCH_ParticlesUtil;
 import com.norwood.mcheli.plane.MCH_PlaneInfo;
-import com.norwood.mcheli.plane.MCP_EntityPlane;
+import com.norwood.mcheli.plane.MCH_EntityPlane;
 import com.norwood.mcheli.plane.MCP_RenderPlane;
 import com.norwood.mcheli.ship.MCH_EntityShip;
 import com.norwood.mcheli.ship.MCH_RenderShip;
@@ -109,7 +109,7 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
     public void registerRenderer() {
         RenderingRegistry.registerEntityRenderingHandler(MCH_EntitySeat.class, com.norwood.mcheli.helper.debug.MCH_RenderTest.factory(0.0F, 0.3125F, 0.0F, "seat"));
         RenderingRegistry.registerEntityRenderingHandler(MCH_EntityHeli.class, MCH_RenderHeli.FACTORY);
-        RenderingRegistry.registerEntityRenderingHandler(MCP_EntityPlane.class, MCP_RenderPlane.FACTORY);
+        RenderingRegistry.registerEntityRenderingHandler(MCH_EntityPlane.class, MCP_RenderPlane.FACTORY);
         RenderingRegistry.registerEntityRenderingHandler(MCH_EntityShip.class, MCH_RenderShip.FACTORY);
         RenderingRegistry.registerEntityRenderingHandler(MCH_EntityTank.class, MCH_RenderTank.FACTORY);
         RenderingRegistry.registerEntityRenderingHandler(MCH_EntityGLTD.class, MCH_RenderGLTD.FACTORY);
@@ -521,7 +521,7 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
 
     @Override
     public void init() {
-        MinecraftForge.EVENT_BUS.register(new MCH_ParticlesUtil());
+        MinecraftForge.EVENT_BUS.register(new MCH_CameraManager());
         MinecraftForge.EVENT_BUS.register(new MCH_ClientEventHook());
     }
 

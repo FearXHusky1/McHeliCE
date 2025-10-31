@@ -56,7 +56,7 @@ public class MCP_ClientPlaneTickHandler extends MCH_AircraftClientTickHandler {
         };
     }
 
-    protected void update(EntityPlayer player, MCP_EntityPlane plane) {
+    protected void update(EntityPlayer player, MCH_EntityPlane plane) {
         if (plane.getIsGunnerMode(player)) {
             MCH_SeatInfo seatInfo = plane.getSeatInfo(player);
             if (seatInfo != null) {
@@ -76,19 +76,19 @@ public class MCP_ClientPlaneTickHandler extends MCH_AircraftClientTickHandler {
 
         this.isBeforeRiding = this.isRiding;
         EntityPlayer player = this.mc.player;
-        MCP_EntityPlane plane = null;
+        MCH_EntityPlane plane = null;
         boolean isPilot = true;
         if (player != null) {
-            if (player.getRidingEntity() instanceof MCP_EntityPlane) {
-                plane = (MCP_EntityPlane) player.getRidingEntity();
+            if (player.getRidingEntity() instanceof MCH_EntityPlane) {
+                plane = (MCH_EntityPlane) player.getRidingEntity();
             } else if (player.getRidingEntity() instanceof MCH_EntitySeat seat) {
-                if (seat.getParent() instanceof MCP_EntityPlane) {
+                if (seat.getParent() instanceof MCH_EntityPlane) {
                     isPilot = false;
-                    plane = (MCP_EntityPlane) seat.getParent();
+                    plane = (MCH_EntityPlane) seat.getParent();
                 }
             } else if (player.getRidingEntity() instanceof MCH_EntityUavStation uavStation) {
-                if (uavStation.getControlAircract() instanceof MCP_EntityPlane) {
-                    plane = (MCP_EntityPlane) uavStation.getControlAircract();
+                if (uavStation.getControlAircract() instanceof MCH_EntityPlane) {
+                    plane = (MCH_EntityPlane) uavStation.getControlAircract();
                 }
             }
         }
@@ -135,11 +135,11 @@ public class MCP_ClientPlaneTickHandler extends MCH_AircraftClientTickHandler {
         }
     }
 
-    protected void playerControlInGUI(EntityPlayer player, MCP_EntityPlane plane, boolean isPilot) {
+    protected void playerControlInGUI(EntityPlayer player, MCH_EntityPlane plane, boolean isPilot) {
         this.commonPlayerControlInGUI(player, plane, isPilot, new PacketPlayerControlPlane(new DataPlayerControlAircraft()));
     }
 
-    protected void playerControl(EntityPlayer player, MCP_EntityPlane plane, boolean isPilot) {
+    protected void playerControl(EntityPlayer player, MCH_EntityPlane plane, boolean isPilot) {
         DataPlayerControlAircraft pc = new DataPlayerControlAircraft();
         boolean send = this.commonPlayerControl(player, plane, isPilot, pc);
 

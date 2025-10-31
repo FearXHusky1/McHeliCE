@@ -4,8 +4,8 @@
     "srcrgb": "one",
     "dstrgb": "zero"
   },
-  "vertex": "nightvision",
-  "fragment": "nightvision",
+  "vertex": "mcheli:nightvision",
+  "fragment": "mcheli:nightvision",
   "attributes": [ "Position" ],
   "samplers": [
     { "name": "DiffuseSampler" }

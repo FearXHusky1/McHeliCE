@@ -1,7 +1,7 @@
 package com.norwood.mcheli;
 
 import com.norwood.mcheli.helicopter.MCH_EntityHeli;
-import com.norwood.mcheli.plane.MCP_EntityPlane;
+import com.norwood.mcheli.plane.MCH_EntityPlane;
 import com.norwood.mcheli.tank.MCH_EntityTank;
 import com.norwood.mcheli.vehicle.MCH_EntityVehicle;
 import com.norwood.mcheli.wrapper.W_Block;
@@ -478,7 +478,7 @@ public class MCH_Config {
 
     public static float applyDamageByExternal(Entity target, DamageSource ds, float damage) {
         List<MCH_Config.DamageEntity> list;
-        if (target instanceof MCH_EntityHeli || target instanceof MCP_EntityPlane) {
+        if (target instanceof MCH_EntityHeli || target instanceof MCH_EntityPlane) {
             list = DamageAircraftByExternal.list;
         } else if (target instanceof MCH_EntityTank) {
             list = DamageTankByExternal.list;
@@ -506,7 +506,7 @@ public class MCH_Config {
         if (target != null) {
             String targetName = target.getClass().toString();
             List<DamageEntity> list;
-            if (target instanceof MCH_EntityHeli || target instanceof MCP_EntityPlane) {
+            if (target instanceof MCH_EntityHeli || target instanceof MCH_EntityPlane) {
                 list = DamageVsMCHeliAircraft.list;
             } else if (target instanceof MCH_EntityTank) {
                 list = DamageVsMCHeliTank.list;

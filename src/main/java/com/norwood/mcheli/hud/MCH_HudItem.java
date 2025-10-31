@@ -6,7 +6,7 @@ import com.norwood.mcheli.eval.eval.ExpRuleFactory;
 import com.norwood.mcheli.eval.eval.Expression;
 import com.norwood.mcheli.eval.eval.var.MapVariable;
 import com.norwood.mcheli.helicopter.MCH_EntityHeli;
-import com.norwood.mcheli.plane.MCP_EntityPlane;
+import com.norwood.mcheli.plane.MCH_EntityPlane;
 import com.norwood.mcheli.weapon.MCH_SightType;
 import com.norwood.mcheli.weapon.MCH_WeaponBase;
 import com.norwood.mcheli.weapon.MCH_WeaponInfo;
@@ -23,7 +23,7 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.MathHelper;
-import org.lwjgl.opengl.GL11; import net.minecraft.client.renderer.GlStateManager;
+import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -316,7 +316,7 @@ public abstract class MCH_HudItem extends Gui {
     }
 
     public static int getVtolStat(MCH_EntityAircraft ac) {
-        return ac instanceof MCP_EntityPlane ? ac.getVtolMode() : 0;
+        return ac instanceof MCH_EntityPlane ? ac.getVtolMode() : 0;
     }
 
     public static int getFreeLook(MCH_EntityAircraft ac, EntityPlayer player) {
@@ -324,7 +324,7 @@ public abstract class MCH_HudItem extends Gui {
     }
 
     public static int getAutoPilot(MCH_EntityAircraft ac, EntityPlayer player) {
-        return ac instanceof MCP_EntityPlane && ac.isPilot(player) && ac.getIsGunnerMode(player) ? 1 : 0;
+        return ac instanceof MCH_EntityPlane && ac.isPilot(player) && ac.getIsGunnerMode(player) ? 1 : 0;
     }
 
     public static double getColor() {

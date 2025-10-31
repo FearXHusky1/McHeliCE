@@ -8,7 +8,7 @@ import com.norwood.mcheli.compat.hbm.NTSettingContainer;
 import com.norwood.mcheli.compat.hbm.VNTSettingContainer;
 import com.norwood.mcheli.helicopter.MCH_EntityHeli;
 import com.norwood.mcheli.helper.MCH_Utils;
-import com.norwood.mcheli.plane.MCP_EntityPlane;
+import com.norwood.mcheli.plane.MCH_EntityPlane;
 import com.norwood.mcheli.ship.MCH_EntityShip;
 import com.norwood.mcheli.tank.MCH_EntityTank;
 import com.norwood.mcheli.vehicle.MCH_EntityVehicle;
@@ -274,7 +274,7 @@ public class WeaponParser {
             var clazz = switch (entry.getKey()) {
                 case "Player" -> EntityPlayer.class;
                 case "Heli", "Helicopter" -> MCH_EntityHeli.class;
-                case "Plane" -> MCP_EntityPlane.class;
+                case "Plane" -> MCH_EntityPlane.class;
                 case "Ship" -> MCH_EntityShip.class;
                 case "Tank" -> MCH_EntityTank.class;
                 case "Vehicle" -> MCH_EntityVehicle.class;
