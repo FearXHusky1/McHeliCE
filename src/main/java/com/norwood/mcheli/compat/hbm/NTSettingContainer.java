@@ -18,7 +18,6 @@ public class NTSettingContainer {
 
     public final List<String> attributes = new ArrayList<>() {
     };
-    public int strenght;
     List<Object> runtimeAttribs;
     private int resolution = 16;
 
@@ -35,7 +34,7 @@ public class NTSettingContainer {
     }
 
     @Optional.Method(modid = "hbm")
-    public void explode(World world, Entity exploder, double x, double y, double z) {
+    public void explode(World world, Entity exploder, double x, double y, double z, int strenght) {
         var explosionNT = new com.hbm.explosion.ExplosionNT(world, exploder, x, y, z, strenght);
         explosionNT.addAllAttrib((List) runtimeAttribs);
         explosionNT.overrideResolution(resolution);

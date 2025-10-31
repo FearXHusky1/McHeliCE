@@ -317,8 +317,9 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
         if(useHBM && isLoaded(MODID_HBM)){
            if(vntSettingContainer != null)
                vntSettingContainer.loadRuntimeInstances();
-            if(ntSettingContainer != null)
+            if(ntSettingContainer != null) {
                 ntSettingContainer.loadRuntimeInstances();
+            }
         } else if (useHBM && !isLoaded(MODID_HBM))
             MCH_Logger.get().warn("Weapon:\"{}\" uses HBM capabilites, to use it please install HBM:NTM Community Edition", name);
     }

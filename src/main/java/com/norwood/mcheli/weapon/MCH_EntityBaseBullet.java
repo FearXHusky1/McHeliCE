@@ -940,7 +940,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
                 if (getInfo().ntSettingContainer == null) break;
                 var nt = getInfo().ntSettingContainer;
                 if (!effectOnly)
-                    nt.explode(this.world, this, x, y, z);
+                    nt.explode(this.world, this, x, y, z, (int) expBlock);
 
             }
             case NTM_MINI_NUKE -> {
