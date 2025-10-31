@@ -951,7 +951,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
             case NTM_NUKE -> {
                 HBMUtil.EntityNukeExplosionMK5(this.world, (int) expBlock, x, y, z,effectOnly);
             }
-            case NTM_CHLORINE -> {
+            case NTM_CHEMICAL -> {
                 HBMUtil.ExplosionChaos_spawnChlorine(world, x, y, z, getInfo().chemicalContainer);
             }
             case NTM_MIST -> {

@@ -34,10 +34,11 @@ public class WeaponParser {
             return MCH_WeaponInfo.Payload.NONE;
 
         return switch (s.trim().toUpperCase(Locale.ROOT)) {
-            case "NTM_EXP_SMALL", "SMALL" -> MCH_WeaponInfo.Payload.NTM_VNT;
-            case "NTM_EXP_LARGE", "LARGE" -> MCH_WeaponInfo.Payload.NTM_NT;
+            case "NTM_VNT", "VNT" -> MCH_WeaponInfo.Payload.NTM_VNT;
+            case "NTM_NT", "NT" -> MCH_WeaponInfo.Payload.NTM_NT;
             case "NTM_NUKE", "NUKE" -> MCH_WeaponInfo.Payload.NTM_NUKE;
-            case "NTM_CHLORINE", "CHLORINE" -> MCH_WeaponInfo.Payload.NTM_CHLORINE;
+            case "NTM_MININUKE", "MININUKE" -> MCH_WeaponInfo.Payload.NTM_MINI_NUKE;
+            case "CHEMICAL", "NTM_CHEMICAL" -> MCH_WeaponInfo.Payload.NTM_CHEMICAL;
             case "NTM_MIST", "MIST" -> MCH_WeaponInfo.Payload.NTM_MIST;
             default -> MCH_WeaponInfo.Payload.NONE;
         };
@@ -429,7 +430,7 @@ public class WeaponParser {
                         for (Map.Entry<String, Object> vntEntry : vntMap.entrySet()) {
                             var value = vntEntry.getValue();
                             switch (entry.getKey()) {
-                                case "IsSmall" -> effect.isSmall = ((Boolean) value).booleanValue();
+                                case "IsSmall" -> effect.isSmall = (Boolean) value;
                                 case "CloudCount" -> effect.cloudCount = ((Number) value).intValue();
                                 case "CloudScale" -> effect.cloudScale = ((Number) value).floatValue();
                                 case "CloudSpeedMult" -> effect.cloudSpeedMult = ((Number) value).floatValue();

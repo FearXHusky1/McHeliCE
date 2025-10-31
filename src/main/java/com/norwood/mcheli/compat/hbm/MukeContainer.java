@@ -1,6 +1,5 @@
 package com.norwood.mcheli.compat.hbm;
 
-import com.hbm.config.BombConfig;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import net.minecraft.nbt.NBTTagCompound;
@@ -39,7 +38,7 @@ public class MukeContainer {
     }};
     public static MukeContainer PARAMS_HIGH = new MukeContainer() {{
         miniNuke = false;
-        blastRadius = BombConfig.fatmanRadius;
+        blastRadius = 35;
         shrapnelCount = 0;
     }};
     public boolean miniNuke = true;

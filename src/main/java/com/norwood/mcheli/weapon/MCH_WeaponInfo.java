@@ -321,7 +321,7 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
                 ntSettingContainer.loadRuntimeInstances();
             }
         } else if (useHBM && !isLoaded(MODID_HBM))
-            MCH_Logger.get().warn("Weapon:\"{}\" uses HBM capabilites, to use it please install HBM:NTM Community Edition", name);
+            MCH_Logger.get().warn("Weapon:\"{}\" uses HBM capabilities, to use it please install HBM:NTM Community Edition", name);
     }
 
 
@@ -407,7 +407,7 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
         NTM_NT,
         NTM_MINI_NUKE,
         NTM_NUKE,
-        NTM_CHLORINE,
+        NTM_CHEMICAL,
         NTM_MIST
     }
 
