@@ -38,8 +38,8 @@
  * For more details, see https://docs.gradle.org/8.4/userguide/java_library_plugin.html#sec:java_library_configurations_graph
  */
 dependencies {
-    compileOnly rfg.deobf("curse.maven:hbm-nuclear-tech-mod-community-edition-1312314:7168878")
-//    runtimeOnlyNonPublishable("curse.maven:hbm-nuclear-tech-mod-community-edition-1312314:7168878")
+    compileOnly rfg.deobf("curse.maven:hbm-nuclear-tech-mod-community-edition-1312314:7165124")
+    runtimeOnly rfg.deobf("curse.maven:hbm-nuclear-tech-mod-community-edition-1312314:7165124")
     compileOnly("org.projectlombok:lombok:1.18.42")
     implementation "io.gitlab.hohserg.elegant.networking:elegant-networking-1.12:3.14"
     annotationProcessor "org.projectlombok:lombok:1.18.42", "io.gitlab.hohserg.elegant.networking:annotation-processor:3.14"

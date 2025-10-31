@@ -379,7 +379,7 @@ public class WeaponParser {
         info.useHBM = true;
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             switch (entry.getKey()) {
-                case "PayloadType" -> info.payloadNTM = parsePayload((String) entry.getValue());
+                case "PayloadType", "Type" -> info.payloadNTM = parsePayload((String) entry.getValue());
                 case "EffectOnly" -> info.effectOnly = (Boolean) entry.getValue();
                 case "Mist" -> parseMist(info, (Map<String, Object>) entry.getValue());
                 case "MiniNuke", "Muke" -> {
@@ -407,6 +407,7 @@ public class WeaponParser {
                 case "VNT" -> parseVNT(info, (Map<String, Object>) entry.getValue());
 
                 case "NT" -> parseNTExplosion(info, (Map<String, Object>) entry.getValue());
+                default -> logUnkownEntry(entry, "NTM");
             }
         }
     }
@@ -443,6 +444,7 @@ public class WeaponParser {
                                 case "DebrisHorizontalDeviation" -> effect.debrisHorizontalDeviation = ((Number) value).floatValue();
                                 case "DebrisVerticalOffset" -> effect.debrisVerticalOffset = ((Number) value).floatValue();
                                 case "SoundRange" -> effect.soundRange = ((Number) value).floatValue();
+                                default -> logUnkownEntry(entry, "VNTEffect");
                             }
                         }
                         info.vntSettingContainer.explosionEffect = effect;
@@ -457,7 +459,7 @@ public class WeaponParser {
         MistContainer container = new MistContainer();
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             switch (entry.getKey()) {
-                case "FluidType" -> container.fluidType = (String) entry.getValue();
+                case "FluidType","Fluid" -> container.fluidType = ((String) entry.getValue()).toUpperCase(Locale.ROOT).trim();
                 case "CloudCount" -> container.cloudCount = ((Number) entry.getValue()).intValue();
                 case "Width" -> container.width = ((Number) entry.getValue()).floatValue();
                 case "Height" -> container.height = ((Number) entry.getValue()).floatValue();

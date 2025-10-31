@@ -20,8 +20,12 @@ public class MistContainer {
         for (int i = 0; i < cloudCount; i++) {
             com.hbm.entity.effect.EntityMist mist = new com.hbm.entity.effect.EntityMist(world);
             mist.setType(com.hbm.inventory.fluid.Fluids.fromName(fluidType));
-            mist.setPosition(x + world.rand.nextInt(areaSpread * 2) - areaSpread, y, z + world.rand.nextInt(areaSpread * 2) - areaSpread);
-            mist.setDuration(lifetime + world.rand.nextInt(lifetimeVariance));
+            double xVariance = areaSpread == 0? x : x + world.rand.nextInt(areaSpread * 2) - areaSpread;
+            double zVariance = areaSpread == 0? z : z + world.rand.nextInt(areaSpread * 2) - areaSpread;
+            int calculatedLifetime =  lifetimeVariance == 0 ?  lifetime : lifetime + world.rand.nextInt(lifetimeVariance);
+            mist.setPosition(xVariance, y, zVariance);
+            mist.setArea(width,height);
+            mist.setDuration(calculatedLifetime);
             world.spawnEntity(mist);
         }
     }

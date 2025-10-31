@@ -24,6 +24,8 @@ import static com.norwood.mcheli.compat.ModCompatManager.isLoaded;
 
 public class MCH_WeaponInfo extends MCH_BaseInfo {
 
+    public static Random rand = new Random();
+    public final String name;
     //HBM compat
     public boolean useHBM = false;
     public Payload payloadNTM = Payload.NONE;
@@ -33,9 +35,6 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
     public MistContainer mistContainer = null;
     public MukeContainer mukeContainer = null;
     public NTSettingContainer ntSettingContainer = null;
-
-    public final String name;
-    public static Random rand = new Random();
     public String explosionType;
     public String displayName;
     public String type = "";
@@ -310,19 +309,22 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
     @Override
     public void onPostReload() {
         MCH_WeaponInfoManager.setRoundItems();
-        if(dispenseItemLoc != null){
+        if (dispenseItemLoc != null) {
             Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(dispenseItemLoc));
-            if(item != null) dispenseItem = item;
+            if (item != null) dispenseItem = item;
         }
         loadNTMFunctionality();
     }
 
     public void loadNTMFunctionality() {
-        if(useHBM && isLoaded(MODID_HBM)){
-           if(vntSettingContainer != null)
-               vntSettingContainer.loadRuntimeInstances();
-            if(ntSettingContainer != null) {
+        if (useHBM && isLoaded(MODID_HBM)) {
+            if (vntSettingContainer != null)
+                vntSettingContainer.loadRuntimeInstances();
+            if (ntSettingContainer != null) {
                 ntSettingContainer.loadRuntimeInstances();
+            }
+            if (mukeContainer != null) {
+                mukeContainer.loadRuntimeInstances();
             }
         } else if (useHBM && !isLoaded(MODID_HBM))
             MCH_Logger.get().warn("Weapon:\"{}\" uses HBM capabilities, to use it please install HBM:NTM Community Edition", name);
@@ -431,8 +433,7 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
 
     @Getter
     @Setter
-    public static class MuzzleFlashRaw
-     {
+    public static class MuzzleFlashRaw {
         float Distance;
         float Size;
         float Range;
