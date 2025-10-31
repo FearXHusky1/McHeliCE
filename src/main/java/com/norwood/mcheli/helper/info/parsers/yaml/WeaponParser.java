@@ -15,7 +15,6 @@ import com.norwood.mcheli.vehicle.MCH_EntityVehicle;
 import com.norwood.mcheli.weapon.MCH_Cartridge;
 import com.norwood.mcheli.weapon.MCH_SightType;
 import com.norwood.mcheli.weapon.MCH_WeaponInfo;
-import lombok.NoArgsConstructor;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 
@@ -25,9 +24,11 @@ import java.util.stream.Collectors;
 
 import static com.norwood.mcheli.helper.info.parsers.yaml.YamlParser.*;
 
-@NoArgsConstructor
 @SuppressWarnings("unchecked")
 public class WeaponParser {
+
+    private WeaponParser() {
+    }
 
     private static MCH_WeaponInfo.Payload parsePayload(String s) {
         if (s == null || s.isEmpty())
@@ -413,7 +414,7 @@ public class WeaponParser {
     private static void parseVNT(MCH_WeaponInfo info, Map<String, Object> map) {
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             switch (entry.getKey()) {
-                case "Attributes" -> new VNTSettingContainer((Map<String, Object>) entry.getValue());
+                case "Attributes" -> info.vntSettingContainer = new VNTSettingContainer((Map<String, Object>) entry.getValue());
                 case "Effect" -> {
                     if (entry.getValue() instanceof String str) {
                         info.vntSettingContainer.explosionEffect = switch (str.toUpperCase(Locale.ROOT)) {
@@ -429,7 +430,7 @@ public class WeaponParser {
                         var effect = VNTSettingContainer.ExplosionEffect.standard();
                         for (Map.Entry<String, Object> vntEntry : vntMap.entrySet()) {
                             var value = vntEntry.getValue();
-                            switch (entry.getKey()) {
+                            switch (vntEntry.getKey()) {
                                 case "IsSmall" -> effect.isSmall = (Boolean) value;
                                 case "CloudCount" -> effect.cloudCount = ((Number) value).intValue();
                                 case "CloudScale" -> effect.cloudScale = ((Number) value).floatValue();
