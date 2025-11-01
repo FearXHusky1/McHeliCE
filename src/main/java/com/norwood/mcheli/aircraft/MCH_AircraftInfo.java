@@ -8,10 +8,7 @@ import com.norwood.mcheli.helper.client._IModelCustom;
 import com.norwood.mcheli.helper.info.IItemContent;
 import com.norwood.mcheli.hud.MCH_Hud;
 import com.norwood.mcheli.hud.MCH_HudManager;
-import com.norwood.mcheli.hud.direct_drawable.DirectDrawable;
-import com.norwood.mcheli.hud.direct_drawable.HudGPS;
-import com.norwood.mcheli.hud.direct_drawable.HudMortarRadar;
-import com.norwood.mcheli.hud.direct_drawable.HudRWR;
+import com.norwood.mcheli.hud.direct_drawable.*;
 import com.norwood.mcheli.wrapper.W_Entity;
 import lombok.AllArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -273,6 +270,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo implements IItemCont
 
         list.add(HudGPS.INSTANCE);
         list.add(HudMortarRadar.INSTANCE);
+        list.add(HudBVRLock.INSTANCE);
         return list;
     }
 

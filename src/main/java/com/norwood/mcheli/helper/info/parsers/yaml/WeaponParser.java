@@ -460,10 +460,10 @@ public class WeaponParser {
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             switch (entry.getKey()) {
                 case "FluidType","Fluid" -> container.fluidType = ((String) entry.getValue()).toUpperCase(Locale.ROOT).trim();
-                case "CloudCount" -> container.cloudCount = ((Number) entry.getValue()).intValue();
+                case "CloudCount", "Count" -> container.cloudCount = ((Number) entry.getValue()).intValue();
                 case "Width" -> container.width = ((Number) entry.getValue()).floatValue();
                 case "Height" -> container.height = ((Number) entry.getValue()).floatValue();
-                case "AreaSpread" -> container.areaSpread = ((Number) entry.getValue()).intValue();
+                case "AreaSpread","Spread" -> container.areaSpread = ((Number) entry.getValue()).intValue();
                 case "Lifetime" -> container.lifetime = ((Number) entry.getValue()).intValue();
                 case "LifetimeVariance" -> container.lifetimeVariance = ((Number) entry.getValue()).intValue();
                 default -> logUnkownEntry(entry, "Mist");

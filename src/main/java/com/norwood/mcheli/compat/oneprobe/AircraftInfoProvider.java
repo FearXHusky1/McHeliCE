@@ -25,8 +25,33 @@ public class AircraftInfoProvider implements IEntityDisplayOverride {
     public boolean overrideStandardInfo(ProbeMode probeMode, IProbeInfo iProbeInfo, EntityPlayer entityPlayer, World world, Entity entity, IProbeHitEntityData iProbeHitEntityData) {
         if (entity instanceof MCH_EntityAircraft aircraft) {
             var info = aircraft.getAcInfo();
-            if(info == null) return false;
-            iProbeInfo.entity(aircraft, iProbeInfo.defaultEntityStyle().scale(info.oneProbeScale));
+            if (info == null) return false;
+
+            IProbeInfo root = iProbeInfo.vertical();
+
+            for(int j = 0; j<2;j++)
+                root.text(" ");
+
+            IProbeInfo row = root.horizontal();
+
+            row.text("         ");
+            row.entity(aircraft, row.defaultEntityStyle()
+                    .scale(info.oneProbeScale * 0.8f)
+                    .width(50)
+                    .height(50));
+
+            root.text(String.format("§e%s§r", aircraft.getDisplayName().getUnformattedText()));
+            root.text(String.format("HP: %d / %d", aircraft.getHP(), aircraft.getMaxHP()));
+            root.text(String.format("Speed: %.0f m/s", aircraft.currentSpeed));
+            root.text(String.format("Weapon: %s",
+                    aircraft.getCurrentWeapon(entityPlayer) != null
+                            ? aircraft.getCurrentWeapon(entityPlayer).getName()
+                            : "None"));
+
+            if (aircraft.getRiddenByEntity() != null) {
+                root.text("Pilot: " + aircraft.getRiddenByEntity().getName());
+            }
+
             return true;
         }
         return false;
