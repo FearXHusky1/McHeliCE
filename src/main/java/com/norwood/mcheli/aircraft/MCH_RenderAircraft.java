@@ -1018,8 +1018,10 @@ public abstract class MCH_RenderAircraft<T extends MCH_EntityAircraft> extends W
             GlStateManager.pushMatrix();
             GlStateManager.translate(x, y, z);
 
-            for (MCH_BoundingBox bb : e.extraBoundingBox) {
+            for (int i = 0; i < e.extraBoundingBox.length; i++) {
+                var bb = e.extraBoundingBox[i];
                 GlStateManager.pushMatrix();
+
 
                 if (bb.rotatedOffset != null)
                     GlStateManager.translate(bb.rotatedOffset.x, bb.rotatedOffset.y, bb.rotatedOffset.z);
@@ -1036,12 +1038,12 @@ public abstract class MCH_RenderAircraft<T extends MCH_EntityAircraft> extends W
                 GlStateManager.rotate(pAngle, 1.0F, 0.0F, 0.0F);
                 GlStateManager.rotate(rAngle, 0.0F, 0.0F, 1.0F);
 
-                GlStateManager.scale(bb.width, bb.height, bb.width);
+                GlStateManager.scale(bb.width, bb.height, bb.widthZ);
 
                 this.bindTexture("textures/bounding_box.png");
                 debugModel.renderAll();
                 GlStateManager.popMatrix();
-                this.drawHitBoxDetail(bb);
+                this.drawHitBoxDetail(bb, i + 1);
             }
 
             GlStateManager.popMatrix();
@@ -1049,8 +1051,8 @@ public abstract class MCH_RenderAircraft<T extends MCH_EntityAircraft> extends W
         }
     }
 
-    public void drawHitBoxDetail(MCH_BoundingBox bb) {
-        String s = String.format("%.2f", bb.damageFactor);
+    public void drawHitBoxDetail(MCH_BoundingBox bb, int index) {
+        String s = String.format("[%d] %.2f", index, bb.damageFactor);
         float scale = 0.08F;
 
         GlStateManager.pushMatrix();
