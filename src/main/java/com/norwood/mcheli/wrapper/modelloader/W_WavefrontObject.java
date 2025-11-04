@@ -70,7 +70,7 @@ public class W_WavefrontObject extends W_ModelCustom {
         loadObjModel(resource.getInputStream());
     }
 
-      public W_WavefrontObject(String fileName, URL resource) throws _ModelFormatException {
+    public W_WavefrontObject(String fileName, URL resource) throws _ModelFormatException {
         this.fileName = fileName;
         try {
             loadObjModel(resource.openStream());
@@ -174,13 +174,13 @@ public class W_WavefrontObject extends W_ModelCustom {
                 } else if (currentLine.startsWith("f ")) {
 
                     if (currentGroupObject == null) {
-                        currentGroupObject = new GroupObject("Default");
+                        currentGroupObject = new GroupObject("$body");
                     }
 
                     W_Face face = parseFace(currentLine, lineCount);
 
                     currentGroupObject.faces.add(face);
-                } else if ((currentLine.startsWith("g ") | currentLine.startsWith("o ")) && currentLine.charAt(2) == '$') {
+                } else if ((currentLine.startsWith("g ") | currentLine.startsWith("o "))) {
                     GroupObject group = parseGroupObject(currentLine, lineCount);
 
                     if (group != null) {

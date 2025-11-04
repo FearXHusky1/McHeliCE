@@ -357,8 +357,6 @@ public class MCH_MOD {
         this.registerEntity();
         MCH_Lib.Log("Register renderer");
         proxy.registerRenderer();
-        MCH_Lib.Log("Register models");
-        proxy.registerModels();
         MCH_Lib.Log("Register Sounds");
         proxy.registerSounds();
         proxy.updateGeneratedLanguage();

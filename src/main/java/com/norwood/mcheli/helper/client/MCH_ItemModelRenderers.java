@@ -1,6 +1,7 @@
 package com.norwood.mcheli.helper.client;
 
 import com.google.common.collect.Maps;
+import com.norwood.mcheli.MCH_Lib;
 import com.norwood.mcheli.MCH_MOD;
 import com.norwood.mcheli.helper.client.model.MCH_BakedModel;
 import com.norwood.mcheli.helper.client.renderer.item.CustomItemStackRenderer;
@@ -58,6 +59,8 @@ public class MCH_ItemModelRenderers {
         ContentRegistries.vehicle().forEachValue(MCH_ItemModelRenderers::registerLegacyModelLocation);
         ContentRegistries.ship().forEachValue(MCH_ItemModelRenderers::registerLegacyModelLocation);
         ContentRegistries.throwable().forEachValue(MCH_ItemModelRenderers::registerLegacyModelLocation);
+        MCH_Lib.Log("Register models");
+        MCH_MOD.proxy.registerModels();
     }
 
     @SubscribeEvent

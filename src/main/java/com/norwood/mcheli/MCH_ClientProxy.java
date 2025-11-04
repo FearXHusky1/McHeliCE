@@ -66,7 +66,6 @@ import net.minecraftforge.fml.relauncher.Side;
 import java.io.File;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -274,12 +273,10 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
             return null;
         });
 
+        allTasks.join();
 
 
     }
-
-
-
 
 
     @Override
@@ -291,7 +288,6 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
             info.model = info.model.toVBO();
             done.complete(null);
         });
-        done.join();
 
 
         for (MCH_HeliInfo.Rotor rotor : info.rotorList) {
@@ -311,7 +307,6 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
             info.model = info.model.toVBO();
             done.complete(null);
         });
-        done.join();
 
         for (MCH_AircraftInfo.DrawnPart n : info.nozzles) {
             n.model = this.loadPartModel("planes", info.name, info.model, n.modelName);
@@ -347,7 +342,6 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
             info.model = info.model.toVBO();
             done.complete(null);
         });
-        done.join();
 
         for (MCH_AircraftInfo.DrawnPart n : info.nozzles) {
             n.model = this.loadPartModel("ships", info.name, info.model, n.modelName);
@@ -384,7 +378,6 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
             info.model = info.model.toVBO();
             done.complete(null);
         });
-        done.join();
         for (MCH_VehicleInfo.VPart vp : info.partList) {
             vp.model = this.loadPartModel("vehicles", info.name, info.model, vp.modelName);
             if (vp.child != null) {
@@ -405,7 +398,6 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
             info.model = info.model.toVBO();
             done.complete(null);
         });
-        done.join();
         this.registerCommonPart("tanks", info);
         MCH_ModelManager.setForceReloadMode(false);
     }
