@@ -180,7 +180,7 @@ public class W_WavefrontObject extends W_ModelCustom {
                     W_Face face = parseFace(currentLine, lineCount);
 
                     currentGroupObject.faces.add(face);
-                } else if ((currentLine.startsWith("g ") | currentLine.startsWith("o "))) {
+                } else if (((currentLine.startsWith("g ") | currentLine.startsWith("o "))) && currentLine.charAt(2) == '$') {
                     GroupObject group = parseGroupObject(currentLine, lineCount);
 
                     if (group != null) {
