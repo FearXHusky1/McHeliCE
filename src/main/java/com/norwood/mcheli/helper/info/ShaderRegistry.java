@@ -28,7 +28,7 @@ import static org.lwjgl.opengl.GL20.glUniformMatrix4;
 public class ShaderRegistry {
     private static final FloatBuffer MATRIX_BUFFER = BufferUtils.createFloatBuffer(16);
     private static final Map<String, ShaderProgram> shaderMap = new HashMap<>();
-    public static final String SHADER_PATH = "/shaders/";
+    public static final String SHADER_PATH = "shaders/";
 
     public static void uploadMatrix4f(int uniformLoc, Matrix4f mat) {
         MATRIX_BUFFER.clear();
@@ -38,23 +38,26 @@ public class ShaderRegistry {
     }
 
     public static void init() {
+
         registerShader("basic");
     }
 
     private static void registerShader(String name) {
         IResource shaderVert = null;
         IResource shaderFrag = null;
+        ResourceLocation fragLoc = new ResourceLocation(Tags.MODID, String.format("%s%s.frag",SHADER_PATH, name));
+        ResourceLocation vertLoc = new ResourceLocation(Tags.MODID, String.format("%s%s.vert",SHADER_PATH, name));
         try {
             shaderVert = Minecraft.getMinecraft().getResourceManager()
-                    .getResource(new ResourceLocation(Tags.MODID, SHADER_PATH + name + ".vert"));
+                    .getResource(vertLoc);
             shaderFrag = Minecraft.getMinecraft().getResourceManager()
-                    .getResource(new ResourceLocation(Tags.MODID, SHADER_PATH + name + ".vert"));
+                    .getResource(fragLoc);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
 
-        var shaderProg = new ShaderProgram(shaderVert.getInputStream(), shaderFrag.getInputStream());
+        var shaderProg = new ShaderProgram(shaderVert.getInputStream(), vertLoc, shaderFrag.getInputStream(), fragLoc);
         shaderMap.put(name,shaderProg);
 
 
@@ -83,9 +86,9 @@ public class ShaderRegistry {
         private final Map<String, Integer> uniformCache = new HashMap<>();
 
         @SneakyThrows
-        public ShaderProgram(InputStream vertexPath, InputStream fragmentPath) {
-            int vert = compile(GL20.GL_VERTEX_SHADER, readStream(vertexPath));
-            int frag = compile(GL20.GL_FRAGMENT_SHADER, readStream(fragmentPath));
+        public ShaderProgram(InputStream vertStream, ResourceLocation vertexPath, InputStream fragStream, ResourceLocation fragPath) {
+            int vert = compile(GL20.GL_VERTEX_SHADER, readStream(vertStream),vertexPath.toString());
+            int frag = compile(GL20.GL_FRAGMENT_SHADER, readStream(fragStream), fragPath.toString());
             programId = GL20.glCreateProgram();
             GL20.glAttachShader(programId, vert);
             GL20.glAttachShader(programId, frag);
@@ -94,12 +97,12 @@ public class ShaderRegistry {
             GL20.glDeleteShader(frag);
         }
 
-        private int compile(int type, String src) {
+        private int compile(int type, String src, String path) {
             int shader = GL20.glCreateShader(type);
             GL20.glShaderSource(shader, src);
             GL20.glCompileShader(shader);
             if (GL20.glGetShaderi(shader, GL20.GL_COMPILE_STATUS) == GL11.GL_FALSE)
-                throw new RuntimeException(GL20.glGetShaderInfoLog(shader, 100));
+                throw new RuntimeException("Error compiling shader " + path + "\n" + GL20.glGetShaderInfoLog(shader, 100));
             return shader;
         }
 

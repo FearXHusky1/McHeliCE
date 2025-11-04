@@ -9,10 +9,10 @@ in vec3 Normal;
 uniform sampler2D tex;
 //uniform vec3 lightPos;
 //uniform vec3 viewPos;
-uniform vec3 color;
+uniform vec4 color;
 
 void main(){
-    vec2 uv = aUVW.xy;
+    vec2 uv = TextCoord.xy;
     FragColor = texture(tex, uv) * color;
 }
 

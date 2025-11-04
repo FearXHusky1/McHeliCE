@@ -15,12 +15,14 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
+import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.event.CommandEvent;
 import net.minecraftforge.event.entity.EntityEvent.CanUpdate;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.EntityInteract;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import java.util.List;
 import java.util.UUID;
@@ -29,6 +31,16 @@ public class MCH_EventHook extends W_EventHook {
     @Override
     public void commandEvent(CommandEvent event) {
         MCH_Command.onCommandEvent(event);
+    }
+
+    @SubscribeEvent
+    public void onTextureStitch(TextureStitchEvent.Pre event) {
+        MCH_MOD.proxy.registerParticleTextures(event);
+    }
+
+    @SubscribeEvent
+    public void onTextureStitchPost(TextureStitchEvent.Post event) {
+        MCH_MOD.proxy.registerShaders(event);
     }
 
     @Override
