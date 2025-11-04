@@ -279,10 +279,13 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
     }
 
 
+
+
+
     @Override
     public void registerModelsHeli(MCH_HeliInfo info, boolean reload) {
         MCH_ModelManager.setForceReloadMode(reload);
-        info.model = MCH_ModelManager.load("helicopters", info.name).toVBO();
+        info.model = MCH_ModelManager.load("helicopters", info.name);
         CompletableFuture<Void> done = new CompletableFuture<>();
         Minecraft.getMinecraft().addScheduledTask(() -> {
             info.model = info.model.toVBO();

@@ -14,55 +14,19 @@ public class ModelVBO extends W_ModelCustom implements _IModelCustom {
     static int VERTEX_SIZE = 3;
     static int UV_SIZE = 3;
     List<ModelVBO.VBOBufferData> groups = new ArrayList<>();
+
     public ModelVBO(W_WavefrontObject obj) {
-        for (W_GroupObject g : obj.groupObjects) {
-            ModelVBO.VBOBufferData data = new ModelVBO.VBOBufferData();
-            data.name = g.name;
+        uploadVBO(obj.groupObjects);
 
-            FloatBuffer vertexData = BufferUtils.createFloatBuffer(g.faces.size() * 3 * VERTEX_SIZE);
-            FloatBuffer uvData = BufferUtils.createFloatBuffer(g.faces.size() * 3 * UV_SIZE);
-            FloatBuffer normalData = BufferUtils.createFloatBuffer(g.faces.size() * 3 * VERTEX_SIZE);
-
-            for (W_Face face : g.faces) {
-                for (int i = 0; i < face.vertices.length; i++) {
-                    W_Vertex vert = face.vertices[i];
-                    W_TextureCoordinate tex = new W_TextureCoordinate(0, 0);
-                    W_Vertex normal = face.vertexNormals[i];
-
-                    if (face.textureCoordinates != null && face.textureCoordinates.length > 0) {
-                        tex = face.textureCoordinates[i];
-                    }
-
-                    data.vertices++;
-                    vertexData.put(new float[]{vert.x, vert.y, vert.z});
-                    uvData.put(new float[]{tex.u, tex.v, tex.w});
-                    normalData.put(new float[]{normal.x, normal.y, normal.z});
-                }
-            }
-            vertexData.flip();
-            uvData.flip();
-            normalData.flip();
-
-            data.vertexHandle = GL15.glGenBuffers();
-            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, data.vertexHandle);
-            GL15.glBufferData(GL15.GL_ARRAY_BUFFER, vertexData, GL15.GL_STATIC_DRAW);
-            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
-
-            data.uvHandle = GL15.glGenBuffers();
-            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, data.uvHandle);
-            GL15.glBufferData(GL15.GL_ARRAY_BUFFER, uvData, GL15.GL_STATIC_DRAW);
-            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
-
-            data.normalHandle = GL15.glGenBuffers();
-            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, data.normalHandle);
-            GL15.glBufferData(GL15.GL_ARRAY_BUFFER, normalData, GL15.GL_STATIC_DRAW);
-            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
-
-            groups.add(data);
-        }
     }
+
+
     public ModelVBO(W_MetasequoiaObject obj) {
-        for (W_GroupObject g : obj.groupObjects) {
+        uploadVBO(obj.groupObjects);
+    }
+
+    private void uploadVBO(List<GroupObject> obj) {
+        for (GroupObject g : obj) {
             ModelVBO.VBOBufferData data = new ModelVBO.VBOBufferData();
             data.name = g.name;
 
@@ -105,8 +69,10 @@ public class ModelVBO extends W_ModelCustom implements _IModelCustom {
             GL15.glBufferData(GL15.GL_ARRAY_BUFFER, normalData, GL15.GL_STATIC_DRAW);
             GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 
+
             groups.add(data);
         }
+
     }
 
     @Override
@@ -222,6 +188,7 @@ public class ModelVBO extends W_ModelCustom implements _IModelCustom {
         int vertexHandle;
         int uvHandle;
         int normalHandle;
+        int vaoHandle;
 
     }
 

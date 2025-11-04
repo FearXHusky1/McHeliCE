@@ -3,7 +3,6 @@ package com.norwood.mcheli.helper.client;
 import com.norwood.mcheli.helper.MCH_Utils;
 import com.norwood.mcheli.helper.client.model.loader.IVertexModelLoader;
 import com.norwood.mcheli.helper.client.model.loader.MetasequoiaModelLoader;
-import com.norwood.mcheli.helper.client.model.loader.TechneModelLoader;
 import com.norwood.mcheli.helper.client.model.loader.WavefrontModelLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.IResourceManager;
@@ -18,12 +17,11 @@ import java.io.IOException;
 public class MCH_Models {
     private static final IVertexModelLoader objLoader = new WavefrontModelLoader();
     private static final IVertexModelLoader mqoLoader = new MetasequoiaModelLoader();
-    private static final IVertexModelLoader tcnLoader = new TechneModelLoader();
 
     public static _IModelCustom loadModel(String name) throws IllegalArgumentException, _ModelFormatException {
         ResourceLocation resource = MCH_Utils.suffix("models/" + name);
         IResourceManager resourceManager = Minecraft.getMinecraft().getResourceManager();
-        IVertexModelLoader[] loaders = new IVertexModelLoader[]{objLoader, mqoLoader, tcnLoader};
+        IVertexModelLoader[] loaders = new IVertexModelLoader[]{objLoader, mqoLoader};
         _IModelCustom model = null;
 
         for (IVertexModelLoader loader : loaders) {
