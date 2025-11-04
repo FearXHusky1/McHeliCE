@@ -922,7 +922,7 @@ public abstract class MCH_RenderAircraft<T extends MCH_EntityAircraft> extends W
     }
 
     public void renderEntitySimple(MCH_EntityAircraft ac, Entity entity, float tickTime, float yaw, float pitch, float roll, float width, float height) {
-        if (entity != null) {
+        if (entity != null || renderManager.renderViewEntity == null) {
             boolean isPilot = ac.isPilot(entity);
             boolean isClientPlayer = W_Lib.isClientPlayer(entity);
             if (!isClientPlayer || !W_Lib.isFirstPerson() || isPilot && ac.getCameraId() > 0) {
