@@ -1,18 +1,25 @@
 package com.norwood.mcheli.wrapper.modelloader;
 
 import com.norwood.mcheli.helper.client._IModelCustom;
+import net.minecraft.client.renderer.GlStateManager;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL15;
+import org.lwjgl.opengl.GL30;
+import org.lwjgl.opengl.KHRDebug;
 
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL15.*;
+
+
 public class ModelVBO extends W_ModelCustom implements _IModelCustom {
 
+    private static final int FLOAT_SIZE = 4;
+    private static final int STRIDE = 9 * FLOAT_SIZE;
     static int VERTEX_SIZE = 3;
-    static int UV_SIZE = 3;
     List<ModelVBO.VBOBufferData> groups = new ArrayList<>();
 
     public ModelVBO(W_WavefrontObject obj) {
@@ -55,12 +62,13 @@ public class ModelVBO extends W_ModelCustom implements _IModelCustom {
 
     private void uploadVBO(List<GroupObject> obj) {
         for (GroupObject g : obj) {
-            ModelVBO.VBOBufferData data = new ModelVBO.VBOBufferData();
+            VBOBufferData data = new VBOBufferData();
             data.name = g.name;
 
-            FloatBuffer vertexData = BufferUtils.createFloatBuffer(g.faces.size() * 3 * VERTEX_SIZE);
-            FloatBuffer uvData = BufferUtils.createFloatBuffer(g.faces.size() * 3 * UV_SIZE);
-            FloatBuffer normalData = BufferUtils.createFloatBuffer(g.faces.size() * 3 * VERTEX_SIZE);
+            List<Float> vertexData = new ArrayList<>(g.faces.size() * 3 * VERTEX_SIZE);
+            List<Float> uvwData = new ArrayList<>(g.faces.size() * 3 * VERTEX_SIZE);
+            List<Float> normalData = new ArrayList<>(g.faces.size() * 3 * VERTEX_SIZE);
+
 
             for (W_Face face : g.faces) {
                 for (int i = 0; i < face.vertices.length; i++) {
@@ -73,34 +81,71 @@ public class ModelVBO extends W_ModelCustom implements _IModelCustom {
                     }
 
                     data.vertices++;
-                    vertexData.put(new float[]{vert.x, vert.y, vert.z});
-                    uvData.put(new float[]{tex.u, tex.v, tex.w});
-                    normalData.put(new float[]{normal.x, normal.y, normal.z});
+                    vertexData.add(vert.x);
+                    vertexData.add(vert.y);
+                    vertexData.add(vert.z);
+
+                    uvwData.add(tex.u);
+                    uvwData.add(tex.v);
+                    uvwData.add(tex.w);
+
+                    normalData.add(normal.x);
+                    normalData.add(normal.y);
+                    normalData.add(normal.z);
                 }
             }
-            vertexData.flip();
-            uvData.flip();
-            normalData.flip();
+            float[] combinedData = new float[data.vertices * 9];
+            int dst = 0;
+            for (int i = 0; i < data.vertices; i++) {
+                combinedData[dst++] = vertexData.get(i * 3);
+                combinedData[dst++] = vertexData.get(i * 3 + 1);
+                combinedData[dst++] = vertexData.get(i * 3 + 2);
 
-            data.vertexHandle = GL15.glGenBuffers();
-            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, data.vertexHandle);
-            GL15.glBufferData(GL15.GL_ARRAY_BUFFER, vertexData, GL15.GL_STATIC_DRAW);
-            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+                combinedData[dst++] = uvwData.get(i * 3);
+                combinedData[dst++] = uvwData.get(i * 3 + 1);
+                combinedData[dst++] = uvwData.get(i * 3 + 2);
 
-            data.uvHandle = GL15.glGenBuffers();
-            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, data.uvHandle);
-            GL15.glBufferData(GL15.GL_ARRAY_BUFFER, uvData, GL15.GL_STATIC_DRAW);
-            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
-
-            data.normalHandle = GL15.glGenBuffers();
-            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, data.normalHandle);
-            GL15.glBufferData(GL15.GL_ARRAY_BUFFER, normalData, GL15.GL_STATIC_DRAW);
-            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+                combinedData[dst++] = normalData.get(i * 3);
+                combinedData[dst++] = normalData.get(i * 3 + 1);
+                combinedData[dst++] = normalData.get(i * 3 + 2);
+            }
 
 
+            FloatBuffer buffer = BufferUtils.createFloatBuffer(combinedData.length);
+            buffer.put(combinedData);
+            buffer.flip();
+
+            data.vaoHandle = GL30.glGenVertexArrays();
+            data.vboHandle = glGenBuffers();
+            GL30.glBindVertexArray(data.vaoHandle);
+            glBindBuffer(GL_ARRAY_BUFFER, data.vboHandle);
+            glBufferData(GL_ARRAY_BUFFER, buffer, GL_STATIC_DRAW);
+
+            GL11.glVertexPointer(3, GL11.GL_FLOAT, STRIDE, 0L);
+            glEnableClientState(GL_VERTEX_ARRAY);
+
+            GL11.glTexCoordPointer(3, GL11.GL_FLOAT, STRIDE, 3L * Float.BYTES);
+            glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+
+            GL11.glNormalPointer(GL11.GL_FLOAT, STRIDE, 6L * Float.BYTES);
+            glEnableClientState(GL_NORMAL_ARRAY);
+
+            GL30.glBindVertexArray(0);
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
             groups.add(data);
         }
 
+    }
+
+    private void renderVBO(ModelVBO.VBOBufferData data) {
+        GL30.glBindVertexArray(data.vaoHandle);
+        GlStateManager.glDrawArrays(GL11.GL_TRIANGLES, 0, data.vertices);
+        GL30.glBindVertexArray(0);
+        KHRDebug.glDebugMessageInsert(KHRDebug.GL_DEBUG_SOURCE_APPLICATION,
+                KHRDebug.GL_DEBUG_TYPE_MARKER,
+                1235,
+                KHRDebug.GL_DEBUG_SEVERITY_NOTIFICATION,
+                "I DID A RENDER");
     }
 
     @Override
@@ -108,32 +153,6 @@ public class ModelVBO extends W_ModelCustom implements _IModelCustom {
         return "obj_vbo";
     }
 
-   private void prepare(ModelVBO.VBOBufferData data) {
-       GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, data.vertexHandle);
-       GL11.glVertexPointer(VERTEX_SIZE, GL11.GL_FLOAT, 0, 0l);
-
-       GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, data.uvHandle);
-       GL11.glTexCoordPointer(UV_SIZE, GL11.GL_FLOAT, 0, 0l);
-
-       GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, data.normalHandle);
-       GL11.glNormalPointer(GL11.GL_FLOAT, 0, 0l);
-
-       GL11.glEnableClientState(GL11.GL_VERTEX_ARRAY);
-       GL11.glEnableClientState(GL11.GL_TEXTURE_COORD_ARRAY);
-       GL11.glEnableClientState(GL11.GL_NORMAL_ARRAY);
-   }
-   private void clean(){
-       GL11.glDisableClientState(GL11.GL_VERTEX_ARRAY);
-       GL11.glDisableClientState(GL11.GL_TEXTURE_COORD_ARRAY);
-       GL11.glDisableClientState(GL11.GL_NORMAL_ARRAY);
-       GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
-   }
-
-    private void renderVBO(ModelVBO.VBOBufferData data) {
-        prepare(data);
-        GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, data.vertices);
-        clean();
-    }
 
     @Override
     public void renderAll() {
@@ -156,9 +175,9 @@ public class ModelVBO extends W_ModelCustom implements _IModelCustom {
     @Override
     public void renderPart(String partName) {
         for (ModelVBO.VBOBufferData data : groups) {
-                if (data.name.equalsIgnoreCase(partName)) {
-                    renderVBO(data);
-                }
+            if (data.name.equalsIgnoreCase(partName)) {
+                renderVBO(data);
+            }
         }
 
     }
@@ -218,9 +237,7 @@ public class ModelVBO extends W_ModelCustom implements _IModelCustom {
 
         String name;
         int vertices = 0;
-        int vertexHandle;
-        int uvHandle;
-        int normalHandle;
+        int vboHandle;
         int vaoHandle;
 
     }
