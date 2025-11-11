@@ -1,20 +1,19 @@
 package com.norwood.mcheli;
 
-import java.util.Objects;
-import java.util.Random;
-import java.util.concurrent.ConcurrentHashMap;
-
 import com.norwood.mcheli.helper.MCH_Utils;
-import net.minecraft.client.model.ModelRenderer;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
-
 import com.norwood.mcheli.helper.client.MCH_Models;
 import com.norwood.mcheli.helper.client._IModelCustom;
 import com.norwood.mcheli.wrapper.W_ModelBase;
 import com.norwood.mcheli.wrapper.modelloader.W_ModelCustom;
+import net.minecraft.client.model.ModelRenderer;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Objects;
+import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
 
 @SideOnly(Side.CLIENT)
 public class MCH_ModelManager extends W_ModelBase {
@@ -30,10 +29,13 @@ public class MCH_ModelManager extends W_ModelBase {
         defaultModel.addBox(-5.0F, -5.0F, -5.0F, 10, 10, 10, 0.0F);
     }
 
-    private MCH_ModelManager() {}
+    private MCH_ModelManager() {
+    }
 
     public static void makeVBO() {
-        map.replaceAll((k, v) -> v.toVBO());
+        map.forEach((k, v) -> {
+            if (v != null) v.toVBO();
+        });
     }
 
     public static void setForceReloadMode(boolean b) {
@@ -79,7 +81,8 @@ public class MCH_ModelManager extends W_ModelBase {
         _IModelCustom model = map.get(name);
         if (model != null) {
             model.renderAll();
-        } else if (defaultModel == null) {}
+        } else if (defaultModel == null) {
+        }
     }
 
     public static void renderPart(String name, String partName) {

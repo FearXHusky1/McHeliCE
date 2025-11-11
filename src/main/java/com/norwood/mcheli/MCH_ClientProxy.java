@@ -12,6 +12,7 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.client.model.ModelLoaderRegistry;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.client.SplashProgress;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.relauncher.Side;
@@ -165,6 +166,8 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
             MCH_ModelManager.load("container");
             MCH_ModelManager.load("parachute1");
             MCH_ModelManager.load("parachute2");
+            MCH_ModelManager.load("wrench");
+            MCH_ModelManager.load("rangefinder");
             MCH_ModelManager.load("lweapons", "fim92");
             MCH_ModelManager.load("lweapons", "fgm148");
             long end = System.nanoTime();
@@ -188,16 +191,17 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
             long start = System.nanoTime();
             for (String s : MCH_RenderUavStation.MODEL_NAME) {
                 MCH_ModelManager.load(s);
+
             }
             long end = System.nanoTime();
             System.out.println("[MCH-LOADER][UAV] Loaded in " + ((end - start) / 1_000_000) + " ms");
         });
-
-        long startBasic = System.nanoTime();
-        MCH_ModelManager.load("wrench");
-        MCH_ModelManager.load("rangefinder");
-        long endBasic = System.nanoTime();
-        System.out.println("[MCH-LOADER][BASIC MODELS] Loaded in " + ((endBasic - startBasic) / 1_000_000) + " ms");
+//
+//        CompletableFuture<Void> basic = CompletableFuture.runAsync(() -> {
+//                    long startBasic = System.nanoTime();
+//                    long endBasic = System.nanoTime();
+//                    System.out.println("[MCH-LOADER][BASIC MODELS] Loaded in " + ((endBasic - startBasic) / 1_000_000) + " ms");
+//                });
 
         CompletableFuture<Void> heliFuture = CompletableFuture.runAsync(() -> {
             long start = System.nanoTime();
@@ -270,6 +274,10 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
         });
 
         allTasks.join();
+
+        SplashProgress.pause();
+        MCH_ModelManager.makeVBO();
+        SplashProgress.resume();
     }
 
     @Override

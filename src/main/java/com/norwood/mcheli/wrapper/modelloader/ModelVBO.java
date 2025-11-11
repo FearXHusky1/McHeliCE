@@ -70,7 +70,7 @@ public class ModelVBO extends W_ModelCustom implements _IModelCustom {
                 for (int i = 0; i < face.vertices.length; i++) {
                     W_Vertex vert = face.vertices[i];
                     W_TextureCoordinate tex = new W_TextureCoordinate(0, 0);
-                    W_Vertex normal = face.vertexNormals[i];
+                    W_Vertex normal = face.vertexNormals != null ?  face.vertexNormals[i] : new W_Vertex(0,0,0);//Oh yeah, sometimes models just miss those... What the fuck
 
                     if (face.textureCoordinates != null && face.textureCoordinates.length > 0) {
                         tex = face.textureCoordinates[i];

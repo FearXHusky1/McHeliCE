@@ -64,17 +64,17 @@ public class W_MetasequoiaObject extends W_ModelCustom {
         this.loadObjModel(inputStream);
     }
 
-    private static boolean isValidGroupObjectLine(String line) {
+    private boolean isValidGroupObjectLine(String line) {
         String[] s = line.split(" ");
         return s.length >= 2 && s[0].equals("Object") && s[1].length() >= 4 && s[1].charAt(0) == '"';
     }
 
-    private static boolean isValidVertexLine(String line) {
+    private boolean isValidVertexLine(String line) {
         String[] s = line.split(" ");
         return s[0].equals("vertex");
     }
 
-    private static boolean isValidFaceLine(String line) {
+    private boolean isValidFaceLine(String line) {
         String[] s = line.split(" ");
         return s[0].equals("face");
     }
