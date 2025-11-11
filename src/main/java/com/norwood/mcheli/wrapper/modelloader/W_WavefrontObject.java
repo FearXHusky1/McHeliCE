@@ -21,46 +21,27 @@ import java.util.regex.Pattern;
 
 @SideOnly(Side.CLIENT)
 public class W_WavefrontObject extends W_ModelCustom {
-    private static Pattern vertexPattern = Pattern.compile("(v( (\\-){0,1}\\d+\\.\\d+){3,4} *\\n)|(v( (\\-){0,1}\\d+\\.\\d+){3,4} *$)");
-
-    private static Pattern vertexNormalPattern = Pattern.compile("(vn( (\\-){0,1}\\d+\\.\\d+){3,4} *\\n)|(vn( (\\-){0,1}\\d+\\.\\d+){3,4} *$)");
-
-    private static Pattern textureCoordinatePattern = Pattern.compile("(vt( (\\-){0,1}\\d+\\.\\d+){2,3} *\\n)|(vt( (\\-){0,1}\\d+\\.\\d+){2,3} *$)");
-
-    private static Pattern face_V_VT_VN_Pattern = Pattern.compile("(f( \\d+/\\d+/\\d+){3,4} *\\n)|(f( \\d+/\\d+/\\d+){3,4} *$)");
-
-    private static Pattern face_V_VT_Pattern = Pattern.compile("(f( \\d+/\\d+){3,4} *\\n)|(f( \\d+/\\d+){3,4} *$)");
-
-    private static Pattern face_V_VN_Pattern = Pattern.compile("(f( \\d+//\\d+){3,4} *\\n)|(f( \\d+//\\d+){3,4} *$)");
-
-    private static Pattern face_V_Pattern = Pattern.compile("(f( \\d+){3,4} *\\n)|(f( \\d+){3,4} *$)");
-
-    private static Pattern groupObjectPattern = Pattern.compile("([go]( [-\\$\\w\\d]+) *\\n)|([go]( [-\\$\\w\\d]+) *$)");
-
-    private static Matcher vertexMatcher;
-
-    private static Matcher vertexNormalMatcher;
-
-    private static Matcher textureCoordinateMatcher;
-
-    private static Matcher face_V_VT_VN_Matcher;
-
-    private static Matcher face_V_VT_Matcher;
-
-    private static Matcher face_V_VN_Matcher;
-
-    private static Matcher face_V_Matcher;
-
-    private static Matcher groupObjectMatcher;
 
     public ArrayList<W_Vertex> vertices = new ArrayList<>();
-
     public ArrayList<W_Vertex> vertexNormals = new ArrayList<>();
-
     public ArrayList<W_TextureCoordinate> textureCoordinates = new ArrayList<>();
-
     public ArrayList<GroupObject> groupObjects = new ArrayList<>();
-
+    private Pattern vertexPattern = Pattern.compile("(v( (\\-){0,1}\\d+\\.\\d+){3,4} *\\n)|(v( (\\-){0,1}\\d+\\.\\d+){3,4} *$)");
+    private Pattern vertexNormalPattern = Pattern.compile("(vn( (\\-){0,1}\\d+\\.\\d+){3,4} *\\n)|(vn( (\\-){0,1}\\d+\\.\\d+){3,4} *$)");
+    private Pattern textureCoordinatePattern = Pattern.compile("(vt( (\\-){0,1}\\d+\\.\\d+){2,3} *\\n)|(vt( (\\-){0,1}\\d+\\.\\d+){2,3} *$)");
+    private Pattern face_V_VT_VN_Pattern = Pattern.compile("(f( \\d+/\\d+/\\d+){3,4} *\\n)|(f( \\d+/\\d+/\\d+){3,4} *$)");
+    private Pattern face_V_VT_Pattern = Pattern.compile("(f( \\d+/\\d+){3,4} *\\n)|(f( \\d+/\\d+){3,4} *$)");
+    private Pattern face_V_VN_Pattern = Pattern.compile("(f( \\d+//\\d+){3,4} *\\n)|(f( \\d+//\\d+){3,4} *$)");
+    private Pattern face_V_Pattern = Pattern.compile("(f( \\d+){3,4} *\\n)|(f( \\d+){3,4} *$)");
+    private Pattern groupObjectPattern = Pattern.compile("([go]( [-\\$\\w\\d]+) *\\n)|([go]( [-\\$\\w\\d]+) *$)");
+    private Matcher vertexMatcher;
+    private Matcher vertexNormalMatcher;
+    private Matcher textureCoordinateMatcher;
+    private Matcher face_V_VT_VN_Matcher;
+    private Matcher face_V_VT_Matcher;
+    private Matcher face_V_VN_Matcher;
+    private Matcher face_V_Matcher;
+    private Matcher groupObjectMatcher;
     private GroupObject currentGroupObject;
 
     private String fileName;
@@ -84,53 +65,53 @@ public class W_WavefrontObject extends W_ModelCustom {
         loadObjModel(inputStream);
     }
 
-    private static boolean isValidVertexLine(String line) {
+    private boolean isValidVertexLine(String line) {
         if (vertexMatcher != null) vertexMatcher.reset();
         vertexMatcher = vertexPattern.matcher(line);
         return vertexMatcher.matches();
     }
 
-    private static boolean isValidVertexNormalLine(String line) {
+    private boolean isValidVertexNormalLine(String line) {
         if (vertexNormalMatcher != null) vertexNormalMatcher.reset();
         vertexNormalMatcher = vertexNormalPattern.matcher(line);
         return vertexNormalMatcher.matches();
     }
 
-    private static boolean isValidTextureCoordinateLine(String line) {
+    private boolean isValidTextureCoordinateLine(String line) {
         if (textureCoordinateMatcher != null) textureCoordinateMatcher.reset();
         textureCoordinateMatcher = textureCoordinatePattern.matcher(line);
         return textureCoordinateMatcher.matches();
     }
 
-    private static boolean isValidFace_V_VT_VN_Line(String line) {
+    private boolean isValidFace_V_VT_VN_Line(String line) {
         if (face_V_VT_VN_Matcher != null) face_V_VT_VN_Matcher.reset();
         face_V_VT_VN_Matcher = face_V_VT_VN_Pattern.matcher(line);
         return face_V_VT_VN_Matcher.matches();
     }
 
-    private static boolean isValidFace_V_VT_Line(String line) {
+    private boolean isValidFace_V_VT_Line(String line) {
         if (face_V_VT_Matcher != null) face_V_VT_Matcher.reset();
         face_V_VT_Matcher = face_V_VT_Pattern.matcher(line);
         return face_V_VT_Matcher.matches();
     }
 
-    private static boolean isValidFace_V_VN_Line(String line) {
+    private boolean isValidFace_V_VN_Line(String line) {
         if (face_V_VN_Matcher != null) face_V_VN_Matcher.reset();
         face_V_VN_Matcher = face_V_VN_Pattern.matcher(line);
         return face_V_VN_Matcher.matches();
     }
 
-    private static boolean isValidFace_V_Line(String line) {
+    private boolean isValidFace_V_Line(String line) {
         if (face_V_Matcher != null) face_V_Matcher.reset();
         face_V_Matcher = face_V_Pattern.matcher(line);
         return face_V_Matcher.matches();
     }
 
-    private static boolean isValidFaceLine(String line) {
+    private boolean isValidFaceLine(String line) {
         return (isValidFace_V_VT_VN_Line(line) || isValidFace_V_VT_Line(line) || isValidFace_V_VN_Line(line) || isValidFace_V_Line(line));
     }
 
-    private static boolean isValidGroupObjectLine(String line) {
+    private boolean isValidGroupObjectLine(String line) {
         if (groupObjectMatcher != null) groupObjectMatcher.reset();
         groupObjectMatcher = groupObjectPattern.matcher(line);
         return groupObjectMatcher.matches();
@@ -180,7 +161,7 @@ public class W_WavefrontObject extends W_ModelCustom {
                     W_Face face = parseFace(currentLine, lineCount);
 
                     currentGroupObject.faces.add(face);
-                } else if ((currentLine.startsWith("g ") | currentLine.startsWith("o "))) {
+                } else if (((currentLine.startsWith("g ") | currentLine.startsWith("o "))) && currentLine.charAt(2) == '$') {
                     GroupObject group = parseGroupObject(currentLine, lineCount);
 
                     if (group != null) {
@@ -236,23 +217,9 @@ public class W_WavefrontObject extends W_ModelCustom {
         }
     }
 
-    public void tessellateOnly(Tessellator tessellator, String... groupNames) {
-        for (GroupObject groupObject : this.groupObjects) {
-            for (String groupName : groupNames) {
-                if (groupName.equalsIgnoreCase(groupObject.name)) groupObject.render(tessellator);
-            }
-        }
-    }
-
     public void renderPart(String partName) {
         for (GroupObject groupObject : this.groupObjects) {
             if (partName.equalsIgnoreCase(groupObject.name)) groupObject.render();
-        }
-    }
-
-    public void tessellatePart(Tessellator tessellator, String partName) {
-        for (GroupObject groupObject : this.groupObjects) {
-            if (partName.equalsIgnoreCase(groupObject.name)) groupObject.render(tessellator);
         }
     }
 
@@ -266,6 +233,10 @@ public class W_WavefrontObject extends W_ModelCustom {
         }
     }
 
+    @Override
+    public _IModelCustom toVBO() {
+        return new ModelVBO(this);
+    }
 
     private W_Vertex parseVertex(String line, int lineCount) throws _ModelFormatException {
         W_Vertex vertex = null;

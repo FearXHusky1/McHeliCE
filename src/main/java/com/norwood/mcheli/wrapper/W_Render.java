@@ -1,26 +1,25 @@
 package com.norwood.mcheli.wrapper;
 
-import com.norwood.mcheli.MCH_Config;
-import com.norwood.mcheli.MCH_MOD;
+import java.nio.FloatBuffer;
+
 import net.minecraft.client.renderer.GLAllocation;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
-import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;
+
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.opengl.GL11;
 
-import java.nio.FloatBuffer;
+import com.norwood.mcheli.MCH_Config;
+import com.norwood.mcheli.MCH_MOD;
 
 public abstract class W_Render<T extends Entity> extends Render<T> {
+
     protected static final ResourceLocation TEX_DEFAULT = new ResourceLocation(MCH_MOD.DOMAIN, "textures/default.png");
     private static final FloatBuffer colorBuffer = GLAllocation.createDirectFloatBuffer(16);
-    public int srcBlend;
-    public int dstBlend;
 
     protected W_Render(RenderManager renderManager) {
         super(renderManager);
@@ -46,7 +45,6 @@ public abstract class W_Render<T extends Entity> extends Render<T> {
             GlStateManager.shadeModel(GL11.GL_SMOOTH); // 7425
         }
 
-
         GlStateManager.enableLighting();
         GlStateManager.enableLight(0);
         GlStateManager.enableLight(1);
@@ -54,7 +52,7 @@ public abstract class W_Render<T extends Entity> extends Render<T> {
         GlStateManager.colorMaterial(1032, 5634);
         GlStateManager.enableCull(); // 2884
         GlStateManager.enableAlpha();
-        GlStateManager.alphaFunc(GL11.GL_GREATER, 0.001F); // 516, 0.001F
+        GlStateManager.alphaFunc(GL11.GL_GREATER, 0.001F);
 
         int j = lighting % 65536;
         int k = lighting / 65536;
@@ -62,17 +60,12 @@ public abstract class W_Render<T extends Entity> extends Render<T> {
 
         GlStateManager.color(0.75F, 0.75F, 0.75F, 1.0F);
 
-        GlStateManager.enableBlend(); // 3042
-        this.srcBlend = GL11.glGetInteger(GL11.GL_BLEND_SRC); // 3041
-        this.dstBlend = GL11.glGetInteger(GL11.GL_BLEND_DST); // 3040
-        GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA); // 770, 771
+        GlStateManager.enableBlend();
+        GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
     }
+
     public void restoreCommonRenderParam() {
-        GlStateManager.blendFunc(this.srcBlend, this.dstBlend);
         GlStateManager.disableBlend();
         GlStateManager.shadeModel(GL11.GL_FLAT);
     }
-
-
-
 }

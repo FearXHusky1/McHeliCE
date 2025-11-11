@@ -1,6 +1,13 @@
 package com.norwood.mcheli.wrapper.modelloader;
 
-import com.norwood.mcheli.helper.client._ModelFormatException;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
@@ -10,22 +17,21 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
+import com.norwood.mcheli.helper.client._IModelCustom;
+import com.norwood.mcheli.helper.client._ModelFormatException;
 
 @SideOnly(Side.CLIENT)
 public class W_MetasequoiaObject extends W_ModelCustom {
+
     public ArrayList<W_Vertex> vertices = new ArrayList<>();
     public final ArrayList<GroupObject> groupObjects = new ArrayList<>();
-    private final GroupObject currentGroupObject = null;
     private final String fileName;
     private int vertexNum = 0;
     private int faceNum = 0;
+
+    public ModelVBO asVBO() {
+        return new ModelVBO(this);
+    }
 
     public W_MetasequoiaObject(ResourceLocation location, IResource resource) throws _ModelFormatException {
         this.fileName = resource.toString();
@@ -58,17 +64,17 @@ public class W_MetasequoiaObject extends W_ModelCustom {
         this.loadObjModel(inputStream);
     }
 
-    private static boolean isValidGroupObjectLine(String line) {
+    private boolean isValidGroupObjectLine(String line) {
         String[] s = line.split(" ");
         return s.length >= 2 && s[0].equals("Object") && s[1].length() >= 4 && s[1].charAt(0) == '"';
     }
 
-    private static boolean isValidVertexLine(String line) {
+    private boolean isValidVertexLine(String line) {
         String[] s = line.split(" ");
         return s[0].equals("vertex");
     }
 
-    private static boolean isValidFaceLine(String line) {
+    private boolean isValidFaceLine(String line) {
         String[] s = line.split(" ");
         return s[0].equals("face");
     }
@@ -133,14 +139,16 @@ public class W_MetasequoiaObject extends W_ModelCustom {
                                 currentLine = normalizeWhitespace(currentLine);
                                 String[] sx = currentLine.split(" ");
                                 if (sx.length == 3) {
-                                    W_Vertex v = new W_Vertex(Float.parseFloat(sx[0]) / 100.0F, Float.parseFloat(sx[1]) / 100.0F, Float.parseFloat(sx[2]) / 100.0F);
+                                    W_Vertex v = new W_Vertex(Float.parseFloat(sx[0]) / 100.0F,
+                                            Float.parseFloat(sx[1]) / 100.0F, Float.parseFloat(sx[2]) / 100.0F);
                                     this.checkMinMax(v);
                                     this.vertices.add(v);
                                     if (--vertexNum <= 0) {
                                         break;
                                     }
                                 } else if (sx.length > 0) {
-                                    throw new _ModelFormatException("format error : " + this.fileName + " : line=" + lineCount);
+                                    throw new _ModelFormatException(
+                                            "format error : " + this.fileName + " : line=" + lineCount);
                                 }
                             }
 
@@ -160,8 +168,7 @@ public class W_MetasequoiaObject extends W_ModelCustom {
                                     lineCount++;
                                     currentLine = normalizeWhitespace(currentLine);
                                     String[] sx = currentLine.split(" ");
-                                    if (sx.length <= 2) {
-                                    } else {
+                                    if (sx.length <= 2) {} else {
                                         if (Integer.parseInt(sx[0]) >= 3) {
                                             W_Face[] faces = this.parseFace(currentLine, lineCount, mirror);
 
@@ -193,13 +200,11 @@ public class W_MetasequoiaObject extends W_ModelCustom {
 
             try {
                 reader.close();
-            } catch (IOException var27) {
-            }
+            } catch (IOException var27) {}
 
             try {
                 inputStream.close();
-            } catch (IOException var26) {
-            }
+            } catch (IOException var26) {}
         }
     }
 
@@ -229,7 +234,8 @@ public class W_MetasequoiaObject extends W_ModelCustom {
         for (W_Face f : group.faces) {
             for (int id : f.verticesID) {
                 if (id == verticesID) {
-                    if (!(f.faceNormal.x * faceNormal.x + f.faceNormal.y * faceNormal.y + f.faceNormal.z * faceNormal.z < facet)) {
+                    if (!(f.faceNormal.x * faceNormal.x + f.faceNormal.y * faceNormal.y +
+                            f.faceNormal.z * faceNormal.z < facet)) {
                         v.add(f.faceNormal);
                     }
                     break;
@@ -333,6 +339,11 @@ public class W_MetasequoiaObject extends W_ModelCustom {
         }
     }
 
+    @Override
+    public _IModelCustom toVBO() {
+        return this.asVBO();
+    }
+
     public void tessellateAllExcept(Tessellator tessellator, String... excludedGroupNames) {
         for (GroupObject groupObject : this.groupObjects) {
             boolean exclude = false;
@@ -357,60 +368,66 @@ public class W_MetasequoiaObject extends W_ModelCustom {
             return new W_Face[0];
         } else if (vnum == 3) {
             W_Face face = new W_Face();
-            face.verticesID = new int[]{Integer.parseInt(s[3]), Integer.parseInt(s[2]), Integer.parseInt(s[1])};
-            face.vertices = new W_Vertex[]{this.vertices.get(face.verticesID[0]), this.vertices.get(face.verticesID[1]), this.vertices.get(face.verticesID[2])};
+            face.verticesID = new int[] { Integer.parseInt(s[3]), Integer.parseInt(s[2]), Integer.parseInt(s[1]) };
+            face.vertices = new W_Vertex[] { this.vertices.get(face.verticesID[0]),
+                    this.vertices.get(face.verticesID[1]), this.vertices.get(face.verticesID[2]) };
             if (s.length >= 11) {
-                face.textureCoordinates = new W_TextureCoordinate[]{
+                face.textureCoordinates = new W_TextureCoordinate[] {
                         new W_TextureCoordinate(Float.parseFloat(s[9]), Float.parseFloat(s[10])),
                         new W_TextureCoordinate(Float.parseFloat(s[7]), Float.parseFloat(s[8])),
                         new W_TextureCoordinate(Float.parseFloat(s[5]), Float.parseFloat(s[6]))
                 };
             } else {
-                face.textureCoordinates = new W_TextureCoordinate[]{
-                        new W_TextureCoordinate(0.0F, 0.0F), new W_TextureCoordinate(0.0F, 0.0F), new W_TextureCoordinate(0.0F, 0.0F)
+                face.textureCoordinates = new W_TextureCoordinate[] {
+                        new W_TextureCoordinate(0.0F, 0.0F), new W_TextureCoordinate(0.0F, 0.0F),
+                        new W_TextureCoordinate(0.0F, 0.0F)
                 };
             }
 
             face.faceNormal = face.calculateFaceNormal();
-            return new W_Face[]{face};
+            return new W_Face[] { face };
         } else {
             W_Face face1 = new W_Face();
-            face1.verticesID = new int[]{Integer.parseInt(s[3]), Integer.parseInt(s[2]), Integer.parseInt(s[1])};
-            face1.vertices = new W_Vertex[]{
-                    this.vertices.get(face1.verticesID[0]), this.vertices.get(face1.verticesID[1]), this.vertices.get(face1.verticesID[2])
+            face1.verticesID = new int[] { Integer.parseInt(s[3]), Integer.parseInt(s[2]), Integer.parseInt(s[1]) };
+            face1.vertices = new W_Vertex[] {
+                    this.vertices.get(face1.verticesID[0]), this.vertices.get(face1.verticesID[1]),
+                    this.vertices.get(face1.verticesID[2])
             };
             if (s.length >= 12) {
-                face1.textureCoordinates = new W_TextureCoordinate[]{
+                face1.textureCoordinates = new W_TextureCoordinate[] {
                         new W_TextureCoordinate(Float.parseFloat(s[10]), Float.parseFloat(s[11])),
                         new W_TextureCoordinate(Float.parseFloat(s[8]), Float.parseFloat(s[9])),
                         new W_TextureCoordinate(Float.parseFloat(s[6]), Float.parseFloat(s[7]))
                 };
             } else {
-                face1.textureCoordinates = new W_TextureCoordinate[]{
-                        new W_TextureCoordinate(0.0F, 0.0F), new W_TextureCoordinate(0.0F, 0.0F), new W_TextureCoordinate(0.0F, 0.0F)
+                face1.textureCoordinates = new W_TextureCoordinate[] {
+                        new W_TextureCoordinate(0.0F, 0.0F), new W_TextureCoordinate(0.0F, 0.0F),
+                        new W_TextureCoordinate(0.0F, 0.0F)
                 };
             }
 
             face1.faceNormal = face1.calculateFaceNormal();
             W_Face face2 = new W_Face();
-            face2.verticesID = new int[]{Integer.parseInt(s[4]), Integer.parseInt(s[3]), Integer.parseInt(s[1])};
-            face2.vertices = new W_Vertex[]{
-                    this.vertices.get(face2.verticesID[0]), this.vertices.get(face2.verticesID[1]), this.vertices.get(face2.verticesID[2])
+            face2.verticesID = new int[] { Integer.parseInt(s[4]), Integer.parseInt(s[3]), Integer.parseInt(s[1]) };
+            face2.vertices = new W_Vertex[] {
+                    this.vertices.get(face2.verticesID[0]), this.vertices.get(face2.verticesID[1]),
+                    this.vertices.get(face2.verticesID[2])
             };
             if (s.length >= 14) {
-                face2.textureCoordinates = new W_TextureCoordinate[]{
+                face2.textureCoordinates = new W_TextureCoordinate[] {
                         new W_TextureCoordinate(Float.parseFloat(s[12]), Float.parseFloat(s[13])),
                         new W_TextureCoordinate(Float.parseFloat(s[10]), Float.parseFloat(s[11])),
                         new W_TextureCoordinate(Float.parseFloat(s[6]), Float.parseFloat(s[7]))
                 };
             } else {
-                face2.textureCoordinates = new W_TextureCoordinate[]{
-                        new W_TextureCoordinate(0.0F, 0.0F), new W_TextureCoordinate(0.0F, 0.0F), new W_TextureCoordinate(0.0F, 0.0F)
+                face2.textureCoordinates = new W_TextureCoordinate[] {
+                        new W_TextureCoordinate(0.0F, 0.0F), new W_TextureCoordinate(0.0F, 0.0F),
+                        new W_TextureCoordinate(0.0F, 0.0F)
                 };
             }
 
             face2.faceNormal = face2.calculateFaceNormal();
-            return new W_Face[]{face1, face2};
+            return new W_Face[] { face1, face2 };
         }
     }
 
@@ -425,7 +442,8 @@ public class W_MetasequoiaObject extends W_ModelCustom {
 
             return group;
         } else {
-            throw new _ModelFormatException("Error parsing entry ('" + line + "', line " + lineCount + ") in file '" + this.fileName + "' - Incorrect format");
+            throw new _ModelFormatException("Error parsing entry ('" + line + "', line " + lineCount + ") in file '" +
+                    this.fileName + "' - Incorrect format");
         }
     }
 

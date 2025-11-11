@@ -1,5 +1,21 @@
 package com.norwood.mcheli;
 
+import java.util.List;
+import java.util.UUID;
+
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumHand;
+import net.minecraftforge.client.event.TextureStitchEvent;
+import net.minecraftforge.event.CommandEvent;
+import net.minecraftforge.event.entity.EntityEvent.CanUpdate;
+import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.event.entity.living.LivingAttackEvent;
+import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent.EntityInteract;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+
 import com.norwood.mcheli.aircraft.MCH_EntityAircraft;
 import com.norwood.mcheli.aircraft.MCH_EntitySeat;
 import com.norwood.mcheli.aircraft.MCH_ItemAircraft;
@@ -11,24 +27,22 @@ import com.norwood.mcheli.wrapper.W_Entity;
 import com.norwood.mcheli.wrapper.W_EntityPlayer;
 import com.norwood.mcheli.wrapper.W_EventHook;
 import com.norwood.mcheli.wrapper.W_Lib;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumHand;
-import net.minecraftforge.event.CommandEvent;
-import net.minecraftforge.event.entity.EntityEvent.CanUpdate;
-import net.minecraftforge.event.entity.EntityJoinWorldEvent;
-import net.minecraftforge.event.entity.living.LivingAttackEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent.EntityInteract;
-
-import java.util.List;
-import java.util.UUID;
 
 public class MCH_EventHook extends W_EventHook {
+
     @Override
     public void commandEvent(CommandEvent event) {
         MCH_Command.onCommandEvent(event);
+    }
+
+    @SubscribeEvent
+    public void onTextureStitch(TextureStitchEvent.Pre event) {
+        MCH_MOD.proxy.registerParticleTextures(event);
+    }
+
+    @SubscribeEvent
+    public void onTextureStitchPost(TextureStitchEvent.Post event) {
+        MCH_MOD.proxy.registerShaders(event);
     }
 
     @Override
@@ -61,9 +75,8 @@ public class MCH_EventHook extends W_EventHook {
     }
 
     private void correctInvalidRotation(Entity e) {
-        boolean invalidPitch =
-                Float.isNaN(e.rotationPitch) || Float.isNaN(e.prevRotationPitch) ||
-                        Float.isInfinite(e.rotationPitch) || Float.isInfinite(e.prevRotationPitch);
+        boolean invalidPitch = Float.isNaN(e.rotationPitch) || Float.isNaN(e.prevRotationPitch) ||
+                Float.isInfinite(e.rotationPitch) || Float.isInfinite(e.prevRotationPitch);
 
         if (invalidPitch) {
             MCH_Lib.Log(e, "### EntityJoinWorldEvent Error: Player invalid rotation pitch (" + e.rotationPitch + ")");
@@ -71,9 +84,8 @@ public class MCH_EventHook extends W_EventHook {
             e.prevRotationPitch = 0.0F;
         }
 
-        boolean invalidYaw =
-                Float.isNaN(e.rotationYaw) || Float.isNaN(e.prevRotationYaw) ||
-                        Float.isInfinite(e.rotationYaw) || Float.isInfinite(e.prevRotationYaw);
+        boolean invalidYaw = Float.isNaN(e.rotationYaw) || Float.isNaN(e.prevRotationYaw) ||
+                Float.isInfinite(e.rotationYaw) || Float.isInfinite(e.prevRotationYaw);
 
         if (invalidYaw) {
             MCH_Lib.Log(e, "### EntityJoinWorldEvent Error: Player invalid rotation yaw (" + e.rotationYaw + ")");
@@ -81,7 +93,6 @@ public class MCH_EventHook extends W_EventHook {
             e.prevRotationYaw = 0.0F;
         }
     }
-
 
     @Override
     public void livingAttackEvent(LivingAttackEvent event) {
@@ -136,12 +147,11 @@ public class MCH_EventHook extends W_EventHook {
         event.setAmount(damage * factor);
     }
 
-
     public MCH_EntityAircraft getRiddenAircraft(Entity entity) {
-        if(entity==null)return null;
+        if (entity == null) return null;
         MCH_EntityAircraft ac = null;
         Entity ridden = entity.getRidingEntity();
-        if(ridden == null){
+        if (ridden == null) {
             return null;
         }
         if (ridden instanceof MCH_EntityAircraft) {
@@ -151,7 +161,8 @@ public class MCH_EventHook extends W_EventHook {
         }
 
         if (ac == null) {
-            List<MCH_EntityAircraft> list = entity.world.getEntitiesWithinAABB(MCH_EntityAircraft.class, entity.getEntityBoundingBox().grow(50.0, 50.0, 50.0));
+            List<MCH_EntityAircraft> list = entity.world.getEntitiesWithinAABB(MCH_EntityAircraft.class,
+                    entity.getEntityBoundingBox().grow(50.0, 50.0, 50.0));
             for (MCH_EntityAircraft tmp : list) {
                 if (tmp.isMountedEntity(entity)) {
                     return tmp;
@@ -167,7 +178,8 @@ public class MCH_EventHook extends W_EventHook {
         ItemStack item = event.getEntityPlayer().getHeldItem(EnumHand.MAIN_HAND);
         if (!item.isEmpty()) {
             if (item.getItem() instanceof MCH_ItemChain) {
-                MCH_ItemChain.interactEntity(item, event.getTarget(), event.getEntityPlayer(), event.getEntityPlayer().world);
+                MCH_ItemChain.interactEntity(item, event.getTarget(), event.getEntityPlayer(),
+                        event.getEntityPlayer().world);
                 event.setCanceled(true);
             } else if (item.getItem() instanceof MCH_ItemAircraft) {
                 ((MCH_ItemAircraft) item.getItem()).rideEntity(item, event.getTarget(), event.getEntityPlayer());

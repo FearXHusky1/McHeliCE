@@ -14,10 +14,7 @@ import com.norwood.mcheli.multiplay.MCH_GuiTargetMarker;
 import com.norwood.mcheli.uav.MCH_EntityUavStation;
 import com.norwood.mcheli.weapon.MCH_WeaponGuidanceSystem;
 import com.norwood.mcheli.weapon.MCH_WeaponSet;
-import com.norwood.mcheli.wrapper.W_Entity;
-import com.norwood.mcheli.wrapper.W_EntityRenderer;
-import com.norwood.mcheli.wrapper.W_Lib;
-import com.norwood.mcheli.wrapper.W_Render;
+import com.norwood.mcheli.wrapper.*;
 import com.norwood.mcheli.wrapper.modelloader.W_ModelCustom;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
@@ -38,6 +35,7 @@ import javax.annotation.Nullable;
 import java.util.Iterator;
 
 public abstract class MCH_RenderAircraft<T extends MCH_EntityAircraft> extends W_Render<T> {
+
     public static boolean renderingEntity = false;
     public static _IModelCustom debugModel = null;
 
@@ -50,14 +48,17 @@ public abstract class MCH_RenderAircraft<T extends MCH_EntityAircraft> extends W
             if (e.isSkipNormalRender()) {
                 return !renderingEntity;
             }
-        } else if ((entity.getClass().toString().indexOf("flansmod.common.driveables.EntityPlane") > 0 || entity.getClass().toString().indexOf("flansmod.common.driveables.EntityVehicle") > 0) && entity.getRidingEntity() instanceof MCH_EntitySeat) {
+        } else if ((entity.getClass().toString().indexOf("flansmod.common.driveables.EntityPlane") > 0 ||
+                entity.getClass().toString().indexOf("flansmod.common.driveables.EntityVehicle") > 0) &&
+                entity.getRidingEntity() instanceof MCH_EntitySeat) {
             return !renderingEntity;
         }
 
         return false;
     }
 
-    public static void renderLight(double x, double y, double z, float tickTime, MCH_EntityAircraft ac, MCH_AircraftInfo info) {
+    public static void renderLight(double x, double y, double z, float tickTime, MCH_EntityAircraft ac,
+                                   MCH_AircraftInfo info) {
         if (ac.haveSearchLight()) {
             if (ac.isSearchLightON()) {
                 Entity entity = ac.getEntityBySeatId(1);
@@ -111,7 +112,8 @@ public abstract class MCH_RenderAircraft<T extends MCH_EntityAircraft> extends W
 
                     for (int i = 0; i < 25; i++) {
                         float angle = (float) (15.0 * i / 180.0 * Math.PI);
-                        builder.pos(MathHelper.sin(angle) * width, height, MathHelper.cos(angle) * width).color(ce.r, ce.g, ce.b, ce.a).endVertex();
+                        builder.pos(MathHelper.sin(angle) * width, height, MathHelper.cos(angle) * width)
+                                .color(ce.r, ce.g, ce.b, ce.a).endVertex();
                     }
 
                     tessellator.draw();
@@ -272,7 +274,8 @@ public abstract class MCH_RenderAircraft<T extends MCH_EntityAircraft> extends W
             GlStateManager.pushMatrix();
             if (w.turret) {
                 GlStateManager.translate(info.turretPosition.x, info.turretPosition.y, info.turretPosition.z);
-                float ty = MCH_Lib.smooth(ac.getLastRiderYaw() - ac.getRotYaw(), ac.prevLastRiderYaw - ac.prevRotationYaw, tickTime);
+                float ty = MCH_Lib.smooth(ac.getLastRiderYaw() - ac.getRotYaw(),
+                        ac.prevLastRiderYaw - ac.prevRotationYaw, tickTime);
                 GlStateManager.rotate(ty, 0.0F, -1.0F, 0.0F);
                 GlStateManager.translate(-info.turretPosition.x, -info.turretPosition.y, -info.turretPosition.z);
             }
@@ -302,7 +305,8 @@ public abstract class MCH_RenderAircraft<T extends MCH_EntityAircraft> extends W
             }
 
             if (w.turret) {
-                float ty = MCH_Lib.smooth(ac.getLastRiderYaw() - ac.getRotYaw(), ac.prevLastRiderYaw - ac.prevRotationYaw, tickTime);
+                float ty = MCH_Lib.smooth(ac.getLastRiderYaw() - ac.getRotYaw(),
+                        ac.prevLastRiderYaw - ac.prevRotationYaw, tickTime);
                 ty -= ws.rotationTurretYaw;
                 GlStateManager.rotate(-ty, 0.0F, -1.0F, 0.0F);
             }
@@ -375,7 +379,9 @@ public abstract class MCH_RenderAircraft<T extends MCH_EntityAircraft> extends W
         }
     }
 
-    public static void renderWeaponChild(MCH_EntityAircraft ac, MCH_AircraftInfo info, MCH_AircraftInfo.PartWeaponChild w, MCH_WeaponSet ws, Entity e, float tickTime) {
+    public static void renderWeaponChild(MCH_EntityAircraft ac, MCH_AircraftInfo info,
+                                         MCH_AircraftInfo.PartWeaponChild w, MCH_WeaponSet ws, Entity e,
+                                         float tickTime) {
         float rotYaw;
         float prevYaw;
         float rotPitch;
@@ -470,7 +476,6 @@ public abstract class MCH_RenderAircraft<T extends MCH_EntityAircraft> extends W
 
     public static void renderCrawlerTrack(MCH_EntityAircraft ac, MCH_AircraftInfo info, float tickTime) {
         if (!info.partCrawlerTrack.isEmpty()) {
-            int prevWidth = GL11.glGetInteger(2833);
             Tessellator tessellator = Tessellator.getInstance();
             BufferBuilder builder = tessellator.getBuffer();
 
@@ -482,7 +487,8 @@ public abstract class MCH_RenderAircraft<T extends MCH_EntityAircraft> extends W
                     builder.begin(0, DefaultVertexFormats.POSITION_COLOR);
 
                     for (int i = 0; i < c.cx.length; i++) {
-                        builder.pos(c.z, c.cx[i], c.cy[i]).color((int) (255.0F / c.cx.length * i), 80, 255 - (int) (255.0F / c.cx.length * i), 255).endVertex();
+                        builder.pos(c.z, c.cx[i], c.cy[i]).color((int) (255.0F / c.cx.length * i), 80,
+                                255 - (int) (255.0F / c.cx.length * i), 255).endVertex();
                     }
 
                     tessellator.draw();
@@ -529,7 +535,7 @@ public abstract class MCH_RenderAircraft<T extends MCH_EntityAircraft> extends W
             }
 
             GlStateManager.enableBlend();
-            GL11.glPointSize(prevWidth);
+            // GL11.glPointSize(prevWidth);
         }
     }
 
@@ -547,7 +553,8 @@ public abstract class MCH_RenderAircraft<T extends MCH_EntityAircraft> extends W
                     GlStateManager.translate(h.pos.x * f, h.pos.y * f, h.pos.z * f);
                 } else {
                     GlStateManager.translate(h.pos.x, h.pos.y, h.pos.z);
-                    GlStateManager.rotate((prevRot + (rot - prevRot) * tickTime) * h.maxRotFactor, (float) h.rot.x, (float) h.rot.y, (float) h.rot.z);
+                    GlStateManager.rotate((prevRot + (rot - prevRot) * tickTime) * h.maxRotFactor, (float) h.rot.x,
+                            (float) h.rot.y, (float) h.rot.z);
                     GlStateManager.translate(-h.pos.x, -h.pos.y, -h.pos.z);
                 }
 
@@ -559,7 +566,8 @@ public abstract class MCH_RenderAircraft<T extends MCH_EntityAircraft> extends W
 
     public static void renderThrottle(MCH_EntityAircraft ac, MCH_AircraftInfo info, float tickTime) {
         if (info.havePartThrottle()) {
-            float throttle = MCH_Lib.smooth((float) ac.getCurrentThrottle(), (float) ac.getPrevCurrentThrottle(), tickTime);
+            float throttle = MCH_Lib.smooth((float) ac.getCurrentThrottle(), (float) ac.getPrevCurrentThrottle(),
+                    tickTime);
 
             for (MCH_AircraftInfo.Throttle h : info.partThrottle) {
                 GlStateManager.pushMatrix();
@@ -585,7 +593,8 @@ public abstract class MCH_RenderAircraft<T extends MCH_EntityAircraft> extends W
                 GlStateManager.translate(w.pos.x * f, w.pos.y * f, w.pos.z * f);
             } else {
                 GlStateManager.translate(w.pos.x, w.pos.y, w.pos.z);
-                GlStateManager.rotate((ws.prevRot + (ws.rot - ws.prevRot) * tickTime) * w.maxRotFactor, (float) w.rot.x, (float) w.rot.y, (float) w.rot.z);
+                GlStateManager.rotate((ws.prevRot + (ws.rot - ws.prevRot) * tickTime) * w.maxRotFactor, (float) w.rot.x,
+                        (float) w.rot.y, (float) w.rot.z);
                 GlStateManager.translate(-w.pos.x, -w.pos.y, -w.pos.z);
             }
 
@@ -635,7 +644,8 @@ public abstract class MCH_RenderAircraft<T extends MCH_EntityAircraft> extends W
                     GlStateManager.translate(c.pos.x * f, c.pos.y * f, c.pos.z * f);
                 } else {
                     GlStateManager.translate(c.pos.x, c.pos.y, c.pos.z);
-                    GlStateManager.rotate((prevRot + (rot - prevRot) * tickTime) * c.maxRotFactor, (float) c.rot.x, (float) c.rot.y, (float) c.rot.z);
+                    GlStateManager.rotate((prevRot + (rot - prevRot) * tickTime) * c.maxRotFactor, (float) c.rot.x,
+                            (float) c.rot.y, (float) c.rot.z);
                     GlStateManager.translate(-c.pos.x, -c.pos.y, -c.pos.z);
                 }
 
@@ -665,7 +675,8 @@ public abstract class MCH_RenderAircraft<T extends MCH_EntityAircraft> extends W
                     if (!n.hatch) {
                         GlStateManager.rotate(rot1 * n.maxRotFactor, (float) n.rot.x, (float) n.rot.y, (float) n.rot.z);
                     } else {
-                        GlStateManager.rotate(rotHatch * n.maxRotFactor, (float) n.rot.x, (float) n.rot.y, (float) n.rot.z);
+                        GlStateManager.rotate(rotHatch * n.maxRotFactor, (float) n.rot.x, (float) n.rot.y,
+                                (float) n.rot.z);
                     }
                 } else {
                     GlStateManager.rotate(rot1Rev * n.maxRotFactor, (float) n.rot.x, (float) n.rot.y, (float) n.rot.z);
@@ -673,9 +684,11 @@ public abstract class MCH_RenderAircraft<T extends MCH_EntityAircraft> extends W
 
                 if (n.enableRot2) {
                     if (!n.reverse) {
-                        GlStateManager.rotate(rot1 * n.maxRotFactor2, (float) n.rot2.x, (float) n.rot2.y, (float) n.rot2.z);
+                        GlStateManager.rotate(rot1 * n.maxRotFactor2, (float) n.rot2.x, (float) n.rot2.y,
+                                (float) n.rot2.z);
                     } else {
-                        GlStateManager.rotate(rot1Rev * n.maxRotFactor2, (float) n.rot2.x, (float) n.rot2.y, (float) n.rot2.z);
+                        GlStateManager.rotate(rot1Rev * n.maxRotFactor2, (float) n.rot2.x, (float) n.rot2.y,
+                                (float) n.rot2.z);
                     }
                 }
 
@@ -710,7 +723,8 @@ public abstract class MCH_RenderAircraft<T extends MCH_EntityAircraft> extends W
 
                 if (ac != null) {
                     if (!W_Entity.isEqual(ac, entity)) {
-                        MCH_WeaponGuidanceSystem gs = ac.getCurrentWeapon(player).getCurrentWeapon().getGuidanceSystem();
+                        MCH_WeaponGuidanceSystem gs = ac.getCurrentWeapon(player).getCurrentWeapon()
+                                .getGuidanceSystem();
                         if (gs != null && gs.canLockEntity(entity)) {
                             RenderManager rm = Minecraft.getMinecraft().getRenderManager();
                             double dist = entity.getDistanceSq(rm.renderViewEntity);
@@ -730,7 +744,6 @@ public abstract class MCH_RenderAircraft<T extends MCH_EntityAircraft> extends W
                                 GlStateManager.enableBlend();
                                 GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
                                 GlStateManager.disableTexture2D();
-                                int prevWidth = GL11.glGetInteger(2849);
                                 float size = Math.max(entity.width, entity.height) * 20.0F;
                                 if (entity instanceof MCH_EntityAircraft) {
                                     size *= 2.0F;
@@ -741,32 +754,45 @@ public abstract class MCH_RenderAircraft<T extends MCH_EntityAircraft> extends W
                                 builder.begin(2, MCH_Verts.POS_COLOR_LMAP);
                                 boolean isLockEntity = gs.isLockingEntity(entity);
                                 if (isLockEntity) {
-                                    GL11.glLineWidth(MCH_Gui.scaleFactor * 1.5F);
-                                    builder.pos(-size - 1.0F, 0.0, 0.0).color(1.0F, 0.0F, 0.0F, 1.0F).lightmap(0, 240).endVertex();
-                                    builder.pos(-size - 1.0F, size * 2.0F, 0.0).color(1.0F, 0.0F, 0.0F, 1.0F).lightmap(0, 240).endVertex();
-                                    builder.pos(size + 1.0F, size * 2.0F, 0.0).color(1.0F, 0.0F, 0.0F, 1.0F).lightmap(0, 240).endVertex();
-                                    builder.pos(size + 1.0F, 0.0, 0.0).color(1.0F, 0.0F, 0.0F, 1.0F).lightmap(0, 240).endVertex();
+                                    GLStateManagerExt.setPointSize(MCH_Gui.scaleFactor * 1.5F);
+                                    builder.pos(-size - 1.0F, 0.0, 0.0).color(1.0F, 0.0F, 0.0F, 1.0F).lightmap(0, 240)
+                                            .endVertex();
+                                    builder.pos(-size - 1.0F, size * 2.0F, 0.0).color(1.0F, 0.0F, 0.0F, 1.0F)
+                                            .lightmap(0, 240).endVertex();
+                                    builder.pos(size + 1.0F, size * 2.0F, 0.0).color(1.0F, 0.0F, 0.0F, 1.0F)
+                                            .lightmap(0, 240).endVertex();
+                                    builder.pos(size + 1.0F, 0.0, 0.0).color(1.0F, 0.0F, 0.0F, 1.0F).lightmap(0, 240)
+                                            .endVertex();
                                 } else {
-                                    GL11.glLineWidth(MCH_Gui.scaleFactor);
-                                    builder.pos(-size - 1.0F, 0.0, 0.0).color(1.0F, 0.3F, 0.0F, 8.0F).lightmap(0, 240).endVertex();
-                                    builder.pos(-size - 1.0F, size * 2.0F, 0.0).color(1.0F, 0.3F, 0.0F, 8.0F).lightmap(0, 240).endVertex();
-                                    builder.pos(size + 1.0F, size * 2.0F, 0.0).color(1.0F, 0.3F, 0.0F, 8.0F).lightmap(0, 240).endVertex();
-                                    builder.pos(size + 1.0F, 0.0, 0.0).color(1.0F, 0.3F, 0.0F, 8.0F).lightmap(0, 240).endVertex();
+                                    GLStateManagerExt.setPointSize(MCH_Gui.scaleFactor);
+                                    builder.pos(-size - 1.0F, 0.0, 0.0).color(1.0F, 0.3F, 0.0F, 8.0F).lightmap(0, 240)
+                                            .endVertex();
+                                    builder.pos(-size - 1.0F, size * 2.0F, 0.0).color(1.0F, 0.3F, 0.0F, 8.0F)
+                                            .lightmap(0, 240).endVertex();
+                                    builder.pos(size + 1.0F, size * 2.0F, 0.0).color(1.0F, 0.3F, 0.0F, 8.0F)
+                                            .lightmap(0, 240).endVertex();
+                                    builder.pos(size + 1.0F, 0.0, 0.0).color(1.0F, 0.3F, 0.0F, 8.0F).lightmap(0, 240)
+                                            .endVertex();
                                 }
 
                                 tessellator.draw();
                                 GlStateManager.popMatrix();
-                                if (!ac.isUAV() && isLockEntity && Minecraft.getMinecraft().gameSettings.thirdPersonView == 0) {
+                                if (!ac.isUAV() && isLockEntity &&
+                                        Minecraft.getMinecraft().gameSettings.thirdPersonView == 0) {
                                     GlStateManager.pushMatrix();
                                     builder.begin(1, MCH_Verts.POS_COLOR_LMAP);
                                     GL11.glLineWidth(1.0F);
-                                    builder.pos(x, y + entity.height / 2.0F, z).color(1.0F, 0.0F, 0.0F, 1.0F).lightmap(0, 240).endVertex();
-                                    builder.pos(ac.lastTickPosX - TileEntityRendererDispatcher.staticPlayerX, ac.lastTickPosY - TileEntityRendererDispatcher.staticPlayerY - 1.0, ac.lastTickPosZ - TileEntityRendererDispatcher.staticPlayerZ).color(1.0F, 0.0F, 0.0F, 1.0F).lightmap(0, 240).endVertex();
+                                    builder.pos(x, y + entity.height / 2.0F, z).color(1.0F, 0.0F, 0.0F, 1.0F)
+                                            .lightmap(0, 240).endVertex();
+                                    builder.pos(ac.lastTickPosX - TileEntityRendererDispatcher.staticPlayerX,
+                                                    ac.lastTickPosY - TileEntityRendererDispatcher.staticPlayerY - 1.0,
+                                                    ac.lastTickPosZ - TileEntityRendererDispatcher.staticPlayerZ)
+                                            .color(1.0F, 0.0F, 0.0F, 1.0F).lightmap(0, 240).endVertex();
                                     tessellator.draw();
                                     GlStateManager.popMatrix();
                                 }
 
-                                GL11.glLineWidth(prevWidth);
+                                GLStateManagerExt.restorePointSize();
                                 GlStateManager.enableTexture2D();
                                 GlStateManager.depthMask(true);
                                 GlStateManager.enableLighting();
@@ -780,7 +806,8 @@ public abstract class MCH_RenderAircraft<T extends MCH_EntityAircraft> extends W
         }
     }
 
-    public static void renderRope(MCH_EntityAircraft ac, MCH_AircraftInfo info, double x, double y, double z, float tickTime) {
+    public static void renderRope(MCH_EntityAircraft ac, MCH_AircraftInfo info, double x, double y, double z,
+                                  float tickTime) {
         GlStateManager.pushMatrix();
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder builder = tessellator.getBuffer();
@@ -790,8 +817,10 @@ public abstract class MCH_RenderAircraft<T extends MCH_EntityAircraft> extends W
 
             for (int i = 0; i < info.repellingHooks.size(); i++) {
                 builder.begin(3, DefaultVertexFormats.POSITION_COLOR);
-                builder.pos(info.repellingHooks.get(i).pos.x, info.repellingHooks.get(i).pos.y, info.repellingHooks.get(i).pos.z).color(0, 0, 0, 255).endVertex();
-                builder.pos(info.repellingHooks.get(i).pos.x, info.repellingHooks.get(i).pos.y + ac.ropesLength, info.repellingHooks.get(i).pos.z).color(0, 0, 0, 255).endVertex();
+                builder.pos(info.repellingHooks.get(i).pos.x, info.repellingHooks.get(i).pos.y,
+                        info.repellingHooks.get(i).pos.z).color(0, 0, 0, 255).endVertex();
+                builder.pos(info.repellingHooks.get(i).pos.x, info.repellingHooks.get(i).pos.y + ac.ropesLength,
+                        info.repellingHooks.get(i).pos.z).color(0, 0, 0, 255).endVertex();
                 tessellator.draw();
             }
 
@@ -810,7 +839,8 @@ public abstract class MCH_RenderAircraft<T extends MCH_EntityAircraft> extends W
             float pitch = entity.calcRotPitch(tickTime);
             float roll = this.calcRot(entity.getRotRoll(), entity.prevRotationRoll, tickTime);
             if (MCH_Config.EnableModEntityRender.prmBool) {
-                this.renderRiddenEntity(entity, tickTime, yaw, pitch + info.entityPitch, roll + info.entityRoll, info.entityWidth, info.entityHeight);
+                this.renderRiddenEntity(entity, tickTime, yaw, pitch + info.entityPitch, roll + info.entityRoll,
+                        info.entityWidth, info.entityHeight);
             }
 
             if (!shouldSkipRender(entity)) {
@@ -836,7 +866,6 @@ public abstract class MCH_RenderAircraft<T extends MCH_EntityAircraft> extends W
             }
         }
     }
-
 
     public void doRenderShadowAndFire(Entity entity, double x, double y, double z, float yaw, float partialTicks) {
         if (entity.canRenderOnFire()) {
@@ -906,7 +935,8 @@ public abstract class MCH_RenderAircraft<T extends MCH_EntityAircraft> extends W
         }
     }
 
-    public void renderRiddenEntity(MCH_EntityAircraft ac, float tickTime, float yaw, float pitch, float roll, float width, float height) {
+    public void renderRiddenEntity(MCH_EntityAircraft ac, float tickTime, float yaw, float pitch, float roll,
+                                   float width, float height) {
         MCH_ClientEventHook.setCancelRender(false);
         GlStateManager.pushMatrix();
         this.renderEntitySimple(ac, ac.getRiddenByEntity(), tickTime, yaw, pitch, roll, width, height);
@@ -921,78 +951,80 @@ public abstract class MCH_RenderAircraft<T extends MCH_EntityAircraft> extends W
         MCH_ClientEventHook.setCancelRender(true);
     }
 
-    public void renderEntitySimple(MCH_EntityAircraft ac, Entity entity, float tickTime, float yaw, float pitch, float roll, float width, float height) {
-        if (entity != null || renderManager.renderViewEntity == null) {
-            boolean isPilot = ac.isPilot(entity);
-            boolean isClientPlayer = W_Lib.isClientPlayer(entity);
-            if (!isClientPlayer || !W_Lib.isFirstPerson() || isPilot && ac.getCameraId() > 0) {
-                GlStateManager.pushMatrix();
-                if (entity.ticksExisted == 0) {
-                    entity.lastTickPosX = entity.posX;
-                    entity.lastTickPosY = entity.posY;
-                    entity.lastTickPosZ = entity.posZ;
-                }
-
-                double x = entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * tickTime;
-                double y = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * tickTime;
-                double z = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * tickTime;
-                float f1 = entity.prevRotationYaw + (entity.rotationYaw - entity.prevRotationYaw) * tickTime;
-                int i = entity.getBrightnessForRender();
-                if (entity.isBurning()) {
-                    i = 15728880;
-                }
-
-                int j = i % 65536;
-                int k = i / 65536;
-                OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, j, k);
-                GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-                double dx = x - TileEntityRendererDispatcher.staticPlayerX;
-                double dy = y - TileEntityRendererDispatcher.staticPlayerY;
-                double dz = z - TileEntityRendererDispatcher.staticPlayerZ;
-                GlStateManager.translate(dx, dy, dz);
-                GlStateManager.rotate(yaw, 0.0F, -1.0F, 0.0F);
-                GlStateManager.rotate(pitch, 1.0F, 0.0F, 0.0F);
-                GlStateManager.rotate(roll, 0.0F, 0.0F, 1.0F);
-                GlStateManager.scale(width, height, width);
-                GlStateManager.rotate(-yaw, 0.0F, -1.0F, 0.0F);
-                GlStateManager.translate(-dx, -dy, -dz);
-                boolean bk = renderingEntity;
-                renderingEntity = true;
-                Entity ridingEntity = entity.getRidingEntity();
-                if (!W_Lib.isEntityLivingBase(entity) && !(entity instanceof MCH_IEntityCanRideAircraft)) {
-                    entity.dismountRidingEntity();
-                }
-
-                EntityLivingBase entityLiving = entity instanceof EntityLivingBase ? (EntityLivingBase) entity : null;
-                float bkPitch = 0.0F;
-                float bkPrevPitch = 0.0F;
-                if (isPilot && entityLiving != null) {
-                    entityLiving.renderYawOffset = ac.getRotYaw();
-                    entityLiving.prevRenderYawOffset = ac.getRotYaw();
-                    if (ac.getCameraId() > 0) {
-                        entityLiving.rotationYawHead = ac.getRotYaw();
-                        entityLiving.prevRotationYawHead = ac.getRotYaw();
-                        bkPitch = entityLiving.rotationPitch;
-                        bkPrevPitch = entityLiving.prevRotationPitch;
-                        entityLiving.rotationPitch = ac.getRotPitch();
-                        entityLiving.prevRotationPitch = ac.getRotPitch();
-                    }
-                }
-
-                W_EntityRenderer.renderEntityWithPosYaw(this.renderManager, entity, dx, dy, dz, f1, tickTime, false);
-                if (isPilot && entityLiving != null && ac.getCameraId() > 0) {
-                    entityLiving.rotationPitch = bkPitch;
-                    entityLiving.prevRotationPitch = bkPrevPitch;
-                }
-
-                entity.startRiding(ridingEntity);
-                renderingEntity = bk;
-                GlStateManager.popMatrix();
+    public void renderEntitySimple(MCH_EntityAircraft ac, Entity entity, float tickTime, float yaw, float pitch,
+                                   float roll, float width, float height) {
+        if (entity == null || renderManager.renderViewEntity == null) return;
+        boolean isPilot = ac.isPilot(entity);
+        boolean isClientPlayer = W_Lib.isClientPlayer(entity);
+        if (!isClientPlayer || !W_Lib.isFirstPerson() || isPilot && ac.getCameraId() > 0) {
+            GlStateManager.pushMatrix();
+            if (entity.ticksExisted == 0) {
+                entity.lastTickPosX = entity.posX;
+                entity.lastTickPosY = entity.posY;
+                entity.lastTickPosZ = entity.posZ;
             }
+
+            double x = entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * tickTime;
+            double y = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * tickTime;
+            double z = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * tickTime;
+            float f1 = entity.prevRotationYaw + (entity.rotationYaw - entity.prevRotationYaw) * tickTime;
+            int i = entity.getBrightnessForRender();
+            if (entity.isBurning()) {
+                i = 15728880;
+            }
+
+            int j = i % 65536;
+            int k = i / 65536;
+            OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, j, k);
+            GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+            double dx = x - TileEntityRendererDispatcher.staticPlayerX;
+            double dy = y - TileEntityRendererDispatcher.staticPlayerY;
+            double dz = z - TileEntityRendererDispatcher.staticPlayerZ;
+            GlStateManager.translate(dx, dy, dz);
+            GlStateManager.rotate(yaw, 0.0F, -1.0F, 0.0F);
+            GlStateManager.rotate(pitch, 1.0F, 0.0F, 0.0F);
+            GlStateManager.rotate(roll, 0.0F, 0.0F, 1.0F);
+            GlStateManager.scale(width, height, width);
+            GlStateManager.rotate(-yaw, 0.0F, -1.0F, 0.0F);
+            GlStateManager.translate(-dx, -dy, -dz);
+            boolean bk = renderingEntity;
+            renderingEntity = true;
+            Entity ridingEntity = entity.getRidingEntity();
+            if (!W_Lib.isEntityLivingBase(entity) && !(entity instanceof MCH_IEntityCanRideAircraft)) {
+                entity.dismountRidingEntity();
+            }
+
+            EntityLivingBase entityLiving = entity instanceof EntityLivingBase ? (EntityLivingBase) entity : null;
+            float bkPitch = 0.0F;
+            float bkPrevPitch = 0.0F;
+            if (isPilot && entityLiving != null) {
+                entityLiving.renderYawOffset = ac.getRotYaw();
+                entityLiving.prevRenderYawOffset = ac.getRotYaw();
+                if (ac.getCameraId() > 0) {
+                    entityLiving.rotationYawHead = ac.getRotYaw();
+                    entityLiving.prevRotationYawHead = ac.getRotYaw();
+                    bkPitch = entityLiving.rotationPitch;
+                    bkPrevPitch = entityLiving.prevRotationPitch;
+                    entityLiving.rotationPitch = ac.getRotPitch();
+                    entityLiving.prevRotationPitch = ac.getRotPitch();
+                }
+            }
+
+            W_EntityRenderer.renderEntityWithPosYaw(this.renderManager, entity, dx, dy, dz, f1, tickTime, false);
+            if (isPilot && entityLiving != null && ac.getCameraId() > 0) {
+                entityLiving.rotationPitch = bkPitch;
+                entityLiving.prevRotationPitch = bkPrevPitch;
+            }
+
+            entity.startRiding(ridingEntity);
+            renderingEntity = bk;
+            GlStateManager.popMatrix();
         }
+
     }
 
-    public abstract void renderAircraft(MCH_EntityAircraft var1, double var2, double var4, double var6, float var8, float var9, float var10, float var11);
+    public abstract void renderAircraft(MCH_EntityAircraft var1, double var2, double var4, double var6, float var8,
+                                        float var9, float var10, float var11);
 
     public float calcRot(float rot, float prevRot, float tickTime) {
         rot = MathHelper.wrapDegrees(rot);
@@ -1018,10 +1050,8 @@ public abstract class MCH_RenderAircraft<T extends MCH_EntityAircraft> extends W
             GlStateManager.pushMatrix();
             GlStateManager.translate(x, y, z);
 
-            for (int i = 0; i < e.extraBoundingBox.length; i++) {
-                var bb = e.extraBoundingBox[i];
+            for (MCH_BoundingBox bb : e.extraBoundingBox) {
                 GlStateManager.pushMatrix();
-
 
                 if (bb.rotatedOffset != null)
                     GlStateManager.translate(bb.rotatedOffset.x, bb.rotatedOffset.y, bb.rotatedOffset.z);
@@ -1038,21 +1068,21 @@ public abstract class MCH_RenderAircraft<T extends MCH_EntityAircraft> extends W
                 GlStateManager.rotate(pAngle, 1.0F, 0.0F, 0.0F);
                 GlStateManager.rotate(rAngle, 0.0F, 0.0F, 1.0F);
 
-                GlStateManager.scale(bb.width, bb.height, bb.widthZ);
+                GlStateManager.scale(bb.width, bb.height, bb.width);
 
                 this.bindTexture("textures/bounding_box.png");
                 debugModel.renderAll();
                 GlStateManager.popMatrix();
-                this.drawHitBoxDetail(bb, i + 1);
+                this.drawHitBoxDetail(bb);
             }
 
             GlStateManager.popMatrix();
-            GlStateManager.color(1,1,1,1);
+            GlStateManager.color(1, 1, 1, 1);
         }
     }
 
-    public void drawHitBoxDetail(MCH_BoundingBox bb, int index) {
-        String s = String.format("[%d] %.2f", index, bb.damageFactor);
+    public void drawHitBoxDetail(MCH_BoundingBox bb) {
+        String s = String.format("%.2f", bb.damageFactor);
         float scale = 0.08F;
 
         GlStateManager.pushMatrix();
@@ -1066,6 +1096,7 @@ public abstract class MCH_RenderAircraft<T extends MCH_EntityAircraft> extends W
         GlStateManager.scale(-scale, -scale, scale);
 
         FontRenderer font = this.getFontRendererFromRenderManager();
+        if (font == null) return;
 
         int strWidth = font.getStringWidth(s) / 2;
 
@@ -1087,11 +1118,13 @@ public abstract class MCH_RenderAircraft<T extends MCH_EntityAircraft> extends W
         GlStateManager.popMatrix();
     }
 
-    public final boolean shouldRender(MCH_EntityAircraft livingEntity, ICamera camera, double camX, double camY, double camZ) {
+    public final boolean shouldRender(MCH_EntityAircraft livingEntity, ICamera camera, double camX, double camY,
+                                      double camZ) {
         return false;
     }
 
-    public void renderDebugPilotSeat(MCH_EntityAircraft e, double x, double y, double z, float yaw, float pitch, float roll) {
+    public void renderDebugPilotSeat(MCH_EntityAircraft e, double x, double y, double z, float yaw, float pitch,
+                                     float roll) {
         if (MCH_Config.TestMode.prmBool && debugModel != null) {
             GlStateManager.pushMatrix();
             MCH_SeatInfo seat = e.getSeatInfo(0);
@@ -1107,7 +1140,8 @@ public abstract class MCH_RenderAircraft<T extends MCH_EntityAircraft> extends W
         }
     }
 
-    public void renderCommonPart(MCH_EntityAircraft ac, MCH_AircraftInfo info, double x, double y, double z, float tickTime) {
+    public void renderCommonPart(MCH_EntityAircraft ac, MCH_AircraftInfo info, double x, double y, double z,
+                                 float tickTime) {
         renderRope(ac, info, x, y, z, tickTime);
         renderWeapon(ac, info, tickTime);
         renderRotPart(ac, info, tickTime);
