@@ -22,7 +22,6 @@ public class MCH_ModelManager extends W_ModelBase {
     private static final MCH_ModelManager instance = new MCH_ModelManager();
     private static final ConcurrentHashMap<String, _IModelCustom> map = new ConcurrentHashMap<>();
     private static final ModelRenderer defaultModel;
-    private static final Random rand = new Random();
     private static boolean forceReloadMode = false;
 
     static {
@@ -52,7 +51,6 @@ public class MCH_ModelManager extends W_ModelBase {
 
     public static _IModelCustom load(@NotNull String path, @NotNull String name) {
         return load(path,name,false);
-
     }
 
 

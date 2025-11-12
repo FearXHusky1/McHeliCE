@@ -113,7 +113,6 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
 
     private static void uploadModel(MCH_AircraftInfo info, String path) {
         info.model = MCH_ModelManager.load(path, info.name);
-//        if (info.model == null) return;
         CompletableFuture<Void> done = new CompletableFuture<>();
         Minecraft.getMinecraft().addScheduledTask(() -> {
             info.model = info.model.toVBO();
@@ -594,7 +593,6 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
         Entity.setRenderDistanceWeight(renderDistWeight);
     }
 
-    //mlbv: yes, i hate reflections as much as you do, but somehow AccessTransformer doesn't work on this
 
     @Override
     public List<AddonPack> loadAddonPacks(File addonDir) {
@@ -611,7 +609,6 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
         W_LanguageRegistry.updateGeneratedLang();
     }
 
-    //mlbv: yes, i hate reflections as much as you do, but somehow AccessTransformer doesn't work on this
 
     @Deprecated
     @Override
