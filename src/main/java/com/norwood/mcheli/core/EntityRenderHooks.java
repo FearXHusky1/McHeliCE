@@ -9,6 +9,9 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.tree.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class EntityRenderHooks implements IClassTransformer {
 
     private static final ObfSafeName RENDER_WORLD_PASS = new ObfSafeName("renderWorldPass", "func_175068_a");
@@ -50,23 +53,36 @@ public class EntityRenderHooks implements IClassTransformer {
                        RENDER_ENTITES.matches(renderCall.name) &&
                         renderCall.desc.equals(
                                 "(Lnet/minecraft/entity/Entity;Lnet/minecraft/client/renderer/culling/ICamera;F)V")) {
-                    InsnList toInject = createRenderVehicleHook();
+                    List<AbstractInsnNode> stackArgs = new ArrayList<>();
+                    AbstractInsnNode cursor = renderCall.getPrevious();
+
+                    while (cursor != null && stackArgs.size() < 3) {
+                        int op = cursor.getOpcode();
+                        if (op >= ILOAD && op <= ALOAD || op == LDC || (op >= ICONST_M1 && op <= DCONST_1)) {
+                            stackArgs.add(0, cursor);
+                        }
+                        cursor = cursor.getPrevious();
+                    }
+                    int entityVar = ((VarInsnNode) stackArgs.get(0)).var;
+                    int cameraVar = ((VarInsnNode) stackArgs.get(1)).var;
+                    int partialVar = ((VarInsnNode) stackArgs.get(2)).var;
+                    InsnList toInject = createRenderVehicleHook(entityVar,cameraVar,partialVar);
                     method.instructions.insert(renderCall, toInject);
                 }
             }
         }
     }
 
-    private static InsnList createRenderVehicleHook() {
+    private static InsnList createRenderVehicleHook(int entityVar, int camVar, int partialVar ) {
         InsnList toInject = new InsnList();
         toInject.add(new FieldInsnNode(
                 GETSTATIC,
                 "com/norwood/mcheli/core/VehicleRenderHook",
                 "INSTANCE",
                 "Lcom/norwood/mcheli/core/VehicleRenderHook;")); // access the instance
-        toInject.add(new VarInsnNode(ALOAD, 9)); // renderViewEntity
-        toInject.add(new VarInsnNode(ALOAD, 8)); // camera
-        toInject.add(new VarInsnNode(FLOAD, 2)); // partialTicks
+        toInject.add(new VarInsnNode(ALOAD, entityVar)); // renderViewEntity
+        toInject.add(new VarInsnNode(ALOAD, camVar)); // camera
+        toInject.add(new VarInsnNode(FLOAD, partialVar)); // partialTicks
         toInject.add(new MethodInsnNode(
                 INVOKEVIRTUAL,
                 "com/norwood/mcheli/core/VehicleRenderHook",
