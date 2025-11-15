@@ -1,15 +1,13 @@
 package com.norwood.mcheli.hud;
 
-import java.util.Date;
-
-import net.minecraft.util.math.MathHelper;
-
 import com.norwood.mcheli.MCH_Config;
 import com.norwood.mcheli.MCH_KeyName;
 import com.norwood.mcheli.MCH_Lib;
 import com.norwood.mcheli.MCH_MOD;
-
 import lombok.Getter;
+import net.minecraft.util.math.MathHelper;
+
+import java.util.Date;
 
 @Getter
 public class MCH_HudItemString extends MCH_HudItem {

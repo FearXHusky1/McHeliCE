@@ -1,19 +1,16 @@
 package com.norwood.mcheli.helper.network;
 
-import java.io.DataOutputStream;
-import java.io.IOException;
-
-import javax.annotation.Nullable;
-
+import com.google.common.io.ByteArrayDataInput;
+import io.netty.handler.codec.EncoderException;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTSizeTracker;
 import net.minecraft.nbt.NBTTagCompound;
 
-import com.google.common.io.ByteArrayDataInput;
-
-import io.netty.handler.codec.EncoderException;
+import javax.annotation.Nullable;
+import java.io.DataOutputStream;
+import java.io.IOException;
 
 public class PacketHelper {
 

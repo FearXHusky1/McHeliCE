@@ -1,7 +1,5 @@
 package com.norwood.mcheli.eval.eval.rule;
 
-import java.util.List;
-
 import com.norwood.mcheli.eval.eval.EvalException;
 import com.norwood.mcheli.eval.eval.Expression;
 import com.norwood.mcheli.eval.eval.Rule;
@@ -13,6 +11,8 @@ import com.norwood.mcheli.eval.eval.oper.Operator;
 import com.norwood.mcheli.eval.eval.ref.Refactor;
 import com.norwood.mcheli.eval.eval.srch.Search;
 import com.norwood.mcheli.eval.eval.var.Variable;
+
+import java.util.List;
 
 public class ShareRuleValue extends Rule {
 

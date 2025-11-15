@@ -1,13 +1,13 @@
 package com.norwood.mcheli.item;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
 import com.norwood.mcheli.MCH_BaseInfo;
 import com.norwood.mcheli.helper.addon.AddonResourceLocation;
 import com.norwood.mcheli.helper.info.IContentData;
 import com.norwood.mcheli.wrapper.W_Item;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 public class MCH_ItemInfo extends MCH_BaseInfo implements IContentData { // implements
 

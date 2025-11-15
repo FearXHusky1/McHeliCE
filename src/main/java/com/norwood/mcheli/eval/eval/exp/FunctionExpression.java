@@ -1,9 +1,9 @@
 package com.norwood.mcheli.eval.eval.exp;
 
+import com.norwood.mcheli.eval.eval.EvalException;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import com.norwood.mcheli.eval.eval.EvalException;
 
 public class FunctionExpression extends Col1Expression {
 

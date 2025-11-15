@@ -1,11 +1,14 @@
 package com.norwood.mcheli.eval.eval.rule;
 
-import java.util.*;
-
 import com.norwood.mcheli.eval.eval.exp.AbstractExpression;
 import com.norwood.mcheli.eval.eval.exp.ParenExpression;
 import com.norwood.mcheli.eval.eval.exp.ShareExpValue;
 import com.norwood.mcheli.eval.eval.lex.Lex;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public abstract class AbstractRule {
 

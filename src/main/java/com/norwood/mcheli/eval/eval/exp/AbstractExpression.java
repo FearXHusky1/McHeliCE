@@ -1,9 +1,9 @@
 package com.norwood.mcheli.eval.eval.exp;
 
+import com.norwood.mcheli.eval.eval.EvalException;
+
 import java.util.List;
 import java.util.Objects;
-
-import com.norwood.mcheli.eval.eval.EvalException;
 
 public abstract class AbstractExpression {
 

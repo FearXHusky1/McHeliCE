@@ -1,10 +1,10 @@
 package com.norwood.mcheli.eval.eval.lex;
 
-import java.util.List;
-
 import com.norwood.mcheli.eval.eval.exp.AbstractExpression;
 import com.norwood.mcheli.eval.eval.exp.ShareExpValue;
 import com.norwood.mcheli.eval.util.CharUtil;
+
+import java.util.List;
 
 public class Lex {
 

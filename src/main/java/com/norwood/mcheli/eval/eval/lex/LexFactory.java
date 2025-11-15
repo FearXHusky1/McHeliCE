@@ -1,9 +1,9 @@
 package com.norwood.mcheli.eval.eval.lex;
 
-import java.util.List;
-
 import com.norwood.mcheli.eval.eval.exp.ShareExpValue;
 import com.norwood.mcheli.eval.eval.rule.ShareRuleValue;
+
+import java.util.List;
 
 public class LexFactory {
 

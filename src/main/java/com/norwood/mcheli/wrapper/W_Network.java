@@ -1,13 +1,12 @@
 package com.norwood.mcheli.wrapper;
 
+import com.norwood.mcheli.helper.network.MCH_WrapPacketData;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
-
-import com.norwood.mcheli.helper.network.MCH_WrapPacketData;
 
 public class W_Network {
 
