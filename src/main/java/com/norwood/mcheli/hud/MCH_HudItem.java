@@ -25,10 +25,8 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.MathHelper;
 import org.lwjgl.opengl.GL11;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Random;
+import java.text.MessageFormat;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class MCH_HudItem extends Gui {
@@ -90,11 +88,48 @@ public abstract class MCH_HudItem extends Gui {
     }
 
     public static String toFormula(String s) {
-        return s.toLowerCase().replaceAll("#", "0x").replace("\t", " ").replace(" ", "");
+        if (s == null) return "0";
+        String f = s.toLowerCase();
+        f = f.replaceAll("#", "0x");
+        f = f.replace("\t", " ").replace(" ", "");
+        if(f.startsWith("+")) f = f.substring(1);
+        return preprocessCond(f);
+    }
+
+    public static final Set<String> LEGACY_VARS = new HashSet<>();
+    static {
+        LEGACY_VARS.add("reloading");
+        LEGACY_VARS.add("is_heat_wpn");
+        LEGACY_VARS.add("display_mortar_dist");
+
+    }
+    public static String preprocessCond(String s){
+        for(String boolVar : LEGACY_VARS){
+            if(s.startsWith(boolVar)){
+                // ==0 → !bVar
+                s = s.replaceAll("\\b" + boolVar + "\\s*==\\s*0\\b", "!" + boolVar);
+                // !=0 → bVar
+                s = s.replaceAll("\\b" + boolVar + "\\s*!=\\s*0\\b", boolVar);
+                // ==1 → bVar
+                s = s.replaceAll("\\b" + boolVar + "\\s*==\\s*1\\b", boolVar);
+                // !=1 → !bVar
+                s = s.replaceAll("\\b" + boolVar + "\\s*!=\\s*1\\b", "!" + boolVar);
+            }
+        }
+
+        return s;
     }
 
     public static double calc(String formula) {
-        Expression expr = EXPR_CACHE.computeIfAbsent(formula, form -> AVIATOR.compile(form, true));
+        Expression expr = EXPR_CACHE.computeIfAbsent(formula, form -> {
+            try {
+                return AVIATOR.compile(form, true);
+            } catch (RuntimeException e){
+                throw new RuntimeException(MessageFormat.format("GUI calculation failed for:{0}StackTrace:\n{1}", formula, e.getStackTrace())
+                );
+            }
+
+        });
         Object result = expr.execute(varMap);
         if (result instanceof Number num)
             return num.doubleValue();
@@ -148,7 +183,7 @@ public abstract class MCH_HudItem extends Gui {
         updateVarMapItem("width", width);
         updateVarMapItem("height", height);
         updateVarMapItem("time", player.world.getWorldTime() % 24000L);
-        updateVarMapItem("test_mode", MCH_Config.TestMode.prmBool ? 1.0 : 0.0);
+        updateVarMapItem("test_mode", MCH_Config.TestMode.prmBool);
         updateVarMapItem("plyr_yaw", MathHelper.wrapDegrees(player.rotationYaw));
         updateVarMapItem("plyr_pitch", player.rotationPitch);
         updateVarMapItem("yaw", MathHelper.wrapDegrees(ac.getRotYaw()));
@@ -156,7 +191,7 @@ public abstract class MCH_HudItem extends Gui {
         updateVarMapItem("roll", MathHelper.wrapDegrees(ac.getRotRoll()));
         updateVarMapItem("altitude", Altitude);
         updateVarMapItem("sea_alt", getSeaAltitude(ac));
-        updateVarMapItem("have_radar", ac.isEntityRadarMounted() ? 1.0 : 0.0);
+        updateVarMapItem("have_radar", ac.isEntityRadarMounted());
         updateVarMapItem("radar_rot", getRadarRot(ac));
         updateVarMapItem("hp", ac.getHP());
         updateVarMapItem("max_hp", ac.getMaxHP());
@@ -177,19 +212,19 @@ public abstract class MCH_HudItem extends Gui {
         updateVarMap_Weapon(ws);
         updateVarMapItem("vtol_stat", getVtolStat(ac));
         updateVarMapItem("free_look", getFreeLook(ac, player));
-        updateVarMapItem("gunner_mode", ac.getIsGunnerMode(player) ? 1.0 : 0.0);
+        updateVarMapItem("gunner_mode", ac.getIsGunnerMode(player));
         updateVarMapItem("cam_mode", ac.getCameraMode(player));
         updateVarMapItem("cam_zoom", ac.camera.getCameraZoom());
         updateVarMapItem("auto_pilot", getAutoPilot(ac, player));
-        updateVarMapItem("have_flare", ac.haveFlare() ? 1.0 : 0.0);
-        updateVarMapItem("can_flare", ac.canUseFlare() ? 1.0 : 0.0);
+        updateVarMapItem("have_flare", ac.haveFlare());
+        updateVarMapItem("can_flare", ac.canUseFlare());
         updateVarMapItem("inventory", ac.getSizeInventory());
-        updateVarMapItem("hovering", ac instanceof MCH_EntityHeli && ac.isHoveringMode() ? 1.0 : 0.0);
-        updateVarMapItem("is_uav", ac.isUAV() ? 1.0 : 0.0);
+        updateVarMapItem("hovering", ac instanceof MCH_EntityHeli && ac.isHoveringMode());
+        updateVarMapItem("is_uav", ac.isUAV());
         updateVarMapItem("uav_fs", getUAV_Fs(ac));
     }
 
-    public static void updateVarMapItem(String key, double value) {
+    public static void updateVarMapItem(String key, Object value) {
         varMap.put(key, value);
     }
 
@@ -232,13 +267,15 @@ public abstract class MCH_HudItem extends Gui {
     }
 
     private static void updateVarMap_Weapon(MCH_WeaponSet ws) {
-        int reloading = 0;
         double wpn_heat = 0.0;
-        int is_heat_wpn = 0;
-        int sight_type = 0;
-        double lock = 0.0;
         float rel_time = 0.0F;
-        int display_mortar_dist = 0;
+        double lock = 0.0;
+        int sight_type = 0;
+
+        boolean reloading = false;
+        boolean is_heat_wpn = false;
+        boolean display_mortar_dist = false;
+
         if (ws != null) {
             MCH_WeaponBase wb = ws.getCurrentWeapon();
             MCH_WeaponInfo wi = wb.getInfo();
@@ -246,15 +283,15 @@ public abstract class MCH_HudItem extends Gui {
                 return;
             }
 
-            is_heat_wpn = wi.maxHeatCount > 0 ? 1 : 0;
-            reloading = ws.isInPreparation() ? 1 : 0;
-            display_mortar_dist = wi.displayMortarDistance ? 1 : 0;
+            is_heat_wpn = wi.maxHeatCount > 0;
+            reloading = ws.isInPreparation();
+            display_mortar_dist = wi.displayMortarDistance;
+
             if (wi.delay > wi.reloadTime) {
                 rel_time = (float) ws.countWait / (wi.delay > 0 ? wi.delay : 1);
                 if (rel_time < 0.0F) {
                     rel_time = -rel_time;
                 }
-
                 if (rel_time > 1.0F) {
                     rel_time = 1.0F;
                 }
@@ -273,7 +310,6 @@ public abstract class MCH_HudItem extends Gui {
                 lock = (double) wb.getLockCount() / cntLockMax;
                 sight_type = 2;
             }
-
             if (sight == MCH_SightType.ROCKET) {
                 sight_type = 1;
             }
@@ -288,6 +324,7 @@ public abstract class MCH_HudItem extends Gui {
         updateVarMapItem("dsp_mt_dist", display_mortar_dist);
         updateVarMapItem("mt_dist", MortarDist);
     }
+
 
     public static int isLowFuel(MCH_EntityAircraft ac) {
         int is_low_fuel = 0;
