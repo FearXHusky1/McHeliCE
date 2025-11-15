@@ -54,17 +54,6 @@ public class MCH_EntityThrowable extends EntityThrowable implements IThrowableEn
         this.init();
     }
 
-    public MCH_EntityThrowable(World worldIn, double x, double y, double z, float yaw, float pitch) {
-        this(worldIn);
-        this.setSize(0.25F, 0.25F);
-        this.setLocationAndAngles(x, y, z, yaw, pitch);
-        this.posX = this.posX - MathHelper.cos(this.rotationYaw / 180.0F * (float) Math.PI) * 0.16F;
-        this.posY -= 0.1F;
-        this.posZ = this.posZ - MathHelper.sin(this.rotationYaw / 180.0F * (float) Math.PI) * 0.16F;
-        this.setPosition(this.posX, this.posY, this.posZ);
-        this.shoot(null, pitch, yaw, 0.0F, 1.5F, 1.0F);
-    }
-
     public void init() {
         this.lastOnImpact = null;
         this.countOnUpdate = 0;
@@ -95,8 +84,6 @@ public class MCH_EntityThrowable extends EntityThrowable implements IThrowableEn
         this.boundPosY = this.posY;
         this.boundPosZ = this.posZ;
         if (this.getInfo() != null) {
-            Block block = W_WorldFunc.getBlock(this.world, (int) (this.posX + 0.5), (int) this.posY,
-                    (int) (this.posZ + 0.5));
             Material mat = W_WorldFunc.getBlockMaterial(
                     this.world, (int) (this.posX + 0.5), (int) this.posY, (int) (this.posZ + 0.5));
             if (mat == Material.WATER) {

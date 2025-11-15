@@ -46,4 +46,6 @@ dependencies {
     annotationProcessor "org.projectlombok:lombok:1.18.42", "io.gitlab.hohserg.elegant.networking:annotation-processor:3.14"
     shadowImplementation("org.yaml:snakeyaml:2.5")
     shadowImplementation("org.joml:joml:1.10.8")
+    testImplementation("org.assertj:assertj-core:3.25.3")
+
 }

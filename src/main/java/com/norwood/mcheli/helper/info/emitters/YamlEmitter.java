@@ -55,6 +55,7 @@ public class YamlEmitter implements IEmitter {
 
     }
 
+
     public static void writeTo(Path out, CharSequence content) throws IOException {
         if (out.getParent() != null) Files.createDirectories(out.getParent());
         Files.write(out, content.toString().getBytes(StandardCharsets.UTF_8));

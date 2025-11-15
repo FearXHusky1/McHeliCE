@@ -247,7 +247,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo implements IItemCont
 
     public MCH_AircraftInfo(AddonResourceLocation location, String path) {
         super(location, path);
-        this.name = location.getPath();
+        this.name = location == null ? "IAMTEST" : location.getPath();
         this.displayName = this.name;
         this.textureNameList.add(this.name);
     }
