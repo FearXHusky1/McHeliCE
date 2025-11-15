@@ -15,6 +15,7 @@ import com.norwood.mcheli.gltd.MCH_RenderGLTD;
 import com.norwood.mcheli.helicopter.MCH_EntityHeli;
 import com.norwood.mcheli.helicopter.MCH_HeliInfo;
 import com.norwood.mcheli.helicopter.MCH_RenderHeli;
+import com.norwood.mcheli.helper.MCH_Utils;
 import com.norwood.mcheli.helper.addon.AddonManager;
 import com.norwood.mcheli.helper.addon.AddonPack;
 import com.norwood.mcheli.helper.client.MCH_CameraManager;
@@ -62,9 +63,13 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.SplashProgress;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.relauncher.Side;
 
 import java.io.File;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -73,16 +78,36 @@ import java.util.concurrent.Executors;
 
 public class MCH_ClientProxy extends MCH_CommonProxy {
 
-    private static final Field splashThread;
+    private static final MethodHandle splashThreadGetter;
+    private static final MethodHandle splashEnabledGetter;
+    private static final MethodHandle splashPauseHandle;
+    private static final MethodHandle splashResumeHandle;
 
     //Prevents crashes when the splash thread is not running
     static {
-        try {
-            splashThread = SplashProgress.class.getDeclaredField("thread");
-        } catch (NoSuchFieldException e) {
-            throw new AssertionError(e);
+        Class<?> splash;
+        if (Loader.isModLoaded("modernsplash")) {
+            try {
+                splash = Class.forName("gkappa.modernsplash.CustomSplash");
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException("ModernSplash loaded but failed to find gkappa.modernsplash.CustomSplash", e);
+            }
+        } else {
+            splash = SplashProgress.class;
         }
-        splashThread.setAccessible(true);
+        try {
+            MethodHandles.Lookup lookup = MethodHandles.lookup();
+            Field splashThread = splash.getDeclaredField("thread");
+            Field splashEnabled = splash.getDeclaredField("enabled");
+            splashThread.setAccessible(true);
+            splashEnabled.setAccessible(true);
+            splashThreadGetter = lookup.unreflectGetter(splashThread);
+            splashEnabledGetter = lookup.unreflectGetter(splashEnabled);
+            splashPauseHandle = lookup.findStatic(splash, "pause", MethodType.methodType(void.class));
+            splashResumeHandle = lookup.findStatic(splash, "resume", MethodType.methodType(void.class));
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static void registerModels_Bullet() {
@@ -120,12 +145,43 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
         });
     }
 
+    private static void pauseSplash() {
+        if (splashNotTerminated()) {
+            try {
+                splashPauseHandle.invokeExact();
+                MCH_Utils.logger().debug("[MCH_ClientProxy] successfully paused Splashscreen");
+            } catch (Throwable t) {
+                throw new RuntimeException(t);
+            }
+        }
+    }
+
+    private static void resumeSplash() {
+        if (splashNotTerminated()) {
+            try {
+                splashResumeHandle.invokeExact();
+                MCH_Utils.logger().debug("[MCH_ClientProxy] successfully resumed Splashscreen");
+            } catch (Throwable t) {
+                throw new RuntimeException(t);
+            }
+        }
+    }
+
     private static boolean splashNotTerminated() {
+        try {
+            boolean enabled = (boolean) splashEnabledGetter.invokeExact();
+            if (!enabled) {
+                MCH_Utils.logger().debug("[MCH_ClientProxy] Splashscreen is currently disabled");
+                return false;
+            }
+        } catch (Throwable t) {
+            throw new RuntimeException(t);
+        }
         Thread splashThread;
         try {
-            splashThread = (Thread) MCH_ClientProxy.splashThread.get(null);
-        } catch (IllegalAccessException e) {
-            throw new AssertionError(e);
+            splashThread = (Thread) splashThreadGetter.invokeExact();
+        } catch (Throwable t) {
+            throw new RuntimeException(t);
         }
         return splashThread.getState() != Thread.State.TERMINATED;
     }
@@ -295,9 +351,9 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
 
         allTasks.join();
 
-        if (splashNotTerminated()) SplashProgress.pause();
+        pauseSplash();
         MCH_ModelManager.makeVBO();
-        if (splashNotTerminated()) SplashProgress.resume();
+        resumeSplash();
     }
 
     @Override
