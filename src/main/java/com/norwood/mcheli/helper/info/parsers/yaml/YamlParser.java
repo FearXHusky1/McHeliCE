@@ -634,7 +634,7 @@ public class YamlParser implements IParser {
             case "StepHeight" -> info.stepHeight = getClamped(0F, 1000F, entry.getValue());
             case "CanRotOnGround" -> info.canRotOnGround = (Boolean) entry.getValue();
             case "CanMoveOnGround" -> info.canMoveOnGround = (Boolean) entry.getValue();
-            case "OnGroundPitch" -> info.onGroundPitch = getClamped(-90F, 90F, entry.getValue());
+            case "OnGroundPitch" -> info.onGroundPitch = -getClamped(-90F, 90F, entry.getValue());
             case "PivotTurnThrottle" -> info.pivotTurnThrottle = getClamped(1F, entry.getValue());
 
             case "Mobility" -> {

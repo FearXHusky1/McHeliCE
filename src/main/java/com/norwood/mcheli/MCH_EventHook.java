@@ -27,6 +27,8 @@ import com.norwood.mcheli.wrapper.W_Entity;
 import com.norwood.mcheli.wrapper.W_EntityPlayer;
 import com.norwood.mcheli.wrapper.W_EventHook;
 import com.norwood.mcheli.wrapper.W_Lib;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class MCH_EventHook extends W_EventHook {
 
@@ -35,11 +37,13 @@ public class MCH_EventHook extends W_EventHook {
         MCH_Command.onCommandEvent(event);
     }
 
+    @SideOnly(Side.CLIENT)
     @SubscribeEvent
     public void onTextureStitch(TextureStitchEvent.Pre event) {
         MCH_MOD.proxy.registerParticleTextures(event);
     }
 
+    @SideOnly(Side.CLIENT)
     @SubscribeEvent
     public void onTextureStitchPost(TextureStitchEvent.Post event) {
         MCH_MOD.proxy.registerShaders(event);

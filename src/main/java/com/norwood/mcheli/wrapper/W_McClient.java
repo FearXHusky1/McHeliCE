@@ -29,10 +29,6 @@ public class W_McClient {
 
     public static void addSound(String name) {}
 
-    public static void DEF_bindTexture(String tex) {
-        Minecraft.getMinecraft().renderEngine.bindTexture(new ResourceLocation(tex));
-    }
-
     public static void MOD_bindTexture(String tex) {
         Minecraft.getMinecraft().renderEngine.bindTexture(new ResourceLocation(MCH_MOD.DOMAIN, tex));
     }
