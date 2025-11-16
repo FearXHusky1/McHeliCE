@@ -23,6 +23,7 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.MathHelper;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import org.lwjgl.opengl.GL11;
 
 import java.text.MessageFormat;
@@ -96,13 +97,21 @@ public abstract class MCH_HudItem extends Gui {
         return preprocessCond(f);
     }
 
+
     public static final Set<String> LEGACY_VARS = new HashSet<>();
     static {
         LEGACY_VARS.add("reloading");
         LEGACY_VARS.add("is_heat_wpn");
         LEGACY_VARS.add("display_mortar_dist");
+        LEGACY_VARS.add("dsp_mt_dist");
+        LEGACY_VARS.add("can_flare");
+        LEGACY_VARS.add("have_flare");
+        LEGACY_VARS.add("gunner_mode");
+        LEGACY_VARS.add("test_mode");
+        LEGACY_VARS.add("is_uav");
 
     }
+    //Fixes old integer bool config
     public static String preprocessCond(String s){
         for(String boolVar : LEGACY_VARS){
             if(s.startsWith(boolVar)){
