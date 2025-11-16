@@ -21,17 +21,7 @@ public class MCH_ItemInfo extends MCH_BaseInfo implements IContentData { // impl
     public boolean isShapedRecipe;
     public int stackSize;
 
-    // public MCH_ItemInfo(String name) {
-    // this.name = name;
-    // this.displayName = name;
-    // this.displayNameLang = new HashMap();
-    // this.itemID = 0;
-    // this.item = null;
-    // this.recipeString = new ArrayList();
-    // this.recipe = new ArrayList();
-    // this.isShapedRecipe = true;
-    // this.stackSize = 1;
-    // }
+
 
     public MCH_ItemInfo(AddonResourceLocation location, String filePath, String name) {
         super(location, filePath); // required in 1.12.2 or something
