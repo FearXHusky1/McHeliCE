@@ -33,7 +33,7 @@ public class RenderGlobalTransformer implements IClassTransformer {
                 }
             }
 
-            ClassWriter writer = new W_ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
+            ClassWriter writer = new W_ClassWriter(ClassWriter.COMPUTE_MAXS);
             classNode.accept(writer);
             return writer.toByteArray();
         } catch (Throwable t) {
@@ -48,23 +48,19 @@ public class RenderGlobalTransformer implements IClassTransformer {
         while (iter.hasNext()) {
             AbstractInsnNode insn = iter.next();
 
-            // Locate "istore 28" -> stores the boolean flag
-            if (insn.getOpcode() == Opcodes.ISTORE && insn instanceof VarInsnNode) {
-                VarInsnNode varNode = (VarInsnNode) insn;
+            if (insn.getOpcode() == Opcodes.ISTORE && insn instanceof VarInsnNode varNode) {
                 if (varNode.var == 28) { // flag local index
                     InsnList inject = new InsnList();
-
-                    // Load entity2 (local variable 27)
-                    inject.add(new VarInsnNode(Opcodes.ALOAD, 27));
-                    // Check instanceof our aircraft class
-                    inject.add(new TypeInsnNode(Opcodes.INSTANCEOF, "com/norwood/mcheli/aircraft/MCH_EntityAircraft"));
-
-                    LabelNode skip = new LabelNode();
-                    inject.add(new JumpInsnNode(Opcodes.IFEQ, skip)); // if not instance of, skip
-                    // Overwrite flag with false
-                    inject.add(new InsnNode(Opcodes.ICONST_0));
-                    inject.add(new VarInsnNode(Opcodes.ISTORE, 28));
-                    inject.add(skip);
+                    inject.add(new VarInsnNode(Opcodes.ILOAD, 28));// load flag
+                    inject.add(new VarInsnNode(Opcodes.ALOAD, 27));// load entity2
+                    inject.add(new TypeInsnNode(
+                            Opcodes.INSTANCEOF,
+                            "com/norwood/mcheli/aircraft/MCH_EntityAircraft"
+                    ));
+                    inject.add(new InsnNode(Opcodes.ICONST_1));
+                    inject.add(new InsnNode(Opcodes.IXOR));// !instanceof
+                    inject.add(new InsnNode(Opcodes.IAND));// flag && !instanceof
+                    inject.add(new VarInsnNode(Opcodes.ISTORE, 28)); // store back to flag
 
                     method.instructions.insert(insn, inject);
                     coreLogger.info("Injected aircraft render skip after flag assignment (istore 28)");
